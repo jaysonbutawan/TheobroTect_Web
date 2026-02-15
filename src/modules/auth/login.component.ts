@@ -31,16 +31,22 @@ export class LoginComponent {
     }
 
     this.loading = true;
+      setTimeout(() => {
+      this.loading = false;
 
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (res: any) => {
-        localStorage.setItem('token', res.token);
-        this.router.navigate(['/dashboard']);
-      },
-      error: () => {
-        this.errorMessage = 'Invalid credentials';
-        this.loading = false;
-      }
-    });
+      // Navigate to dashboard
+      this.router.navigate(['/dashboard']);
+    }, 1000);
+
+    // this.authService.login(this.loginForm.value).subscribe({
+    //   next: (res: any) => {
+    //     localStorage.setItem('token', res.token);
+    //     this.router.navigate(['/dashboard']);
+    //   },
+    //   error: () => {
+    //     this.errorMessage = 'Invalid credentials';
+    //     this.loading = false;
+    //   }
+    // });
   }
 }
