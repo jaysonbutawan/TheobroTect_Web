@@ -1,0 +1,56 @@
+<div class="min-h-screen bg-slate-50/50 p-4 md:p-8 font-sans">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="flex h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
+        <span class="text-[10px] font-bold text-red-600 uppercase tracking-widest text-nowrap">Live Monitoring</span>
+      </div>
+      <h2 class="text-4xl font-black text-slate-900 tracking-tight leading-none">
+        Cacao Disease and Pest <span class="text-green-700">Distribution</span> Heatmap
+      </h2>
+      <p class="text-slate-500 mt-2 font-medium">
+        Visualizing detection density across <span class="text-slate-800">Sawata</span> and nearby sectors.
+      </p>
+    </div>
+
+    <div class="flex gap-3 bg-white/80 backdrop-blur-md p-2 rounded-2xl border border-white shadow-sm self-start md:self-center">
+      <div class="px-4 py-2 border-r border-slate-100 text-center">
+        <p class="text-[10px] uppercase font-bold text-slate-400">High Risk</p>
+        <p class="text-xl font-black text-red-600">03</p>
+      </div>
+      <div class="px-4 py-2 text-center">
+        <p class="text-[10px] uppercase font-bold text-slate-400">Total Area</p>
+        <p class="text-xl font-black text-slate-800">12.4k ha</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="relative group">
+    <div class="absolute -inset-1 bg-gradient-to-r from-green-100 to-emerald-100 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+    
+    <div class="relative bg-white p-3 rounded-[2rem] shadow-xl shadow-slate-200/60 border border-white overflow-hidden">
+      <div class="absolute top-6 right-6 z-[1000] flex flex-col gap-2">
+        <button class="bg-white/90 backdrop-blur p-2 rounded-xl shadow-md border border-slate-100 text-slate-600 hover:text-green-600 transition-all hover:scale-105 active:scale-95">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+
+      <div id="map" style="height: 600px;" class="rounded-[1.5rem] grayscale-[0.1] contrast-[1.05]"></div>
+    </div>
+  </div>
+  
+  <div class="mt-8 flex flex-wrap items-center justify-center gap-8">
+    <div class="flex items-center gap-3">
+      <div class="w-4 h-4 rounded-full bg-blue-500 shadow-lg shadow-blue-500/20"></div>
+      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Low Density</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="w-4 h-4 rounded-full bg-lime-500 shadow-lg shadow-lime-500/20"></div>
+      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Moderate</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="w-4 h-4 rounded-full bg-red-500 shadow-lg shadow-red-500/20 animate-pulse"></div>
+      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-red-600">Outbreak Risk</span>
+    </div>
+  </div>
+</div>

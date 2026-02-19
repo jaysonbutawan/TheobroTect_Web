@@ -1,0 +1,44 @@
+/* Custom Pulsing Marker Animation */
+/* We use standard CSS here because Tailwind's animate-ping is sometimes too fast for markers */
+@keyframes marker-glow {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.custom-div-icon .animate-ping {
+  animation: marker-glow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Map Rounded Corners Fix */
+/* Leaflet sometimes has sharp corners even if the parent is rounded; this forces it */
+#map {
+  z-index: 1;
+  outline: none;
+}
+
+/* Customizing the Leaflet Popup Design */
+:host ::ng-deep .leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px;
+}
+
+:host ::ng-deep .leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Clean up the attribution text */
+:host ::ng-deep .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.5) !important;
+  font-size: 9px !important;
+  color: #94a3b8 !important;
+  border-top-left-radius: 8px;
+}
+
+/* Smooth zooming transition */
+.leaflet-container {
+  transition: filter 0.5s ease;
+}

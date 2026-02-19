@@ -1,106 +1,78 @@
 <aside
-  class="flex flex-col w-72 h-screen bg-slate-50/50 backdrop-blur-md border-r border-slate-200 p-6 font-sans"
+  [class.w-72]="!isCollapsed"
+  [class.w-20]="isCollapsed"
+  class="flex flex-col h-screen bg-slate-50/50 backdrop-blur-md border-r border-slate-200 p-4 font-sans transition-all duration-300 relative"
 >
-  <div class="flex items-center space-x-3 mb-12 px-2 group cursor-pointer">
+  <button 
+    (click)="toggleSidebar()"
+    class="absolute -right-3 top-10 bg-white border border-slate-200 rounded-full p-1 shadow-md hover:text-green-700 transition-colors z-50"
+  >
+    <svg 
+      [class.rotate-180]="isCollapsed"
+      class="w-4 h-4 transition-transform duration-300" 
+      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+
+  <div class="flex items-center space-x-3 mb-12 px-2 group cursor-pointer overflow-hidden">
     <div
-      class="w-12 h-12 bg-linear-to-br from-green-700-500 to-[#103e10] rounded-2xl flex items-center justify-center shadow-xl shadow-green-700/20 transform transition-transform group-hover:scale-110 duration-300"
+      class="min-w-[48px] h-12 bg-linear-to-br from-green-600 to-[#103e10] rounded-2xl flex items-center justify-center shadow-xl shadow-green-700/20 transform transition-transform group-hover:scale-110 duration-300"
     >
       <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-        ></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
       </svg>
     </div>
-    <div>
+    <div *ngIf="!isCollapsed" class="whitespace-nowrap transition-opacity duration-300">
       <h2 class="text-xl font-black text-slate-800 tracking-tight leading-tight">TheobroTect</h2>
     </div>
   </div>
 
-  <nav class="flex-1 space-y-1.5">
+  <nav class="flex-1 space-y-1.5 overflow-hidden">
     <a
       routerLink="/dashboard"
-      class="group relative flex items-center space-x-4 px-4 py-3.5 text-slate-500 rounded-xl transition-all duration-300 hover:text-[#3D683A] hover:bg-green-50/50"
+      routerLinkActive="text-[#3D683A] bg-green-50/50"
+      class="group relative flex items-center px-4 py-3.5 text-slate-500 rounded-xl transition-all duration-300 hover:text-[#3D683A] hover:bg-green-50/50"
     >
-      <div
-        class="absolute left-0 w-1 h-0 bg-[#3D683A] rounded-r-full transition-all duration-300 group-hover:h-6"
-      ></div>
-      <svg
-        class="w-6 h-6 transition-transform duration-300 group-hover:scale-110"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-        ></path>
+      <div class="absolute left-0 w-1 h-0 bg-[#3D683A] rounded-r-full transition-all duration-300 group-hover:h-6"></div>
+      <svg class="min-w-[24px] w-6 h-6 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
       </svg>
-      <span class="font-bold text-sm tracking-wide">Dashboard</span>
+      <span *ngIf="!isCollapsed" class="ml-4 font-bold text-sm tracking-wide whitespace-nowrap">Dashboard</span>
     </a>
 
     <a
       routerLink="/dashboard/user-management"
-      routerLinkActive="bg-[#3D683A] text-white shadow-lg shadow-green-700/30 scale-[1.02]"
-      class="flex items-center space-x-4 px-4 py-3.5 rounded-xl transition-all duration-300 bg-[#3D683A] text-white shadow-lg shadow-green-700"
+      routerLinkActive="bg-[#3D683A] text-white shadow-lg shadow-green-700/30"
+      class="flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 text-slate-500 hover:bg-green-50"
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-        ></path>
+      <svg class="min-w-[24px] w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
       </svg>
-      <span class="font-bold text-sm tracking-wide">User Management</span>
+      <span *ngIf="!isCollapsed" class="ml-4 font-bold text-sm tracking-wide whitespace-nowrap">User Management</span>
     </a>
 
     <a
       href="#"
-      class="group relative flex items-center space-x-4 px-4 py-3.5 text-slate-500 rounded-xl transition-all duration-300 hover:text-[#3D683A] hover:bg-green-50/50"
+      class="group relative flex items-center px-4 py-3.5 text-slate-500 rounded-xl transition-all duration-300 hover:text-[#3D683A] hover:bg-green-50/50"
     >
-      <div
-        class="absolute left-0 w-1 h-0 bg-[#3D683A] rounded-r-full transition-all duration-300 group-hover:h-6"
-      ></div>
-      <svg
-        class="w-6 h-6 transition-transform duration-300 group-hover:scale-110"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-        ></path>
+      <div class="absolute left-0 w-1 h-0 bg-[#3D683A] rounded-r-full transition-all duration-300 group-hover:h-6"></div>
+      <svg class="min-w-[24px] w-6 h-6 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
       </svg>
-      <span class="font-bold text-sm tracking-wide">Field Reports</span>
+      <span *ngIf="!isCollapsed" class="ml-4 font-bold text-sm tracking-wide whitespace-nowrap">Field Reports</span>
     </a>
   </nav>
 
-  <div class="mt-auto pt-6 border-t border-slate-200/60">
+  <div class="mt-auto pt-6 border-t border-slate-200/60 overflow-hidden">
     <button
-      class="w-full group flex items-center justify-center space-x-2 py-3 bg-white border border-slate-200 hover:border-green-800 hover:bg-green-800 text-slate-600 hover:text-[#3D683A] font-bold rounded-xl transition-all duration-300 shadow-sm"
+      class="w-full group flex items-center justify-center py-3 bg-white border border-slate-200 hover:border-green-800 hover:bg-green-800 text-slate-600 hover:text-white font-bold rounded-xl transition-all duration-300 shadow-sm"
     >
-      <svg
-        class="w-5 h-5 transition-transform group-hover:rotate-12"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        ></path>
+      <svg class="min-w-[20px] w-5 h-5 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>
-      <span>Support</span>
+      <span *ngIf="!isCollapsed" class="ml-2 whitespace-nowrap">Support</span>
     </button>
   </div>
 </aside>

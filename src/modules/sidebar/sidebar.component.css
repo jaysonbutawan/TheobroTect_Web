@@ -1,0 +1,38 @@
+/* Ensure the sidebar transition is buttery smooth */
+aside {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide text smoothly when collapsing */
+span, h2 {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Tooltip style for when sidebar is collapsed (Optional) */
+.w-20 a:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 100%;
+    margin-left: 10px;
+    padding: 5px 10px;
+    background: #333;
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+/* Rotate the toggle icon */
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Custom scrollbar for the nav area if it overflows */
+nav::-webkit-scrollbar {
+    width: 4px;
+}
+nav::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
