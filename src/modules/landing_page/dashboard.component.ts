@@ -26,6 +26,6 @@ export class DashboardComponent {
 
   navigateToMap(coords: string) {
     // Navigates to Field Reports and passes the coordinates
-    this.router.navigate(['/dashboard/field-reports'], { queryParams: { loc: coords } });
+    this.router.navigate(['/dashboard/heatmap'], { queryParams: { loc: coords } });
   }
 }

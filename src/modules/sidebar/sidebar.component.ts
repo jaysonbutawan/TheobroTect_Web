@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common'; // Required for [class] bindings
+import { RouterModule, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,8 +11,21 @@ import { CommonModule } from '@angular/common'; // Required for [class] bindings
 })
 export class SidebarComponent {
   isCollapsed = false;
+  isReportsOpen = false;
+
+  constructor(private router: Router) {}
+
+  // This detects if the current URL is field-reports
+  isReportsActive(): boolean {
+    return this.router.url.includes('field-reports');
+  }
 
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
+    if (this.isCollapsed) this.isReportsOpen = false;
+  }
+
+  toggleReports() {
+    this.isReportsOpen = !this.isReportsOpen;
   }
 }

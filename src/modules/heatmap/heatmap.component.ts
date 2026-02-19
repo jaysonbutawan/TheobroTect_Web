@@ -5,24 +5,25 @@ import * as L from 'leaflet';
 import 'leaflet.heat';
 
 @Component({
-  selector: 'app-field-reports',
+  selector: 'app-heatmap',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './field-reports.component.html', // Pointing to your new file
-  styleUrl: './field-reports.component.css' // Add this line
+  templateUrl: './heatmap.component.html',
+  styleUrl: './heatmap.component.css'
 })
-export class FieldReportsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   private map!: L.Map;
   private heatmapLayer: any;
 
   constructor(private route: ActivatedRoute) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    // Initialization logic here
+  }
 
   ngAfterViewInit() {
     this.initMap();
-
-    // Watch for location changes in the URL
+    
     this.route.queryParams.subscribe(params => {
       if (params['loc'] && this.map) {
         const coords = params['loc'].split(',').map(Number);
@@ -35,7 +36,7 @@ export class FieldReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.map = L.map('map', {
       center: [7.4477, 125.8093],
       zoom: 12,
-      zoomControl: false // Cleaner UI
+      zoomControl: false 
     });
 
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
@@ -44,7 +45,6 @@ export class FieldReportsComponent implements OnInit, AfterViewInit, OnDestroy {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    // Mock Heatmap Data
     const points: [number, number, number][] = [
       [7.4477, 125.8093, 0.9],
       [7.3077, 125.6839, 0.6],
@@ -64,7 +64,6 @@ export class FieldReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.map) return;
     this.map.flyTo([lat, lng], 15, { animate: true, duration: 2.5 });
 
-    // Custom "Pulsing" Marker
     const customIcon = L.divIcon({
       className: 'custom-div-icon',
       html: `<div class="relative flex items-center justify-center">
@@ -80,6 +79,7 @@ export class FieldReportsComponent implements OnInit, AfterViewInit, OnDestroy {
       .openPopup();
   }
 
+  // THIS IS THE MISSING METHOD CAUSING THE ERROR
   ngOnDestroy() {
     if (this.map) {
       this.map.remove();
