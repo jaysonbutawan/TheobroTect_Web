@@ -1,4 +1,183 @@
- <div class="p-6">
-      <h1 class="text-2xl font-bold">User Management</h1>
-      <p class="text-slate-500 mt-2">Manage your users here.</p>
+<div class="p-8 bg-slate-50 min-h-screen font-sans">
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+    <h1 class="text-2xl font-black text-slate-800 tracking-tight">User Management</h1>
+
+    <div class="flex items-center space-x-4">
+      <div class="relative group">
+        <span
+          class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-[#2e7d32] transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </span>
+        <input
+          type="text"
+          placeholder="Search by name, email or region..."
+          class="block w-full md:w-80 pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-green-100 focus:border-[#2e7d32] outline-none transition-all shadow-sm"
+        />
+      </div>
     </div>
+  </div>
+
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center space-x-3">
+      <select
+        class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all"
+      >
+        <option>All Roles</option>
+      </select>
+      <select
+        class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all"
+      >
+        <option>All Status</option>
+      </select>
+      <button
+        class="flex items-center space-x-2 px-4 py-2 text-[#2e7d32] font-bold text-sm hover:bg-green-50 rounded-lg transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+          ></path>
+        </svg>
+        <span>More Filters</span>
+      </button>
+    </div>
+    <p class="text-sm text-slate-400 font-medium">
+      Showing <span class="text-slate-700 font-bold">1-9</span> of 156 users
+    </p>
+  </div>
+
+  <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b border-slate-100 bg-slate-50/50">
+          <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            User
+          </th>
+          <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            Email Address
+          </th>
+          <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            Region
+          </th>
+          <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            Status
+          </th>
+          <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        <tr class="hover:bg-slate-50/80 transition-colors group">
+          <td class="px-6 py-4">
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-10 h-10 rounded-full bg-orange-100 shrink-0 flex items-center justify-center overflow-hidden border border-slate-100"
+              >
+                <img
+                  src="https://ui-avatars.com/api/?name=Amadou+Kone&background=FFEDD5&color=C2410C"
+                  alt="avatar"
+                />
+              </div>
+              <div>
+                <p class="text-sm font-bold text-slate-800">Amadou Kone</p>
+                <p class="text-[11px] font-medium text-slate-400 italic">Joined 12 Mar 2023</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm font-medium text-slate-500">amadou.kone@cacaomonitor.ci</td>
+          <td class="px-6 py-4 text-sm font-medium text-slate-600">Ivory Coast - West</td>
+          <td class="px-6 py-4">
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span> Active
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center space-x-3">
+              <button class="text-green-600 hover:bg-green-100 p-1.5 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+              </button>
+              <button class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="flex items-center justify-between px-6 py-4 bg-white border-t border-slate-100">
+      <button
+        class="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center"
+      >
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Previous
+      </button>
+      <div class="flex items-center space-x-2">
+        <button class="w-8 h-8 rounded-full bg-[#2e7d32] text-white text-sm font-bold">1</button>
+        <button
+          class="w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 text-sm font-bold transition-colors"
+        >
+          2
+        </button>
+        <button
+          class="w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 text-sm font-bold transition-colors"
+        >
+          3
+        </button>
+        <span class="text-slate-400">...</span>
+        <button
+          class="w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 text-sm font-bold transition-colors"
+        >
+          16
+        </button>
+      </div>
+      <button
+        class="text-sm font-bold text-slate-600 hover:text-[#e65100] transition-colors flex items-center"
+      >
+        Next
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
