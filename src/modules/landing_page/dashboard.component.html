@@ -15,7 +15,7 @@
     <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl hover:-translate-y-2 transition-all duration-500">
       <div class="absolute inset-0 z-0">
         <img src="assets/images/bp.png" alt="Black Pod" class="w-full h-full object-cover blur-[2px] opacity-60 group-hover:scale-110 transition-transform duration-700">
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/40 to-transparent"></div>
+        <div class="absolute inset-0 bg-linear-to-br from-slate-900 via-slate-900/40 to-transparent"></div>
       </div>
 
       <div class="relative z-10">
@@ -46,7 +46,7 @@
     <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl hover:-translate-y-2 transition-all duration-500">
       <div class="absolute inset-0 z-0">
         <img src="assets/images/mb.png" alt="Mealybug" class="w-full h-full object-cover blur-[2px] opacity-60 group-hover:scale-110 transition-transform duration-700">
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/40 to-transparent"></div>
+        <div class="absolute inset-0 bg-linear-to-br from-slate-900 via-slate-900/40 to-transparent"></div>
       </div>
 
       <div class="relative z-10">
@@ -77,7 +77,7 @@
     <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl hover:-translate-y-2 transition-all duration-500">
       <div class="absolute inset-0 z-0">
         <img src="assets/images/pb.png" alt="Pod Borer" class="w-full h-full object-cover blur-[2px] opacity-60 group-hover:scale-110 transition-transform duration-700">
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/40 to-transparent"></div>
+        <div class="absolute inset-0 bg-linear-to-br from-slate-900 via-slate-900/40 to-transparent"></div>
       </div>
 
       <div class="relative z-10">
@@ -104,7 +104,7 @@
   </div>
 
   <div class="mt-16 bg-white rounded-[2.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.03)] border border-gray-100 overflow-hidden">
-    <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gradient-to-r from-white to-gray-50/50">
+    <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-linear-to-r from-white to-gray-50/50">
       <div>
         <h3 class="text-2xl font-black text-gray-900 tracking-tight">Recent Field Activity</h3>
         <p class="text-sm text-gray-500 font-medium mt-1">Select a record to pinpoint the detection on the heatmap.</p>
@@ -150,7 +150,7 @@
             <td class="px-6 py-5 bg-white border-y border-transparent group-hover:border-green-100">
               <div class="flex items-center gap-4">
                 <div class="w-32 bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner">
-                  <div class="bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full transition-all duration-1000" [style.width]="scan.confidence + '%'"></div>
+                  <div class="bg-linear-to-r from-green-400 to-green-600 h-full rounded-full transition-all duration-1000" [style.width]="scan.confidence + '%'"></div>
                 </div>
                 <span class="text-xs font-black text-gray-700">{{ scan.confidence }}%</span>
               </div>
