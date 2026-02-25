@@ -1,0 +1,89 @@
+<div class="reports-container p-6 bg-white rounded-3xl shadow-sm">
+  <div class="flex justify-between items-end mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Field Reports</h1>
+      <p class="text-slate-500 font-medium">Real-time detection logs across plantation zones.</p>
+    </div>
+
+    <div class="flex items-center space-x-3">
+      <div class="relative group">
+        <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 group-focus-within:text-green-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (input)="applyFilters()"
+          placeholder="Search Scan ID..." 
+          class="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none transition-all w-64"
+        >
+      </div>
+
+      <div class="relative">
+        <select 
+          [(ngModel)]="selectedCategory" 
+          (change)="applyFilters()"
+          class="appearance-none pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:border-green-500 cursor-pointer outline-none transition-all shadow-sm"
+        >
+          <option value="ALL">All Species</option>
+          <option value="BLACK_POD">Black Pod</option>
+          <option value="MEALYBUG">Mealybug</option>
+          <option value="POD_BORER">Pod Borer</option>
+        </select>
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overflow-hidden border border-slate-100 rounded-2xl shadow-sm">
+    <table class="w-full text-left border-collapse bg-white">
+      <thead>
+        <tr class="bg-slate-50/50 border-b border-slate-100">
+          <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Scan ID</th>
+          <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Date</th>
+          <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Location</th>
+          <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Risk Level</th>
+          <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Confidence</th>
+          <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        <tr *ngFor="let report of filteredReports" class="hover:bg-green-50/30 transition-colors group">
+          <td class="px-6 py-5">
+            <span class="font-bold text-green-700 bg-green-50 px-3 py-1.5 rounded-lg text-sm border border-green-100">
+              {{ report.id }}
+            </span>
+          </td>
+          <td class="px-6 py-5 text-slate-400 italic font-medium text-sm">
+            {{ report.scanned_at | date:'yyyy-MM-dd' }}
+          </td>
+          <td class="px-6 py-5">
+            <div class="flex items-center text-slate-700 font-bold text-sm">
+              <svg class="w-4 h-4 mr-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              {{ report.location_label || 'Unknown' }}
+            </div>
+          </td>
+          <td class="px-6 py-5">
+            <span [class]="getRiskClass(report.severity_key)" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border">
+              {{ report.severity_key }}
+            </span>
+          </td>
+          <td class="px-6 py-5 font-bold text-slate-600 text-sm">
+            {{ report.confidence | percent:'1.1-1' }}
+          </td>
+          <td class="px-6 py-5 text-center">
+            <button class="text-green-600 font-bold text-xs hover:text-green-800 transition-colors py-2 px-4 rounded-lg hover:bg-green-100/50">
+              View Detail
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="filteredReports.length === 0" class="py-20 text-center">
+      <p class="text-slate-400 font-medium">No reports found matching your criteria.</p>
+    </div>
+  </div>
+</div>
