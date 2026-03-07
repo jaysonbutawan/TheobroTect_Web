@@ -8,7 +8,7 @@ import { CreateUserDto, ListUsersQuery, UpdateUserDto, UserDto } from "./user_ma
 export class UsersApiService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = `${environment.apiUrl}/users`;
+  private readonly baseUrl = `${environment.apiUrl}/list_users`;
 
   list(query: ListUsersQuery = {}) {
     let params = new HttpParams();

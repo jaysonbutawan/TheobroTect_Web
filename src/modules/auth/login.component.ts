@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from './auth.service';
+import { AuthService } from './api.service';
+import { AdminLoginPayload, AdminLoginResponse } from './login.component.dto';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,7 @@ export class LoginComponent {
   errorMessage = '';
   loading = false;
 
-  loginForm = this.fb.group({
+  loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
     remember: [false]
@@ -31,22 +32,34 @@ export class LoginComponent {
     }
 
     this.loading = true;
-      setTimeout(() => {
-      this.loading = false;
+    this.errorMessage = '';
 
-      // Navigate to dashboard
-      this.router.navigate(['/dashboard']);
-    }, 1000);
+    const { email, password } = this.loginForm.getRawValue();
 
-    // this.authService.login(this.loginForm.value).subscribe({
-    //   next: (res: any) => {
-    //     localStorage.setItem('token', res.token);
-    //     this.router.navigate(['/dashboard']);
-    //   },
-    //   error: () => {
-    //     this.errorMessage = 'Invalid credentials';
-    //     this.loading = false;
-    //   }
-    // });
+    const payload: AdminLoginPayload = {
+      email,
+      password
+    };
+
+    this.authService.login(payload).subscribe({
+    next: (res: AdminLoginResponse) => {
+  localStorage.setItem('token', res.token);
+  console.log('saved token:', localStorage.getItem('token'));
+  this.router.navigate(['/dashboard']);
+  this.loading = false;
+},
+
+      error: (err) => {
+        this.loading = false;
+
+        if (err.status === 401) {
+          this.errorMessage = 'Invalid email or password.';
+        } else if (err.status === 403) {
+          this.errorMessage = 'You are not authorized to access admin.';
+        } else {
+          this.errorMessage = 'Login failed. Please try again.';
+        }
+      }
+    });
   }
 }
