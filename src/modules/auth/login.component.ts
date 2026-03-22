@@ -26,40 +26,40 @@ export class LoginComponent {
   });
 
   onSubmit() {
-    if (this.loginForm.invalid) {
-      this.errorMessage = 'Please fill in all required fields correctly.';
-      return;
-    }
+//     if (this.loginForm.invalid) {
+//       this.errorMessage = 'Please fill in all required fields correctly.';
+//       return;
+//     }
 
-    this.loading = true;
-    this.errorMessage = '';
+//     this.loading = true;
+//     this.errorMessage = '';
 
-    const { email, password } = this.loginForm.getRawValue();
+//     const { email, password } = this.loginForm.getRawValue();
 
-    const payload: AdminLoginPayload = {
-      email,
-      password
-    };
+//     const payload: AdminLoginPayload = {
+//       email,
+//       password
+//     };
 
-    this.authService.login(payload).subscribe({
-    next: (res: AdminLoginResponse) => {
-  localStorage.setItem('token', res.token);
-  console.log('saved token:', localStorage.getItem('token'));
+//     this.authService.login(payload).subscribe({
+//     next: (res: AdminLoginResponse) => {
+//   localStorage.setItem('token', res.token);
+//   console.log('saved token:', localStorage.getItem('token'));
   this.router.navigate(['/dashboard']);
-  this.loading = false;
-},
+//   this.loading = false;
+// },
 
-      error: (err) => {
-        this.loading = false;
+//       error: (err) => {
+//         this.loading = false;
 
-        if (err.status === 401) {
-          this.errorMessage = 'Invalid email or password.';
-        } else if (err.status === 403) {
-          this.errorMessage = 'You are not authorized to access admin.';
-        } else {
-          this.errorMessage = 'Login failed. Please try again.';
-        }
-      }
-    });
+//         if (err.status === 401) {
+//           this.errorMessage = 'Invalid email or password.';
+//         } else if (err.status === 403) {
+//           this.errorMessage = 'You are not authorized to access admin.';
+//         } else {
+//           this.errorMessage = 'Login failed. Please try again.';
+//         }
+//       }
+//     });
   }
 }
