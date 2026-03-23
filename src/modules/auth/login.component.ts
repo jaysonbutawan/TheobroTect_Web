@@ -48,6 +48,5 @@ export class LoginComponent {
   this.router.navigate(['/dashboard']);
   // this.loading = false;
 
-//         }
   }
 }
