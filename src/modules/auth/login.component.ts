@@ -53,6 +53,32 @@ export class LoginComponent {
 //       error: (err) => {
 //         this.loading = false;
 
+//     if (this.loginForm.invalid) {
+//       this.errorMessage = 'Please fill in all required fields correctly.';
+//       return;
+//     }
+
+//     this.loading = true;
+//     this.errorMessage = '';
+
+//     const { email, password } = this.loginForm.getRawValue();
+
+//     const payload: AdminLoginPayload = {
+//       email,
+//       password
+//     };
+
+//     this.authService.login(payload).subscribe({
+//     next: (res: AdminLoginResponse) => {
+//   localStorage.setItem('token', res.token);
+//   console.log('saved token:', localStorage.getItem('token'));
+  this.router.navigate(['/dashboard']);
+//   this.loading = false;
+// },
+
+//       error: (err) => {
+//         this.loading = false;
+
 //         if (err.status === 401) {
 //           this.errorMessage = 'Invalid email or password.';
 //         } else if (err.status === 403) {
@@ -63,4 +89,5 @@ export class LoginComponent {
 //       }
 //     });
   // }
+  }
 }
