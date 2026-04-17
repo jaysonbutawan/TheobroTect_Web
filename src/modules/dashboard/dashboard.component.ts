@@ -211,6 +211,12 @@ export class DashboardComponent implements OnInit {
    * Groups data by month and counts healthy vs diseased plants
    */
   private processLineChartData(scans: ScanDto[]): void {
+    console.log('[LINE CHART] Raw scan sample (first 3):', scans.slice(0, 3).map(s => ({
+      disease_key: s.disease_key,
+      severity_key: s.severity_key,
+      scanned_at: s.scanned_at
+    })));
+
     // Group scans by month (YYYY-MM format)
     const monthGroups = this.groupScansByMonth(scans);
 
@@ -256,21 +262,28 @@ export class DashboardComponent implements OnInit {
       podBorerMildCounts.push(podBorerCount);
     });
 
-    // Update line chart datasets
-    if (this.lineChartData.datasets) {
-      this.lineChartData.datasets[0].data = healthyCounts;
-      this.lineChartData.datasets[1].data = blackPodSevereCounts;
-      this.lineChartData.datasets[2].data = mealybugMildCounts;
-      this.lineChartData.datasets[3].data = podBorerMildCounts;
-    }
-
-    console.log('Line chart data updated:', {
-      labels: this.lineChartData.labels,
+    console.log('[LINE CHART] Computed counts before assignment:', {
+      labels: sortedMonths.map(m => this.formatMonth(m)),
       healthy: healthyCounts,
       blackPodSevere: blackPodSevereCounts,
       mealybugMild: mealybugMildCounts,
-      podBorerMild: podBorerMildCounts
+      podBorerMild: podBorerMildCounts,
+      allZero: [...healthyCounts, ...blackPodSevereCounts, ...mealybugMildCounts, ...podBorerMildCounts].every(v => v === 0)
     });
+
+    // Reassign entire object so ng2-charts detects the change (mutation alone won't trigger re-render)
+    this.lineChartData = {
+      labels: sortedMonths.map(m => this.formatMonth(m)),
+      datasets: [
+        { ...this.lineChartData.datasets[0], data: healthyCounts },
+        { ...this.lineChartData.datasets[1], data: blackPodSevereCounts },
+        { ...this.lineChartData.datasets[2], data: mealybugMildCounts },
+        { ...this.lineChartData.datasets[3], data: podBorerMildCounts }
+      ]
+    };
+
+    console.log('[LINE CHART] lineChartData after reassignment:', this.lineChartData);
+    console.log('[LINE CHART] NOTE: if allZero=true above, check severity_key values in raw scan data');
   }
 
   /**
