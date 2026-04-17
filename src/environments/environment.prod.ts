@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://theobrotect.org/api',
+  apiUrl: 'https://theobrotect.org/api/theobrotect',
 };

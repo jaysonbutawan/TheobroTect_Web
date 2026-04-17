@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject ,ChangeDetectorRef} from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from './api.service';
@@ -15,6 +15,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   errorMessage = '';
   loading = false;
@@ -26,27 +27,30 @@ export class LoginComponent {
   });
 
   onSubmit() {
-  //   if (this.loginForm.invalid) {
-  //     this.errorMessage = 'Please fill in all required fields correctly.';
-  //     return;
-  //   }
+    if (this.loginForm.invalid) {
+      this.errorMessage = 'Please fill in all required fields correctly.';
+      return;
+    }
 
-  //   this.loading = true;
-  //   this.errorMessage = '';
+    this.loading = true;
+    this.errorMessage = '';
 
-  //   const { email, password } = this.loginForm.getRawValue();
+    const { email, password } = this.loginForm.getRawValue();
 
-  //   const payload: AdminLoginPayload = {
-  //     email,
-  //     password
-  //   };
+    const payload: AdminLoginPayload = {
+      email,
+      password
+    };
 
-  //   this.authService.login(payload).subscribe({
-  //   next: (res: AdminLoginResponse) => {
-  // localStorage.setItem('token', res.token);
-  // console.log('saved token:', localStorage.getItem('token'));
-  this.router.navigate(['/dashboard']);
-  // this.loading = false;
+    this.authService.login(payload).subscribe({
+      next: (res: AdminLoginResponse) => {
+        localStorage.setItem('token', res.token);
+        console.log('saved token:', localStorage.getItem('token'));
+        this.router.navigate(['/dashboard']);
+        this.loading = false;
+        this.cdr.markForCheck();
 
+      }
+    });
   }
 }

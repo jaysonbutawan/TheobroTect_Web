@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 export class AuthService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = `${environment.apiUrl}/admin`;
+  private readonly baseUrl = `${environment.apiUrl}/auth/admin`;
 
   login(data: AdminLoginPayload): Observable<AdminLoginResponse> {
   return this.http.post<AdminLoginResponse>(`${this.baseUrl}/login`, data);

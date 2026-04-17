@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FieldReportsApiService } from './api.service'; 
+import { FieldReportsApiService } from './api.service';
 import { ScanResultDto } from './scan_result.dto';
 import { MapService } from '../../app/core/services/map.service';
 
@@ -18,7 +18,7 @@ export interface ScanRecord {
   selector: 'app-field-reports',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './field-reports-list.component.html', 
+  templateUrl: './field-reports-list.component.html',
   styleUrls: ['./shared-reports.css']
 })
 
