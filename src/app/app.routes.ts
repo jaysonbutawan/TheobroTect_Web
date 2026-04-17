@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from '../modules/auth/login.component';
 import { LayoutComponent } from '../modules/layout/layout.components';
-import { DashboardComponent } from '../modules/landing_page/dashboard.component';
+import { DashboardComponent } from '../modules/dashboard/dashboard.component';
 import { UserManagementComponent } from '../modules/user_management/user_management.component';
 import { HeatmapComponent } from '../modules/heatmap/heatmap.component';
 

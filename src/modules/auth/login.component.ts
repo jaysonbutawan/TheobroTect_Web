@@ -44,8 +44,7 @@ export class LoginComponent {
 
     this.authService.login(payload).subscribe({
       next: (res: AdminLoginResponse) => {
-        localStorage.setItem('token', res.token);
-        console.log('saved token:', localStorage.getItem('token'));
+        localStorage.setItem('access_token', res.token);
         this.router.navigate(['/dashboard']);
         this.loading = false;
         this.cdr.markForCheck();
