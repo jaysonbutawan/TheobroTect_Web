@@ -1,244 +1,146 @@
-<div class="p-6 md:p-10 space-y-8 bg-transparent min-h-screen font-sans">
-  <div class="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-      <div>
-        <h3 class="text-2xl font-black text-slate-800 tracking-tight">Disease Spread Trends</h3>
-        <p class="text-sm text-slate-500 font-medium mt-1">
-          Monthly case counts across all disease types · {{ selectedYear }}
-        </p>
-      </div>
+<div class="p-6 md:p-10 space-y-8 bg-slate-50/30 min-h-screen font-sans">
 
-      <div class="flex items-center gap-3">
-        <select
-          aria-label="Filter by year"
-          [(ngModel)]="selectedYear"
-          (ngModelChange)="onYearChange()"
-          class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 cursor-pointer shadow-sm transition-all"
-        >
-          <option *ngFor="let y of availableYears" [value]="y">{{ y }}</option>
-        </select>
-      </div>
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Field Intelligence</h1>
+      <p class="text-slate-500 font-medium">Monitoring and disease detection logs by jurisdiction</p>
     </div>
-
-    <div class="flex flex-wrap gap-x-8 gap-y-3 mb-10 pb-6 border-b border-slate-50">
-      <div class="flex items-center gap-2.5 text-xs font-bold text-slate-600">
-        <span class="w-8 h-[4px] rounded-full bg-orange-500"></span> Black Pod Rot
+    
+    <div class="relative w-full lg:w-96">
+      <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
       </div>
-      <div class="flex items-center gap-2.5 text-xs font-bold text-slate-600">
-        <span
-          class="w-8 h-[4px] rounded-full bg-red-500 border-t border-b border-dashed border-red-500 bg-white"
-        ></span>
-        Pod Borer
-      </div>
-      <div class="flex items-center gap-2.5 text-xs font-bold text-slate-600">
-        <span class="w-8 h-[4px] rounded-full bg-purple-500"></span> Mealy Bug
-      </div>
-      <div class="flex items-center gap-2.5 text-xs font-bold text-slate-600">
-        <span
-          class="w-8 h-[4px] rounded-full bg-emerald-500 border-t border-b border-dotted border-emerald-500 bg-white"
-        ></span>
-        Healthy
-      </div>
+      <input 
+        type="text" 
+        [(ngModel)]="barangaySearchQuery"
+        placeholder="Search for a barangay..."
+        class="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
+      >
     </div>
+  </div>
 
-    <div class="relative mt-4">
-      <div class="flex">
-        <div
-          class="flex flex-col justify-between text-right pr-5 py-1.5"
-          style="height: 300px; min-width: 45px"
-        >
-          <span class="text-[11px] font-bold text-slate-400">20</span>
-          <span class="text-[11px] font-bold text-slate-400">16</span>
-          <span class="text-[11px] font-bold text-slate-400">12</span>
-          <span class="text-[11px] font-bold text-slate-400">8</span>
-          <span class="text-[11px] font-bold text-slate-400">4</span>
-          <span class="text-[11px] font-bold text-slate-400">0</span>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    @for (b of filteredBarangays; track b) {
+      <button (click)="selectBarangay(b)" 
+        [class.border-green-500]="selectedBarangay === b"
+        [class.bg-white]="selectedBarangay === b" 
+        [class.shadow-lg]="selectedBarangay === b"
+        class="p-6 border-2 border-transparent bg-slate-100/50 rounded-[2rem] text-left transition-all hover:bg-white hover:shadow-md group">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Barangay</span>
+          <div *ngIf="selectedBarangay === b" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm shadow-green-200"></div>
         </div>
+        <h4 class="text-lg font-black text-slate-800 tracking-tight">{{ b }}</h4>
+      </button>
+    } @empty {
+      <div class="col-span-full py-10 text-center text-slate-400 font-bold italic">
+        No barangays match your search.
+      </div>
+    }
+  </div>
 
-        <div class="flex-1 relative border-l border-slate-100" style="height: 300px">
-          <div class="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
-            <div class="border-t border-dashed border-slate-100 w-full h-0"></div>
-            <div class="border-t border-dashed border-slate-100 w-full h-0"></div>
-            <div class="border-t border-dashed border-slate-100 w-full h-0"></div>
-            <div class="border-t border-dashed border-slate-100 w-full h-0"></div>
-            <div class="border-t border-dashed border-slate-100 w-full h-0"></div>
-            <div class="border-b border-slate-100 w-full h-0"></div>
+  @if (selectedBarangay) {
+    <div class="bg-white border border-slate-200 rounded-[2.5rem] shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      <div class="p-8 border-b border-slate-100 bg-slate-50/30">
+        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
+          
+          <div class="space-y-4 w-full xl:w-auto">
+            <h3 class="text-xl font-black text-slate-900">Scanner Details: {{ selectedBarangay }}</h3>
+            
+            <div class="flex flex-wrap gap-2">
+              @for (cat of diseaseCategories; track cat) {
+                <button (click)="setDiseaseFilter(cat)" type="button" 
+                  [class.bg-slate-900]="selectedDisease === cat"
+                  [class.text-white]="selectedDisease === cat" 
+                  [class.bg-white]="selectedDisease !== cat"
+                  [class.text-slate-700]="selectedDisease !== cat"
+                  class="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 transition-all shadow-sm hover:border-slate-400 hover:bg-slate-50">
+                  {{ cat }}
+                </button>
+              }
+            </div>
           </div>
 
-          <svg
-            class="absolute inset-0 w-full h-full overflow-visible px-2"
-            preserveAspectRatio="none"
-            viewBox="0 0 1100 300"
-          >
-            <path
-              d="M 0 250 L 100 240 L 200 220 L 300 200 L 400 150 L 500 170 L 600 120 L 700 100 L 800 80 L 900 60 L 1000 50 L 1100 50"
-              fill="none"
-              stroke="#f97316"
-              stroke-width="3"
-              stroke-linecap="round"
-            />
-            <path
-              d="M 0 260 L 100 250 L 200 240 L 300 220 L 400 220 L 500 200 L 600 200 L 700 220 L 800 220 L 900 220 L 1000 220 L 1100 220"
-              fill="none"
-              stroke="#ef4444"
-              stroke-width="3"
-              stroke-dasharray="8,5"
-              stroke-linecap="round"
-            />
-            <path
-              d="M 0 280 L 100 280 L 200 250 L 300 250 L 400 240 L 500 250 L 600 240 L 700 250 L 800 250 L 900 240 L 1000 240 L 1100 250"
-              fill="none"
-              stroke="#8b5cf6"
-              stroke-width="3"
-              stroke-linecap="round"
-            />
-            <path
-              d="M 0 190 L 100 180 L 200 190 L 300 200 L 400 200 L 500 180 L 600 200 L 700 200 L 800 200 L 900 180 L 1000 200 L 1100 190"
-              fill="none"
-              stroke="#10b981"
-              stroke-width="3"
-              stroke-dasharray="2,4"
-              stroke-linecap="round"
-            />
-          </svg>
+          <div class="flex flex-wrap items-end gap-4 w-full xl:w-auto">
+            <div class="flex flex-col gap-1.5">
+              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"> Date</span>
+              <input type="date" [(ngModel)]="filterDate" 
+                class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500">
+            </div>
+            
+            
+            <button (click)="generatePDF()"
+              class="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl text-sm font-bold hover:bg-emerald-700 shadow-lg transition-all active:scale-95 ml-auto xl:ml-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export PDF
+            </button>
+          </div>
+
         </div>
       </div>
 
-      <div class="flex ml-[45px] mt-4">
-        <div
-          *ngFor="let month of months"
-          class="flex-1 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest"
-        >
-          {{ month }}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
-    <div
-      class="px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 bg-slate-50/30"
-    >
-      <div>
-        <h3 class="text-xl font-bold text-slate-800 tracking-tight">Recent Scan Activity</h3>
-        <p class="text-sm text-slate-400 font-medium mt-0.5">Real-time health detection logs</p>
-      </div>
-      <div class="flex gap-3">
-        <button
-          type="button"
-          class="flex items-center gap-2 px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-white hover:shadow-sm transition-all"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
-          Export Data
-        </button>
-        <button
-          type="button"
-          class="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 shadow-md transition-all"
-        >
-          View All Logs
-        </button>
-      </div>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-slate-50/50">
-          <tr>
-            <th class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Scan ID
-            </th>
-            <th class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Timestamp
-            </th>
-            <th class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Disease Detected
-            </th>
-            <th class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Location
-            </th>
-            <th class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Status
-            </th>
-            <th
-              class="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 text-right"
-            >
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-50">
-          @for (scan of recentScans; track scan.id) {
-            <tr class="hover:bg-slate-50/80 transition-colors group cursor-default">
-              <td class="px-8 py-5">
-                <span
-                  class="font-mono text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md"
-                  >{{ scan.id }}</span
-                >
-              </td>
-              <td class="px-8 py-5">
-                <div class="text-sm font-bold text-slate-700">{{ scan.timestamp }}</div>
-                <div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Field Entry</div>
-              </td>
-              <td class="px-8 py-5">
-                <div class="flex items-center gap-3">
-                  <span
-                    class="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
-                    [ngClass]="getDotClass(scan.status)"
-                  ></span>
-                  <span class="text-sm font-black text-slate-800">{{ scan.disease }}</span>
-                </div>
-              </td>
-              <td class="px-8 py-5">
-                <div class="flex items-center gap-2 text-sm font-bold text-slate-500">
-                  <svg
-                    class="w-4 h-4 text-slate-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                  </svg>
-                  {{ scan.location }}
-                </div>
-              </td>
-              <td class="px-8 py-5">
-                <span
-                  [ngClass]="getStatusClass(scan.status)"
-                  class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest"
-                >
-                  {{ scan.status }}
-                </span>
-              </td>
-              <td class="px-8 py-5 text-right">
-                <button
-                  class="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 12h.01M12 12h.01M19 12h.01"
-                    />
-                  </svg>
-                </button>
-              </td>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50/50">
+              <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-400">Scanner Identity</th>
+              <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-400">Diagnosis</th>
+              <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-400 text-center">Severity Status</th>
+              <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-400 text-right">Timestamp</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (scan of filteredScans; track scan.id) {
+              <tr class="hover:bg-slate-50/50 transition-colors group">
+                <td class="px-8 py-6">
+                  <span class="font-mono text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg group-hover:bg-white transition-colors">
+                    {{ scan.id }}
+                  </span>
+                </td>
+                <td class="px-8 py-6">
+                  <div class="text-sm font-black text-slate-800">{{ scan.disease }}</div>
+                </td>
+                <td class="px-8 py-6">
+                  <div class="flex justify-center">
+                    <span [ngClass]="getStatusClass(scan.status)"
+                      class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm">
+                      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="getDotClass(scan.status)"></span>
+                      {{ scan.status }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-8 py-6 text-right text-sm font-bold text-slate-500">
+                  {{ scan.timestamp }}
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="px-8 py-20 text-center">
+                  <div class="flex flex-col items-center">
+                    <svg class="w-10 h-10 text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <p class="text-slate-400 font-bold italic">No records found matching these filters.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  } @else {
+    <div class="py-32 flex flex-col items-center justify-center bg-white border-2 border-dashed border-slate-200 rounded-[3rem] animate-in fade-in duration-700">
+      <div class="p-5 bg-slate-50 rounded-full mb-4 text-slate-300">
+        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-800">Intelligence Ready</h3>
+      <p class="text-slate-500 font-medium">Search or select a barangay card above to view field data.</p>
+    </div>
+  }
 </div>
