@@ -1,73 +1,99 @@
-<div class="min-h-screen bg-slate-50 font-sans">
+<div class="min-h-screen bg-[#f0f2f5] font-sans">
+
   <!-- ════════════════════════════════════════════════════
        LIST VIEW
   ═════════════════════════════════════════════════════ -->
   @if (view === 'list') {
     <div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
         <div>
-          <h1 class="text-2xl font-black text-slate-800 tracking-tight">Cacao scan history</h1>
-          <p class="text-sm text-slate-400 mt-1">AI-powered disease detection records</p>
+          <h1 class="text-[22px] font-extrabold text-slate-900 tracking-tight" style="font-family:'Syne',sans-serif;">
+            Cacao scan history
+          </h1>
+          <p class="text-[12px] text-slate-400 mt-1">AI-powered disease detection records</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="inline-flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl bg-white text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Export
+          </button>
+          
         </div>
       </div>
 
       <!-- Stats -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-            Total scans
-          </p>
-          <p class="text-3xl font-black text-slate-800">{{ statTotal }}</p>
-          <p class="text-xs text-slate-400 mt-0.5">all time</p>
+        <!-- Total scans -->
+        <div class="bg-white border border-[#e8ecf0] rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-[3px] bg-slate-400 rounded-t-2xl"></div>
+          <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center mb-3">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <p class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-1" style="font-family:'Syne',sans-serif;">Total scans</p>
+          <p class="text-[28px] font-extrabold text-slate-900 leading-none" style="font-family:'Syne',sans-serif;">{{ statTotal }}</p>
+          <p class="text-[10px] text-slate-400 mt-1">all time</p>
         </div>
-        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-            Avg confidence
-          </p>
-          <p class="text-3xl font-black text-[#2e7d32]">{{ statAvgConf }}%</p>
-          <p class="text-xs text-slate-400 mt-0.5">AI accuracy</p>
+
+        <!-- Avg confidence -->
+        <div class="bg-white border border-[#e8ecf0] rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#2e7d32] rounded-t-2xl"></div>
+          <div class="w-8 h-8 rounded-lg bg-[#dcfce7] flex items-center justify-center mb-3">
+            <svg class="w-4 h-4 text-[#2e7d32]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <p class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-1" style="font-family:'Syne',sans-serif;">Avg confidence</p>
+          <p class="text-[28px] font-extrabold text-[#2e7d32] leading-none" style="font-family:'Syne',sans-serif;">{{ statAvgConf }}%</p>
+          <p class="text-[10px] text-slate-400 mt-1">AI accuracy</p>
         </div>
-        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-            High severity
-          </p>
-          <p class="text-3xl font-black text-red-600">{{ statHigh }}</p>
-          <p class="text-xs text-slate-400 mt-0.5">require action</p>
+
+        <!-- High severity -->
+        <div class="bg-white border border-[#e8ecf0] rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-[3px] bg-red-500 rounded-t-2xl"></div>
+          <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center mb-3">
+            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <p class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-1" style="font-family:'Syne',sans-serif;">High severity</p>
+          <p class="text-[28px] font-extrabold text-red-600 leading-none" style="font-family:'Syne',sans-serif;">{{ statHigh }}</p>
+          <p class="text-[10px] text-slate-400 mt-1">require action</p>
         </div>
-        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-            Healthy pods
-          </p>
-          <p class="text-3xl font-black text-slate-800">{{ statHealthy }}</p>
-          <p class="text-xs text-slate-400 mt-0.5">no disease detected</p>
+
+        <!-- Healthy pods -->
+        <div class="bg-white border border-[#e8ecf0] rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-[3px] bg-amber-400 rounded-t-2xl"></div>
+          <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center mb-3">
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+            </svg>
+          </div>
+          <p class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-1" style="font-family:'Syne',sans-serif;">Healthy pods</p>
+          <p class="text-[28px] font-extrabold text-amber-500 leading-none" style="font-family:'Syne',sans-serif;">{{ statHealthy }}</p>
+          <p class="text-[10px] text-slate-400 mt-1">no disease detected</p>
         </div>
       </div>
 
       <!-- Filter bar -->
-      <div class="flex flex-wrap gap-3 items-center justify-between mb-6">
-        <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap gap-2 items-center justify-between mb-5">
+        <div class="flex flex-wrap gap-2">
           <!-- Search -->
           <div class="relative">
-            <svg
-              class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <input
               type="text"
               [(ngModel)]="filters.search"
               (input)="onSearchChange()"
               placeholder="Search disease, pod ID, region..."
-              class="pl-9 pr-4 py-2 w-60 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-green-100 focus:border-[#2e7d32] outline-none transition-all"
+              class="pl-9 pr-4 py-2 w-60 bg-white border border-[#e2e8f0] rounded-xl text-[12px] text-slate-600 focus:ring-2 focus:ring-green-100 focus:border-[#2e7d32] outline-none transition-all shadow-sm"
             />
           </div>
 
@@ -75,7 +101,7 @@
             [(ngModel)]="filters.disease"
             (change)="onFilterChange()"
             aria-label="Filter by disease type"
-            class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all"
+            class="px-3 py-2 bg-white border border-[#e2e8f0] rounded-xl text-[12px] text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all shadow-sm"
           >
             <option value="">All diseases</option>
             @for (d of diseaseOptions; track d) {
@@ -87,7 +113,7 @@
             [(ngModel)]="filters.severity"
             (change)="onFilterChange()"
             aria-label="Filter by severity level"
-            class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all"
+            class="px-3 py-2 bg-white border border-[#e2e8f0] rounded-xl text-[12px] text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all shadow-sm"
           >
             <option value="">All severity</option>
             @for (s of severityOptions; track s) {
@@ -99,15 +125,15 @@
             [(ngModel)]="filters.sort"
             (change)="onFilterChange()"
             aria-label="Sort scan results"
-            class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all"
+            class="px-3 py-2 bg-white border border-[#e2e8f0] rounded-xl text-[12px] text-slate-600 outline-none cursor-pointer hover:border-slate-300 transition-all shadow-sm"
           >
             @for (opt of sortOptions; track opt.value) {
               <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
         </div>
-        <p class="text-sm text-slate-400">
-          <span class="font-bold text-slate-700">{{ totalScans }}</span> results
+        <p class="text-[12px] text-slate-400">
+          <span class="font-bold text-slate-700" style="font-family:'Syne',sans-serif;">{{ totalScans }}</span> results
         </p>
       </div>
 
@@ -115,14 +141,12 @@
       @if (isLoading) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-            <div
-              class="bg-white border border-slate-100 rounded-2xl overflow-hidden animate-pulse shadow-sm"
-            >
-              <div class="h-36 bg-slate-100"></div>
+            <div class="bg-white border border-[#e8ecf0] rounded-2xl overflow-hidden animate-pulse shadow-sm">
+              <div class="h-28 bg-slate-100"></div>
               <div class="p-4 space-y-3">
                 <div class="h-4 w-40 bg-slate-100 rounded"></div>
                 <div class="h-3 w-24 bg-slate-100 rounded"></div>
-                <div class="h-2 w-full bg-slate-100 rounded-full"></div>
+                <div class="h-14 w-full bg-slate-100 rounded-xl"></div>
               </div>
             </div>
           }
@@ -130,24 +154,12 @@
       } @else if (errorMsg) {
         <div class="text-center py-16">
           <p class="text-red-500 text-sm mb-2">{{ errorMsg }}</p>
-          <button (click)="loadScans()" class="text-[#2e7d32] text-sm font-bold underline">
-            Try again
-          </button>
+          <button (click)="loadScans()" class="text-[#2e7d32] text-sm font-bold underline">Try again</button>
         </div>
       } @else if (pagedScans.length === 0) {
         <div class="text-center py-16">
-          <svg
-            class="w-12 h-12 text-slate-300 mx-auto mb-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+          <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
           <p class="text-slate-400 text-sm">No scans match your filters.</p>
         </div>
@@ -156,21 +168,34 @@
           @for (scan of pagedScans; track scan.id) {
             <div
               (click)="openDetail(scan)"
-              class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
+              class="bg-white border border-[#e8ecf0] rounded-2xl overflow-hidden shadow-sm hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group"
             >
-              <!-- Image / placeholder -->
+              <!-- Image / placeholder with severity-tinted bg -->
               <div
-                class="h-36 bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100"
+                class="h-28 flex items-center justify-center overflow-hidden relative"
+                [ngClass]="{
+                  'bg-red-50':    scan.severity === 'High',
+                  'bg-amber-50':  scan.severity === 'Moderate',
+                  'bg-green-50':  scan.severity === 'Low'
+                }"
               >
                 @if (scan.image_url) {
-                  <!-- <img [src]="scan.image_url" [alt]="scan.pod_id" class="w-full h-full object-cover"> -->
+<img 
+  [src]="scan.image_url || getDefaultImage(scan.disease)" 
+  [alt]="scan.pod_id" 
+  class="w-full h-full object-cover">
                 } @else {
                   <svg
-                    class="w-14 h-14 text-slate-200"
+                    class="w-10 h-14"
                     viewBox="0 0 80 120"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
+                    [ngClass]="{
+                      'text-red-200':    scan.severity === 'High',
+                      'text-amber-200':  scan.severity === 'Moderate',
+                      'text-green-200':  scan.severity === 'Low'
+                    }"
                   >
                     <ellipse cx="40" cy="60" rx="28" ry="48" />
                     <line x1="40" y1="12" x2="40" y2="108" stroke-width="1.5" />
@@ -179,58 +204,99 @@
                     <line x1="18" y1="80" x2="62" y2="80" />
                   </svg>
                 }
+                <!-- Severity pill overlay -->
+                <span
+                  class="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.6px] border"
+                  style="font-family:'Syne',sans-serif;"
+                  [ngClass]="{
+                    'bg-red-50 text-red-800 border-red-200':      scan.severity === 'High',
+                    'bg-amber-50 text-amber-800 border-amber-200': scan.severity === 'Moderate',
+                    'bg-green-50 text-green-800 border-green-200': scan.severity === 'Low'
+                  }"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    [ngClass]="{
+                      'bg-red-500':   scan.severity === 'High',
+                      'bg-amber-400': scan.severity === 'Moderate',
+                      'bg-green-500': scan.severity === 'Low'
+                    }"
+                  ></span>
+                  {{ scan.severity }} severity
+                </span>
               </div>
 
               <div class="p-4">
                 <!-- Title row -->
                 <div class="flex items-start justify-between mb-2">
-                  <p class="text-sm font-bold text-slate-800 leading-snug">{{ scan.disease }}</p>
-                  <p class="text-[11px] text-slate-400 ml-2 shrink-0">
-                    {{ formatDate(scan.scanned_at) }}
-                  </p>
+                  <p class="text-[13.5px] font-extrabold text-slate-900 leading-snug" style="font-family:'Syne',sans-serif;">{{ scan.disease }}</p>
+                  <p class="text-[10px] text-slate-400 ml-2 shrink-0 mt-0.5">{{ formatDate(scan.scanned_at) }}</p>
                 </div>
 
-                <!-- Badges -->
-                <div class="flex flex-wrap gap-1.5 mb-3">
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold"
-                    [ngClass]="{
-                      'bg-red-100 text-red-700': scan.severity === 'High',
-                      'bg-amber-100 text-amber-800': scan.severity === 'Moderate',
-                      'bg-green-100 text-green-800': scan.severity === 'Low',
-                    }"
-                  >
-                    {{ scan.severity }} severity
-                  </span>
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600"
-                  >
+                <!-- Meta row: pod id + region -->
+                <div class="flex items-center gap-2 flex-wrap mb-3">
+                  <span class="inline-flex items-center px-2 py-0.5 bg-slate-50 border border-slate-200 rounded-md text-[10px] text-slate-500 font-medium">
                     {{ scan.pod_id }}
                   </span>
+                  <span class="inline-flex items-center gap-1 text-[10px] text-slate-400">
+                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    {{ scan.region }}
+                  </span>
                 </div>
 
-                <!-- Confidence bar -->
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="text-[11px] text-slate-400 w-16 shrink-0">Confidence</span>
-                  <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      class="h-full rounded-full bg-[#639922] transition-all"
-                      [style.width.%]="scan.confidence"
-                    ></div>
+                <!-- Divider -->
+                <div class="h-px bg-[#f4f6f8] mb-3"></div>
+
+                <!-- Confidence metric block -->
+                <div class="flex items-center justify-between bg-[#f8fafc] border border-[#f0f2f5] rounded-xl px-3 py-2.5 mb-3">
+                  <div class="flex flex-col gap-0.5">
+                    <p class="text-[8.5px] font-bold uppercase tracking-[1px] text-slate-400" style="font-family:'Syne',sans-serif;">AI Confidence</p>
+                    <p
+                      class="font-extrabold leading-none"
+                      style="font-family:'Syne',sans-serif; font-size:26px;"
+                      [ngClass]="{
+                        'text-red-600':   scan.severity === 'High',
+                        'text-amber-500': scan.severity === 'Moderate',
+                        'text-[#2e7d32]': scan.severity === 'Low'
+                      }"
+                    >
+                      {{ formatConf(scan.confidence) }}<span class="text-[13px] font-semibold text-slate-400">%</span>
+                    </p>
+                    <p class="text-[9.5px] text-slate-400 mt-0.5">
+                      {{ scan.confidence >= 90 ? 'Very high certainty' : scan.confidence >= 75 ? 'High certainty' : 'Moderate certainty' }}
+                    </p>
                   </div>
-                  <span class="text-[11px] font-bold text-slate-600 w-8 text-right">{{
-                    formatConf(scan.confidence)
-                  }}</span>
+                  <!-- Ring gauge -->
+                  <div class="relative w-11 h-11 flex-shrink-0">
+                    <svg class="w-11 h-11 -rotate-90" viewBox="0 0 44 44">
+                      <circle cx="22" cy="22" r="19" fill="none" stroke="#f0f2f5" stroke-width="4"/>
+                      <circle
+                        cx="22" cy="22" r="19"
+                        fill="none"
+                        stroke-width="4"
+                        stroke-linecap="round"
+                        [attr.stroke]="scan.severity === 'High' ? '#ef4444' : scan.severity === 'Moderate' ? '#f59e0b' : '#2e7d32'"
+                        [attr.stroke-dasharray]="119.4"
+                        [attr.stroke-dashoffset]="119.4 - (scan.confidence / 100) * 119.4"
+                      />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center text-[9px] font-extrabold text-slate-700" style="font-family:'Syne',sans-serif;">
+                      {{ formatConf(scan.confidence) }}%
+                    </div>
+                  </div>
                 </div>
 
-                <p class="text-[11px] text-slate-400">{{ scan.region }}</p>
-              </div>
-
-              <div class="px-4 pb-4">
                 <button
-                  class="w-full py-2 text-xs font-bold text-[#2e7d32] border border-green-200 rounded-xl hover:bg-green-50 transition-colors"
+                  class="w-full py-2 text-[11px] font-bold border border-green-200 bg-green-50 text-[#2e7d32] rounded-xl hover:bg-green-100 transition-colors flex items-center justify-center gap-1.5"
+                  style="font-family:'Syne',sans-serif;"
                 >
-                  View full report →
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  View full report
                 </button>
               </div>
             </div>
@@ -241,17 +307,19 @@
       <!-- Pagination -->
       @if (!isLoading && pagedScans.length > 0) {
         <div class="flex flex-wrap items-center justify-between mt-8 gap-3">
-          <p class="text-sm text-slate-400">
-            Showing <span class="font-bold text-slate-700">{{ rangeStart }}–{{ rangeEnd }}</span> of
-            <span class="font-bold text-slate-700">{{ totalScans }}</span> scans
+          <p class="text-[11.5px] text-slate-400">
+            Showing <span class="font-bold text-slate-700" style="font-family:'Syne',sans-serif;">{{ rangeStart }}–{{ rangeEnd }}</span> of
+            <span class="font-bold text-slate-700" style="font-family:'Syne',sans-serif;">{{ totalScans }}</span> scans
           </p>
           <div class="flex items-center gap-1.5">
             <button
               (click)="prevPage()"
               [disabled]="currentPage === 1"
-              class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 text-sm font-bold hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 text-sm font-bold hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center"
             >
-              ‹
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
             </button>
             @for (page of pageNumbers; track page; let idx = $index) {
               @if (showEllipsisBefore(page, idx)) {
@@ -259,11 +327,12 @@
               }
               <button
                 (click)="goToPage(page)"
-                class="w-8 h-8 rounded-lg text-sm font-bold transition-all"
+                class="w-8 h-8 rounded-lg text-[12px] font-bold transition-all"
+                style="font-family:'Syne',sans-serif;"
                 [ngClass]="
                   page === currentPage
                     ? 'bg-[#2e7d32] text-white border border-[#2e7d32]'
-                    : 'border border-slate-200 text-slate-500 hover:bg-slate-100'
+                    : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
                 "
               >
                 {{ page }}
@@ -272,9 +341,11 @@
             <button
               (click)="nextPage()"
               [disabled]="currentPage === totalPages"
-              class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 text-sm font-bold hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 text-sm font-bold hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center"
             >
-              ›
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -287,39 +358,47 @@
   ═════════════════════════════════════════════════════ -->
   @if (view === 'detail' && selectedScan) {
     <div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+
       <!-- Back -->
       <button
         (click)="closeDetail()"
-        class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 font-semibold mb-6 transition-colors"
+        class="inline-flex items-center gap-2 text-[12px] text-slate-500 hover:text-slate-800 font-semibold mb-6 transition-colors"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
         Back to scan history
       </button>
 
       <!-- Detail grid -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
         <!-- Left — image + AI scores -->
         <div class="flex flex-col gap-5">
+
           <!-- Pod image -->
           <div
-            class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm h-64 flex items-center justify-center"
+            class="border border-[#e8ecf0] rounded-2xl overflow-hidden shadow-sm h-64 flex items-center justify-center relative"
+            [ngClass]="{
+              'bg-red-50':   selectedScan.severity === 'High',
+              'bg-amber-50': selectedScan.severity === 'Moderate',
+              'bg-green-50': selectedScan.severity === 'Low'
+            }"
           >
             @if (selectedScan.image_url) {
-              <!-- <img [src]="selectedScan.image_url" [alt]="selectedScan.pod_id" class="w-full h-full object-cover"> -->
+              <img [src]="selectedScan.image_url" [alt]="selectedScan.pod_id" class="w-full h-full object-cover">
             } @else {
               <svg
-                class="w-20 h-28 text-slate-200"
+                class="w-20 h-28"
                 viewBox="0 0 80 120"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
+                [ngClass]="{
+                  'text-red-200':   selectedScan.severity === 'High',
+                  'text-amber-200': selectedScan.severity === 'Moderate',
+                  'text-green-200': selectedScan.severity === 'Low'
+                }"
               >
                 <ellipse cx="40" cy="60" rx="28" ry="48" />
                 <line x1="40" y1="12" x2="40" y2="108" stroke-width="1.5" />
@@ -328,21 +407,41 @@
                 <line x1="18" y1="80" x2="62" y2="80" />
               </svg>
             }
+            <!-- Severity pill on image -->
+            <span
+              class="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.6px] border"
+              style="font-family:'Syne',sans-serif;"
+              [ngClass]="{
+                'bg-red-50 text-red-800 border-red-200':      selectedScan.severity === 'High',
+                'bg-amber-50 text-amber-800 border-amber-200': selectedScan.severity === 'Moderate',
+                'bg-green-50 text-green-800 border-green-200': selectedScan.severity === 'Low'
+              }"
+            >
+              <span
+                class="w-1.5 h-1.5 rounded-full"
+                [ngClass]="{
+                  'bg-red-500':   selectedScan.severity === 'High',
+                  'bg-amber-400': selectedScan.severity === 'Moderate',
+                  'bg-green-500': selectedScan.severity === 'Low'
+                }"
+              ></span>
+              {{ selectedScan.severity }} severity
+            </span>
           </div>
 
           <!-- AI prediction breakdown -->
-          <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-            <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">
+          <div class="bg-white border border-[#e8ecf0] rounded-2xl p-5 shadow-sm">
+            <h3 class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-4" style="font-family:'Syne',sans-serif;">
               AI prediction breakdown
             </h3>
             <div class="flex flex-col gap-3">
               @for (entry of sortedScores; track entry[0]) {
                 <div>
-                  <div class="flex justify-between text-xs text-slate-500 mb-1">
+                  <div class="flex justify-between text-[11px] text-slate-500 mb-1.5">
                     <span>{{ entry[0] }}</span>
-                    <span class="font-bold">{{ entry[1].toFixed(1) }}%</span>
+                    <span class="font-bold text-slate-700" style="font-family:'Syne',sans-serif;">{{ entry[1].toFixed(1) }}%</span>
                   </div>
-                  <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       class="h-full rounded-full transition-all"
                       [style.width.%]="entry[1]"
@@ -357,71 +456,112 @@
 
         <!-- Right — details, diagnosis, actions -->
         <div class="flex flex-col gap-5">
+
           <!-- Scan details -->
-          <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-            <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">
+          <div class="bg-white border border-[#e8ecf0] rounded-2xl p-5 shadow-sm">
+            <h3 class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-4" style="font-family:'Syne',sans-serif;">
               Scan details
             </h3>
-            <div class="divide-y divide-slate-50">
+            <div class="divide-y divide-[#f4f6f8]">
               <div class="flex justify-between items-center py-2.5">
-                <span class="text-sm text-slate-500">Pod ID</span>
-                <span class="text-sm font-bold text-slate-800 font-mono">{{
-                  selectedScan.pod_id
-                }}</span>
+                <span class="text-[12px] text-slate-500">Pod ID</span>
+                <span class="text-[12px] font-bold text-slate-800 font-mono">{{ selectedScan.pod_id }}</span>
               </div>
               <div class="flex justify-between items-center py-2.5">
-                <span class="text-sm text-slate-500">Scan date</span>
-                <span class="text-sm font-bold text-slate-800">{{
-                  formatDate(selectedScan.scanned_at)
-                }}</span>
+                <span class="text-[12px] text-slate-500">Scan date</span>
+                <span class="text-[12px] font-bold text-slate-800">{{ formatDate(selectedScan.scanned_at) }}</span>
               </div>
               <div class="flex justify-between items-center py-2.5">
-                <span class="text-sm text-slate-500">Region</span>
-                <span class="text-sm font-bold text-slate-800">{{ selectedScan.region }}</span>
+                <span class="text-[12px] text-slate-500">Region</span>
+                <span class="text-[12px] font-bold text-slate-800">{{ selectedScan.region }}</span>
               </div>
               <div class="flex justify-between items-center py-2.5">
-                <span class="text-sm text-slate-500">Detected disease</span>
-                <span class="text-sm font-bold text-slate-800">{{ selectedScan.disease }}</span>
+                <span class="text-[12px] text-slate-500">Detected disease</span>
+                <span class="text-[12px] font-bold text-slate-800">{{ selectedScan.disease }}</span>
               </div>
               <div class="flex justify-between items-center py-2.5">
-                <span class="text-sm text-slate-500">Severity</span>
+                <span class="text-[12px] text-slate-500">Severity</span>
                 <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
+                  style="font-family:'Syne',sans-serif;"
                   [ngClass]="{
-                    'bg-red-100 text-red-700': selectedScan.severity === 'High',
-                    'bg-amber-100 text-amber-800': selectedScan.severity === 'Moderate',
-                    'bg-green-100 text-green-800': selectedScan.severity === 'Low',
+                    'bg-red-50 text-red-800 border-red-200':      selectedScan.severity === 'High',
+                    'bg-amber-50 text-amber-800 border-amber-200': selectedScan.severity === 'Moderate',
+                    'bg-green-50 text-green-800 border-green-200': selectedScan.severity === 'Low'
                   }"
                 >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    [ngClass]="{
+                      'bg-red-500':   selectedScan.severity === 'High',
+                      'bg-amber-400': selectedScan.severity === 'Moderate',
+                      'bg-green-500': selectedScan.severity === 'Low'
+                    }"
+                  ></span>
                   {{ selectedScan.severity }}
                 </span>
               </div>
-              <div class="flex justify-between items-center py-2.5">
-                <span class="text-sm text-slate-500">Confidence</span>
-                <span class="text-sm font-bold text-[#2e7d32]">{{
-                  formatConf(selectedScan.confidence)
-                }}</span>
+
+              <!-- Confidence as metric row in detail -->
+              <div class="py-3">
+                <div class="flex items-center justify-between bg-[#f8fafc] border border-[#f0f2f5] rounded-xl px-3 py-2.5">
+                  <div class="flex flex-col gap-0.5">
+                    <p class="text-[8.5px] font-bold uppercase tracking-[1px] text-slate-400" style="font-family:'Syne',sans-serif;">AI Confidence</p>
+                    <p
+                      class="font-extrabold leading-none"
+                      style="font-family:'Syne',sans-serif; font-size:28px;"
+                      [ngClass]="{
+                        'text-red-600':   selectedScan.severity === 'High',
+                        'text-amber-500': selectedScan.severity === 'Moderate',
+                        'text-[#2e7d32]': selectedScan.severity === 'Low'
+                      }"
+                    >
+                      {{ formatConf(selectedScan.confidence) }}<span class="text-[14px] font-semibold text-slate-400">%</span>
+                    </p>
+                    <p class="text-[9.5px] text-slate-400 mt-0.5">
+                      {{ selectedScan.confidence >= 90 ? 'Very high certainty' : selectedScan.confidence >= 75 ? 'High certainty' : 'Moderate certainty' }}
+                    </p>
+                  </div>
+                  <!-- Ring gauge -->
+                  <div class="relative w-12 h-12 flex-shrink-0">
+                    <svg class="w-12 h-12 -rotate-90" viewBox="0 0 44 44">
+                      <circle cx="22" cy="22" r="19" fill="none" stroke="#f0f2f5" stroke-width="4"/>
+                      <circle
+                        cx="22" cy="22" r="19"
+                        fill="none"
+                        stroke-width="4"
+                        stroke-linecap="round"
+                        [attr.stroke]="selectedScan.severity === 'High' ? '#ef4444' : selectedScan.severity === 'Moderate' ? '#f59e0b' : '#2e7d32'"
+                        [attr.stroke-dasharray]="119.4"
+                        [attr.stroke-dashoffset]="119.4 - (selectedScan.confidence / 100) * 119.4"
+                      />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center text-[9px] font-extrabold text-slate-700" style="font-family:'Syne',sans-serif;">
+                      {{ formatConf(selectedScan.confidence) }}%
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Diagnosis -->
-          <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-            <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+          <div class="bg-white border border-[#e8ecf0] rounded-2xl p-5 shadow-sm">
+            <h3 class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-3" style="font-family:'Syne',sans-serif;">
               Diagnosis
             </h3>
-            <p class="text-sm text-slate-600 leading-relaxed">{{ selectedScan.description }}</p>
+            <p class="text-[12px] text-slate-600 leading-relaxed">{{ selectedScan.description }}</p>
           </div>
 
           <!-- Recommended actions -->
-          <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-            <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+          <div class="bg-white border border-[#e8ecf0] rounded-2xl p-5 shadow-sm">
+            <h3 class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-3" style="font-family:'Syne',sans-serif;">
               Recommended actions
             </h3>
             <ul class="space-y-2">
               @for (action of selectedScan.actions; track action) {
-                <li class="flex items-start gap-2.5 text-sm text-slate-700">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#639922] mt-1.5 shrink-0"></span>
+                <li class="flex items-start gap-2.5 text-[12px] text-slate-700">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#2e7d32] mt-1.5 shrink-0"></span>
                   {{ action }}
                 </li>
               }
@@ -430,26 +570,35 @@
         </div>
 
         <!-- Full-width — scan history for this pod -->
-        <div class="lg:col-span-2 bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-          <h3 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">
+        <div class="lg:col-span-2 bg-white border border-[#e8ecf0] rounded-2xl p-5 shadow-sm">
+          <h3 class="text-[9px] font-bold uppercase tracking-[1.2px] text-slate-400 mb-4" style="font-family:'Syne',sans-serif;">
             Scan history for {{ selectedScan.pod_id }}
           </h3>
           @if (selectedScan.history.length === 0) {
-            <p class="text-sm text-slate-400">No previous scans on record for this pod.</p>
+            <p class="text-[12px] text-slate-400">No previous scans on record for this pod.</p>
           } @else {
-            <div class="divide-y divide-slate-50">
+            <div class="divide-y divide-[#f4f6f8]">
               @for (h of selectedScan.history; track h.date) {
                 <div class="flex items-center gap-4 py-3">
-                  <span class="text-xs text-slate-400 w-24 shrink-0">{{ formatDate(h.date) }}</span>
-                  <span class="text-sm text-slate-700 flex-1">{{ h.disease }}</span>
+                  <span class="text-[11px] text-slate-400 w-24 shrink-0">{{ formatDate(h.date) }}</span>
+                  <span class="text-[12px] text-slate-700 flex-1">{{ h.disease }}</span>
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold"
+                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                    style="font-family:'Syne',sans-serif;"
                     [ngClass]="{
-                      'bg-red-100 text-red-700': h.severity === 'High',
-                      'bg-amber-100 text-amber-800': h.severity === 'Moderate',
-                      'bg-green-100 text-green-800': h.severity === 'Low',
+                      'bg-red-50 text-red-800 border-red-200':      h.severity === 'High',
+                      'bg-amber-50 text-amber-800 border-amber-200': h.severity === 'Moderate',
+                      'bg-green-50 text-green-800 border-green-200': h.severity === 'Low'
                     }"
                   >
+                    <span
+                      class="w-1.5 h-1.5 rounded-full"
+                      [ngClass]="{
+                        'bg-red-500':   h.severity === 'High',
+                        'bg-amber-400': h.severity === 'Moderate',
+                        'bg-green-500': h.severity === 'Low'
+                      }"
+                    ></span>
                     {{ h.severity }}
                   </span>
                 </div>
@@ -457,7 +606,9 @@
             </div>
           }
         </div>
+
       </div>
     </div>
   }
+
 </div>

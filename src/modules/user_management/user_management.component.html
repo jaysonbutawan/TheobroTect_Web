@@ -1,306 +1,134 @@
-<div class="p-6 sm:p-8 bg-slate-50 min-h-screen font-sans">
-  <!-- ── Header ─────────────────────────────────────────────────────────── -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+<div class="p-8 bg-[#f8fafc] min-h-screen font-sans">
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6">
     <div>
-      <h1 class="text-2xl font-black text-slate-800 tracking-tight">User Management</h1>
-      <p class="text-sm text-slate-400 mt-0.5">View and monitor all system users</p>
+      <h1 class="text-3xl font-bold text-slate-800 tracking-tight">User Management</h1>
+      <p class="text-base text-slate-400 mt-1">View and monitor all system users</p>
     </div>
 
-    <!-- Search -->
-    <div class="relative group">
-      <span
-        class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-[#2e7d32] transition-colors"
-      >
+    <div class="relative group w-full lg:w-[400px]">
+      <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-green-600 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </span>
       <input
         type="text"
-        placeholder="Search by name, email or region..."
+        placeholder="Search"
         [(ngModel)]="search"
         (input)="onSearchChange()"
-        class="block w-full sm:w-80 pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-green-100 focus:border-[#2e7d32] outline-none transition-all shadow-sm"
+        class="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-600 outline-none transition-all shadow-sm group-hover:border-slate-300"
       />
     </div>
   </div>
 
-  <!-- ── Filters bar ─────────────────────────────────────────────────────── -->
-  <div class="flex flex-wrap items-center justify-between mb-6 gap-3">
-    <div class="flex flex-wrap items-center gap-3"></div>
+  <div class="flex flex-wrap items-center justify-between mb-8 gap-4">
+    <div class="flex flex-wrap items-center gap-8">
+      <div class="flex items-center gap-4">
+        <span class="text-sm font-bold text-slate-900">Role</span>
+        <select class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 outline-none cursor-pointer shadow-sm hover:border-slate-300 transition-all">
+          <option>All Roles</option>
+          <option>Admin</option>
+          <option>Editor</option>
+          <option>Viewer</option>
+        </select>
+      </div>
 
-    <!-- Count -->
-    <p class="text-sm text-slate-400 font-medium">
-      Showing <span class="text-slate-700 font-bold">{{ totalUsers }}</span> users
+      <div class="flex items-center gap-4">
+        <span class="text-sm font-bold text-slate-900">Status</span>
+        <select class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 outline-none cursor-pointer shadow-sm hover:border-slate-300 transition-all">
+          <option>All Statuses</option>
+          <option>Active</option>
+          <option>Inactive</option>
+          <option>Pending</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="text-sm text-slate-500 font-medium">
+      Showing <span class="text-slate-900 font-bold">{{ totalUsers }} Users</span>
     </p>
   </div>
 
-  <!-- ── Table card ──────────────────────────────────────────────────────── -->
-  <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+  <div class="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse min-w-[700px]">
+      <table class="w-full text-left border-collapse min-w-[850px]">
         <thead>
-          <tr class="border-b border-slate-100 bg-slate-50/50">
-            <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              User
-            </th>
-            <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Email Address
-            </th>
-            <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Region
-            </th>
-            <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Role
-            </th>
-            <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Status
-            </th>
-            <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Scans
-            </th>
-            <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Actions
-            </th>
+          <tr class="bg-slate-50/50 border-b border-slate-100">
+            <th class="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">User</th>
+            <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Email Address</th>
+            <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Region</th>
+            <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Status</th>
+            <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Scans</th>
+            <th class="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Actions</th>
           </tr>
         </thead>
 
-        <tbody class="divide-y divide-slate-50">
-          <!-- Loading skeleton -->
-          @if (isLoading) {
-            @for (i of [1, 2, 3, 4, 5]; track i) {
-              <tr class="animate-pulse">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-slate-200 shrink-0"></div>
-                    <div class="space-y-1.5">
-                      <div class="h-3 w-28 bg-slate-200 rounded"></div>
-                      <div class="h-2.5 w-20 bg-slate-100 rounded"></div>
-                    </div>
+        <tbody class="divide-y divide-slate-100">
+          @for (user of pagedUsers; track user.id) {
+            <tr class="hover:bg-slate-50/50 transition-all group">
+              <!-- User -->
+              <td class="px-8 py-6">
+                <div class="flex items-center space-x-4">
+                  <div class="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm shrink-0 overflow-hidden">
+                    <svg class="w-7 h-7 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
                   </div>
-                </td>
-                <td class="px-6 py-4"><div class="h-3 w-40 bg-slate-100 rounded"></div></td>
-                <td class="px-6 py-4"><div class="h-3 w-28 bg-slate-100 rounded"></div></td>
-                <td class="px-6 py-4"><div class="h-5 w-20 bg-slate-100 rounded-full"></div></td>
-                <td class="px-6 py-4"><div class="h-5 w-16 bg-slate-100 rounded-full"></div></td>
-                <td class="px-6 py-4"><div class="h-3 w-10 bg-slate-100 rounded"></div></td>
-                <td class="px-6 py-4"><div class="h-8 w-20 bg-slate-100 rounded-lg"></div></td>
-              </tr>
-            }
+                  <div>
+                    <p class="text-[15px] font-bold text-slate-800 leading-tight">{{ user.full_name }}</p>
+                    <p class="text-[12px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">Joined {{ formatDate(user.joined_at) }}</p>
+                  </div>
+                </div>
+              </td>
 
-            <!-- Error state -->
-          } @else if (errorMsg) {
-            <tr>
-              <td colspan="7" class="px-6 py-12 text-center">
-                <p class="text-red-500 text-sm font-medium mb-2">{{ errorMsg }}</p>
-                <button
-                  (click)="loadUsers()"
-                  class="text-[#2e7d32] text-sm font-bold underline hover:no-underline"
-                >
-                  Try again
-                </button>
+              <td class="px-6 py-6 text-sm font-medium text-slate-500">{{ user.email }}</td>
+              <td class="px-6 py-6 text-sm font-medium text-slate-500">{{ user.region }}</td>
+
+              <!-- Status -->
+              <td class="px-6 py-6 text-center">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm border border-transparent" [ngClass]="statusClass(user.status)">
+                  <span class="w-1.5 h-1.5 rounded-full mr-2" [ngClass]="statusDotClass(user.status)"></span>
+                  {{ user.status }}
+                </span>
+              </td>
+
+              <td class="px-6 py-6 text-[15px] font-black text-slate-800 text-center">{{ user.scan_count }}</td>
+
+              <!-- Actions -->
+              <td class="px-8 py-6">
+                <div class="flex items-center justify-center gap-3">
+                  <button (click)="viewUser()" class="p-2.5 bg-slate-100 text-slate-400 hover:bg-[#2e7d32] hover:text-white rounded-xl transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button (click)="deleteUser(user)" class="p-2.5 bg-slate-100 text-slate-400 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
               </td>
             </tr>
-
-            <!-- Empty state -->
-          } @else if (pagedUsers.length === 0) {
-            <tr>
-              <td colspan="7" class="px-6 py-16 text-center">
-                <svg
-                  class="w-10 h-10 text-slate-300 mx-auto mb-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <p class="text-slate-400 text-sm font-medium">
-                  No users found matching your filters.
-                </p>
-              </td>
-            </tr>
-
-            <!-- Data rows -->
-          } @else {
-            @for (user of pagedUsers; track user.id) {
-              <tr class="hover:bg-slate-50/80 transition-colors group">
-                <!-- User -->
-                <td class="px-6 py-4">
-                  <div class="flex items-center space-x-3">
-                    <div
-                      class="w-10 h-10 rounded-full shrink-0 overflow-hidden border border-slate-100"
-                    >
-                      <img
-                        [src]="avatarUrl(user)"
-                        [attr.alt]="user?.full_name ? user.full_name + ' avatar' : 'User avatar'"
-                        [attr.title]="user?.full_name || 'User avatar'"
-                        class="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p class="text-sm font-bold text-slate-800">{{ user.full_name }}</p>
-                      <p class="text-[11px] font-medium text-slate-400 italic">
-                        Joined {{ formatDate(user.joined_at) }}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                <!-- Email -->
-                <td class="px-6 py-4 text-sm font-medium text-slate-500">
-                  {{ user.email }}
-                </td>
-
-                <!-- Region -->
-                <td class="px-6 py-4 text-sm font-medium text-slate-600">
-                  {{ user.region }}
-                </td>
-
-                <!-- Role badge -->
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="roleClass(user.role)"
-                  >
-                    {{ user.role }}
-                  </span>
-                </td>
-
-                <!-- Status badge -->
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="statusClass(user.status)"
-                  >
-                    <span
-                      class="w-1.5 h-1.5 rounded-full mr-1.5"
-                      [ngClass]="statusDotClass(user.status)"
-                    ></span>
-                    {{ user.status | titlecase }}
-                  </span>
-                </td>
-
-                <!-- Scan count -->
-                <td class="px-6 py-4 text-sm font-bold text-slate-700">
-                  {{ user.scan_count }}
-                </td>
-
-                <!-- Actions -->
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <!-- View profile -->
-                    <button
-                      (click)="viewUser()"
-                      title="View Profile"
-                      class="p-1.5 text-[#2e7d32] hover:bg-green-50 rounded-lg transition-colors"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                    </button>
-
-                    <!-- Delete -->
-                    <button
-                      (click)="deleteUser(user)"
-                      title="Delete User"
-                      class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
           }
         </tbody>
       </table>
     </div>
 
-    <!-- ── Pagination ──────────────────────────────────────────────────── -->
-    <div
-      class="flex flex-wrap items-center justify-between px-6 py-4 bg-white border-t border-slate-100 gap-3"
-    >
-      <!-- Previous -->
-      <button
-        (click)="prevPage()"
-        [disabled]="currentPage === 1 || isLoading"
-        class="text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        [ngClass]="currentPage === 1 ? 'text-slate-300' : 'text-slate-500 hover:text-slate-700'"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+    <!-- Pagination -->
+    <div class="flex items-center justify-between px-10 py-8 bg-white border-t border-slate-50">
+      <button (click)="prevPage()" [disabled]="currentPage === 1" class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-30 transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         Previous
       </button>
 
-      <!-- Page numbers -->
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-3">
         @for (page of pageNumbers; track page; let idx = $index) {
-          <!-- Ellipsis before -->
-          @if (showEllipsisBefore(page, idx)) {
-            <span class="text-slate-400 text-sm px-1">...</span>
-          }
-
-          <button
-            (click)="goToPage(page)"
-            class="w-8 h-8 rounded-full text-sm font-bold transition-colors"
-            [ngClass]="
-              page === currentPage
-                ? 'bg-[#2e7d32] text-white shadow-sm'
-                : 'text-slate-500 hover:bg-slate-100'
-            "
-          >
+          <button (click)="goToPage(page)" class="w-11 h-11 rounded-xl text-sm font-bold transition-all" [ngClass]="page === currentPage ? 'bg-[#2e7d32] text-white shadow-lg shadow-green-100' : 'text-slate-400 hover:bg-slate-50'">
             {{ page }}
           </button>
         }
       </div>
 
-      <!-- Next -->
-      <button
-        (click)="nextPage()"
-        [disabled]="currentPage === totalPages || isLoading"
-        class="text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        [ngClass]="
-          currentPage === totalPages ? 'text-slate-300' : 'text-slate-600 hover:text-[#e65100]'
-        "
-      >
+      <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-30 transition-all shadow-sm">
         Next
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
   </div>

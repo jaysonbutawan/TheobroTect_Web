@@ -392,4 +392,30 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
   get rangeStart(): number { return (this.currentPage - 1) * PAGE_SIZE + 1; }
   get rangeEnd():   number { return Math.min(this.currentPage * PAGE_SIZE, this.totalScans); }
+
+
+getDefaultImage(disease: string): string {
+  if (!disease) return 'assets/images/mb.png';
+
+  const d = disease.toLowerCase();
+
+  if (d.includes('monilia') || d.includes('mb')) {
+    return 'assets/images/mb.png';
+  }
+
+  if (d.includes('phytophthora') || d.includes('pb')) {
+    return 'assets/images/pb.png';
+  }
+
+  if (d.includes('black pod') || d.includes('bp')) {
+    return 'assets/images/bp.png';
+  }
+
+  return 'assets/images/mb.png'; // fallback default
 }
+
+
+}
+
+
+
