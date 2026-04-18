@@ -1,34 +1,14 @@
-
 export interface UserDto {
-  id: string;
-  fullName: string;
+  id: number;
+  name: string;
+  email: string;
   address?: string;
-  contact_number?: string;
-  email: string;
-  role?: string;
   created_at?: string;
-  deleted_at?: string;
-  approved_at?: string;
+  total_scans?: number;
 }
 
-export interface CreateUserDto {
-  fullName: string;
-  email: string;
-  password: string;
-  role?: string;
-}
-
-export interface UpdateUserDto {
-  fullName?: string;
-  email?: string;
-  role?: string;
-  isActive?: boolean;
-}
-
-export interface ListUsersQuery {
-  q?: string;
-  page?: number;
-  limit?: number;
-  role?: string;
-  isActive?: boolean;
+export interface UsersResponseDto {
+  status: string;
+  count: number;
+  data: UserDto[];
 }
