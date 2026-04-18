@@ -102,15 +102,15 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       let markerColor = '#10b981'; // Default Green (Healthy)
 
       if (type.includes('mealybug')) {
-        markerColor = '#ef4444'; // Red
+        markerColor = '#f97316'; // Orange
       }
-      else if (type.includes('black pod')) {
+      else if (type.includes('black pod') || type.includes('black_pod_disease')) {
         markerColor = '#ef4444'; // Red
       }
       else if (type.includes('healthy')) {
         markerColor = '#10b981'; // Green
       }
-      else if (type.includes('pod borer') || type.includes('cacao pod borer')) {
+      else if (type.includes('pod borer') || type.includes('cacao_pod_borer')) {
         markerColor = '#facc15'; // Yellow
       }
 

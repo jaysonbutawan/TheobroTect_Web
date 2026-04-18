@@ -1,10 +1,6 @@
 <div class="min-h-screen bg-slate-50/50 p-4 md:p-8 font-sans">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
     <div>
-      <div class="flex items-center gap-2 mb-1">
-        <span class="flex h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
-        <span class="text-[10px] font-bold text-red-600 uppercase tracking-widest text-nowrap">Live Monitoring</span>
-      </div>
       <h2 class="text-4xl font-black text-slate-900 tracking-tight leading-none">
         Cacao Disease and Pest <span class="text-green-700">Distribution</span> Heatmap
       </h2>
@@ -12,24 +8,13 @@
         Visualizing detection density across <span class="text-slate-800">Sawata</span> and nearby sectors.
       </p>
     </div>
-
-    <div class="flex gap-3 bg-white/80 backdrop-blur-md p-2 rounded-2xl border border-white shadow-sm self-start md:self-center">
-      <div class="px-4 py-2 border-r border-slate-100 text-center">
-        <p class="text-[10px] uppercase font-bold text-slate-400">High Risk</p>
-        <p class="text-xl font-black text-red-600">03</p>
-      </div>
-      <div class="px-4 py-2 text-center">
-        <p class="text-[10px] uppercase font-bold text-slate-400">Total Area</p>
-        <p class="text-xl font-black text-slate-800">12.4k ha</p>
-      </div>
-    </div>
   </div>
 
   <div class="relative group">
     <div class="absolute -inset-1 bg-gradient-to-r from-green-100 to-emerald-100 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-    
+
     <div class="relative bg-white p-3 rounded-[2.5rem] shadow-xl shadow-slate-200/60 border border-white overflow-hidden">
-  
+
   <div class="absolute top-6 left-6 z-[1000]">
     <button (click)="goBack()" class="flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-md border border-slate-100 text-slate-700 hover:bg-slate-900 hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 group/back">
       <svg class="w-5 h-5 transition-transform group-hover/back:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +33,7 @@
   <div id="map" style="height: 600px;" class="rounded-[2rem] grayscale-[0.1] contrast-[1.05] z-0"></div>
 </div>
   </div>
-  
+
   <div class="mt-8 flex flex-wrap items-center justify-center gap-8">
     <div class="flex items-center gap-3">
       <div class="w-4 h-4 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/20"></div>
