@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import 'leaflet.heat';
@@ -15,9 +15,11 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   private map!: L.Map;
   private heatmapLayer: any;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private router: Router) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    window.scrollTo(0, 0);
+  }
 
   ngAfterViewInit() {
     this.initMap();
@@ -109,6 +111,10 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   // Recenter helper if you want to call it from a button
   recenterMap() {
     this.map.setView([7.7512, 125.7231], 11);
+  }
+
+  goBack() {
+    this.router.navigate(['/dashboard']);
   }
 
   ngOnDestroy() {
