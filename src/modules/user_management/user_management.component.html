@@ -1,135 +1,147 @@
-<div class="p-8 bg-[#f8fafc] min-h-screen font-sans">
-  <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6">
+<div class="p-6 md:p-8 lg:p-10 bg-slate-50/50 min-h-screen font-sans">
+
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6">
     <div>
-      <h1 class="text-3xl font-bold text-slate-800 tracking-tight">User Management</h1>
-      <p class="text-base text-slate-400 mt-1">View and monitor all system users</p>
+      <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
+      <p class="text-sm text-slate-500 mt-1 font-medium">View, search, and monitor all system access</p>
     </div>
 
-    <div class="relative group w-full lg:w-[400px]">
-      <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-green-600 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+    <div class="relative group w-full lg:w-[380px]">
+      <span class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 transition-colors text-[22px]">
+        search
       </span>
       <input
         type="text"
-        placeholder="Search"
+        placeholder="Search users by name or email..."
         [(ngModel)]="search"
         (input)="onSearchChange()"
-        class="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-600 outline-none transition-all shadow-sm group-hover:border-slate-300"
+        class="block w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 outline-none transition-all shadow-sm hover:border-slate-300"
       />
     </div>
   </div>
 
-  <div class="flex flex-wrap items-center justify-between mb-8 gap-4">
-    <div class="flex flex-wrap items-center gap-8">
-      <div class="flex items-center gap-4">
-        <span class="text-sm font-bold text-slate-900">Role</span>
-        <select class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 outline-none cursor-pointer shadow-sm hover:border-slate-300 transition-all">
+  <div class="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between mb-6 gap-4">
+    <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+
+      <div class="relative w-full sm:w-auto min-w-[140px]">
+        <select class="appearance-none w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-bold text-slate-600 outline-none cursor-pointer shadow-sm hover:border-slate-300 focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all">
           <option>All Roles</option>
           <option>Admin</option>
           <option>Editor</option>
           <option>Viewer</option>
         </select>
+        <span class="material-symbols-rounded absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">
+          expand_more
+        </span>
       </div>
 
-      <div class="flex items-center gap-4">
-        <span class="text-sm font-bold text-slate-900">Status</span>
-        <select class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 outline-none cursor-pointer shadow-sm hover:border-slate-300 transition-all">
+      <div class="relative w-full sm:w-auto min-w-[140px]">
+        <select class="appearance-none w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm font-bold text-slate-600 outline-none cursor-pointer shadow-sm hover:border-slate-300 focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all">
           <option>All Statuses</option>
           <option>Active</option>
           <option>Inactive</option>
           <option>Pending</option>
         </select>
+        <span class="material-symbols-rounded absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">
+          expand_more
+        </span>
       </div>
     </div>
 
-    <p class="text-sm text-slate-500 font-medium">
-      Showing <span class="text-slate-900 font-bold">{{ totalUsers }} Users</span>
-    </p>
+    <div class="px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-sm font-medium text-slate-500">
+      Showing <span class="text-green-700 font-bold ml-1">{{ totalUsers }} Users</span>
+    </div>
   </div>
 
-  <div class="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+  <div class="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse min-w-[850px]">
+      <table class="w-full text-left border-collapse min-w-[900px]">
         <thead>
           <tr class="bg-slate-50/50 border-b border-slate-100">
-            <th class="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">User</th>
+            <th class="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 first:rounded-tl-[2rem]">User</th>
             <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Email Address</th>
             <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Region</th>
             <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Status</th>
             <th class="px-6 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Scans</th>
-            <th class="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Actions</th>
+            <th class="px-8 py-5 text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center last:rounded-tr-[2rem]">Actions</th>
           </tr>
         </thead>
 
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-slate-50">
           @for (user of pagedUsers; track user.id) {
-            <tr class="hover:bg-slate-50/50 transition-all group">
-              <!-- User -->
-              <td class="px-8 py-6">
-                <div class="flex items-center space-x-4">
-                  <div class="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm shrink-0 overflow-hidden">
-                    <svg class="w-7 h-7 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
+            <tr class="hover:bg-green-50/30 transition-colors group">
+
+              <td class="px-8 py-5">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-emerald-50 border border-green-200 flex items-center justify-center font-bold text-green-700 shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                    {{ user.full_name ? user.full_name.charAt(0).toUpperCase() : '?' }}
                   </div>
                   <div>
-                    <p class="text-[15px] font-bold text-slate-800 leading-tight">{{ user.full_name }}</p>
-                    <p class="text-[12px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">Joined {{ formatDate(user.joined_at) }}</p>
+                    <p class="text-sm font-bold text-slate-900 group-hover:text-green-700 transition-colors">{{ user.full_name }}</p>
+                    <p class="text-xs font-medium text-slate-400 mt-0.5">Joined {{ formatDate(user.joined_at) }}</p>
                   </div>
                 </div>
               </td>
 
-              <td class="px-6 py-6 text-sm font-medium text-slate-500">{{ user.email }}</td>
-              <td class="px-6 py-6 text-sm font-medium text-slate-500">{{ user.region }}</td>
+              <td class="px-6 py-5 text-sm font-medium text-slate-600">
+                {{ user.email }}
+              </td>
 
-              <!-- Status -->
-              <td class="px-6 py-6 text-center">
-                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm border border-transparent" [ngClass]="statusClass(user.status)">
+              <td class="px-6 py-5 text-sm font-medium text-slate-600">
+                <div class="flex items-center gap-1.5">
+                  <span class="material-symbols-rounded text-[16px] text-slate-400">location_on</span>
+                  {{ user.region }}
+                </div>
+              </td>
+
+              <td class="px-6 py-5 text-center">
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border"
+                  [ngClass]="statusClass(user.status)"
+                >
                   <span class="w-1.5 h-1.5 rounded-full mr-2" [ngClass]="statusDotClass(user.status)"></span>
                   {{ user.status }}
                 </span>
               </td>
 
-              <td class="px-6 py-6 text-[15px] font-black text-slate-800 text-center">{{ user.scan_count }}</td>
+              <td class="px-6 py-5 text-center">
+                <span class="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 bg-slate-50 border border-slate-100 rounded-lg text-sm font-bold text-slate-700">
+                  {{ user.scan_count }}
+                </span>
+              </td>
 
-              <!-- Actions -->
-              <td class="px-8 py-6">
-                <div class="flex items-center justify-center gap-3">
-                  <button (click)="viewUser()" class="p-2.5 bg-slate-100 text-slate-400 hover:bg-[#2e7d32] hover:text-white rounded-xl transition-all shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <td class="px-8 py-5">
+                <div class="flex items-center justify-center gap-2">
+                  <button
+                    (click)="viewUser()"
+                    title="View Profile"
+                    class="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 hover:border-green-200 border border-transparent transition-all"
+                  >
+                    <span class="material-symbols-rounded text-[20px]">visibility</span>
                   </button>
-                  <button (click)="deleteUser(user)" class="p-2.5 bg-slate-100 text-slate-400 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  <button
+                    (click)="deleteUser(user)"
+                    title="Delete User"
+                    class="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 border border-transparent transition-all"
+                  >
+                    <span class="material-symbols-rounded text-[20px]">delete</span>
                   </button>
                 </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="px-8 py-16 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 mb-4">
+                  <span class="material-symbols-rounded text-3xl text-slate-400">group_off</span>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900">No users found</h3>
+                <p class="text-sm text-slate-500 mt-1">We couldn't find anyone matching your search criteria.</p>
               </td>
             </tr>
           }
         </tbody>
       </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="flex items-center justify-between px-10 py-8 bg-white border-t border-slate-50">
-      <button (click)="prevPage()" [disabled]="currentPage === 1" class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-30 transition-all shadow-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        Previous
-      </button>
-
-      <div class="flex items-center gap-3">
-        @for (page of pageNumbers; track page; let idx = $index) {
-          <button (click)="goToPage(page)" class="w-11 h-11 rounded-xl text-sm font-bold transition-all" [ngClass]="page === currentPage ? 'bg-[#2e7d32] text-white shadow-lg shadow-green-100' : 'text-slate-400 hover:bg-slate-50'">
-            {{ page }}
-          </button>
-        }
-      </div>
-
-      <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-30 transition-all shadow-sm">
-        Next
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-      </button>
     </div>
   </div>
 </div>
