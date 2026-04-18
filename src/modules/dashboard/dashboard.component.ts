@@ -71,6 +71,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadScans();
+    this.recentUserScans();
 
   }
 
@@ -87,17 +88,49 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.getUsersScan().subscribe({
       next: (res) => {
         // Map API response to table data
-        this.recentScans = res.data.map(scan => ({
-          farmer: scan.user_name || 'Unknown',
-          locationName: scan.location_label || 'Unknown Location',
-          type: scan.disease_key || 'Unknown Disease',
-          confidence: scan.confidence || 0,
-          coordinates: `${scan.location_lat},${scan.location_lng}`
-        }));
 
         // Process and aggregate data for charts
         this.processBarChartData(res.data);
         this.processLineChartData(res.data);
+
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Failed to load scans:', err);
+        this.errorMessage = 'Failed to load scans data';
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  recentUserScans(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.cdr.markForCheck();
+
+    this.dashboardService.getUsersScan().subscribe({
+      next: (res) => {
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // start of today
+
+        const filteredScans = res.data.filter(scan => {
+          const createdAt = new Date(scan.created_at);
+          createdAt.setHours(0, 0, 0, 0);
+          return createdAt.getTime() === today.getTime();
+        });
+
+        // Map filtered data
+        this.recentScans = filteredScans.map(scan => ({
+          farmer: scan.user_name || 'Unknown',
+          locationName: scan.location_label || 'Unknown Location',
+          type: scan.disease_key || 'Unknown Disease',
+          severity_key: scan.severity_key || 'Unknown Severity',
+          confidence: scan.confidence || 0,
+          coordinates: `${scan.location_lat},${scan.location_lng}`
+        }));
 
         this.isLoading = false;
         this.cdr.markForCheck();
