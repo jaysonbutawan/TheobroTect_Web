@@ -117,7 +117,7 @@ export class DashboardComponent implements OnInit {
         today.setHours(0, 0, 0, 0); // start of today
 
         const filteredScans = res.data.filter(scan => {
-          const createdAt = new Date(scan.created_at);
+          const createdAt = new Date(scan.scanned_at);
           createdAt.setHours(0, 0, 0, 0);
           return createdAt.getTime() === today.getTime();
         });
@@ -266,34 +266,34 @@ export class DashboardComponent implements OnInit {
     const podBorerMildCounts: number[] = [];
 
     // Process each month group
-    sortedMonths.forEach(month => {
-      const scansForMonth = monthGroups[month];
+sortedMonths.forEach(month => {
+  const scansForMonth = monthGroups[month];
 
-      // Count by disease type and severity
-      const healthyCount = scansForMonth.filter(s =>
-        !s.disease_key || this.normalizeDisease(s.disease_key) === 'healthy'
-      ).length;
+  // Count by disease type and severity
+  const healthyCount = scansForMonth.filter(s =>
+    !s.disease_key || this.normalizeDisease(s.disease_key).includes('healthy')
+  ).length;
 
-      const blackPodCount = scansForMonth.filter(s =>
-        this.normalizeDisease(s.disease_key) === 'black pod' &&
-        s.severity_key?.toLowerCase() === 'severe'
-      ).length;
+  const blackPodCount = scansForMonth.filter(s =>
+    this.normalizeDisease(s.disease_key).includes('black pod') &&
+    s.severity_key?.toLowerCase().includes('severe')
+  ).length;
 
-      const mealybugCount = scansForMonth.filter(s =>
-        this.normalizeDisease(s.disease_key) === 'mealybug' &&
-        s.severity_key?.toLowerCase() === 'mild'
-      ).length;
+  const mealybugCount = scansForMonth.filter(s =>
+    this.normalizeDisease(s.disease_key).includes('mealybug') &&
+    s.severity_key?.toLowerCase().includes('mild')
+  ).length;
 
-      const podBorerCount = scansForMonth.filter(s =>
-        this.normalizeDisease(s.disease_key) === 'pod borer' &&
-        s.severity_key?.toLowerCase() === 'mild'
-      ).length;
+  const podBorerCount = scansForMonth.filter(s =>
+    this.normalizeDisease(s.disease_key).includes('pod borer') &&
+    s.severity_key?.toLowerCase().includes('mild')
+  ).length;
 
-      healthyCounts.push(healthyCount);
-      blackPodSevereCounts.push(blackPodCount);
-      mealybugMildCounts.push(mealybugCount);
-      podBorerMildCounts.push(podBorerCount);
-    });
+  healthyCounts.push(healthyCount);
+  blackPodSevereCounts.push(blackPodCount);
+  mealybugMildCounts.push(mealybugCount);
+  podBorerMildCounts.push(podBorerCount);
+});
 
     console.log('[LINE CHART] Computed counts before assignment:', {
       labels: sortedMonths.map(m => this.formatMonth(m)),
