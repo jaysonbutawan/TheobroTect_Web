@@ -5,7 +5,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 // ─── INTERFACES (match your API response shape) ───────────────────────────────
 
-export type Severity = 'Low' | 'Moderate' | 'High';
+export type Severity = 'Mild' | 'Moderate' | 'Severe';
 export type DiseaseType = 'Black pod rot' | 'Frosty pod rot' | "Witches' broom" | 'Healthy';
 
 export interface DiseaseScore {
@@ -45,7 +45,7 @@ export interface ScanFilters {
 const DUMMY_SCANS: CacaoScan[] = [
   {
     id: 'SC001', pod_id: 'POD-2024-0041', disease: 'Black pod rot',
-    severity: 'High', confidence: 94.2, scanned_at: '2024-11-28',
+    severity: 'Mild', confidence: 94.2, scanned_at: '2024-11-28',
     region: 'Ivory Coast - West',
     scores: { 'Black pod rot': 94.2, 'Frosty pod rot': 3.1, "Witches' broom": 1.8, 'Healthy': 0.9 },
     description: 'Phytophthora-caused fungal infection spreading through pod tissue. Requires urgent intervention.',
@@ -57,17 +57,17 @@ const DUMMY_SCANS: CacaoScan[] = [
     ],
     history: [
       { date: '2024-11-10', disease: 'Black pod rot', severity: 'Moderate' },
-      { date: '2024-10-22', disease: 'Healthy', severity: 'Low' },
+      { date: '2024-10-22', disease: 'Healthy', severity: 'Mild' },
     ],
   },
   {
     id: 'SC002', pod_id: 'POD-2024-0039', disease: 'Healthy',
-    severity: 'Low', confidence: 97.8, scanned_at: '2024-11-27',
+    severity: 'Mild', confidence: 97.8, scanned_at: '2024-11-27',
     region: 'Ghana - Ashanti',
     scores: { 'Healthy': 97.8, 'Black pod rot': 1.2, 'Frosty pod rot': 0.7, "Witches' broom": 0.3 },
     description: 'No signs of disease detected. Pod exhibits normal development and coloration.',
     actions: ['Continue routine monitoring schedule', 'Maintain current fertilization program'],
-    history: [{ date: '2024-10-15', disease: 'Healthy', severity: 'Low' }],
+    history: [{ date: '2024-10-15', disease: 'Healthy', severity: 'Mild' }],
   },
   {
     id: 'SC003', pod_id: 'POD-2024-0036', disease: 'Frosty pod rot',
@@ -81,117 +81,7 @@ const DUMMY_SCANS: CacaoScan[] = [
       'Apply biological control agents',
       'Schedule follow-up scan in 7 days',
     ],
-    history: [{ date: '2024-11-01', disease: 'Healthy', severity: 'Low' }],
-  },
-  {
-    id: 'SC004', pod_id: 'POD-2024-0034', disease: "Witches' broom",
-    severity: 'High', confidence: 91.3, scanned_at: '2024-11-24',
-    region: 'Ivory Coast - East',
-    scores: { "Witches' broom": 91.3, 'Frosty pod rot': 5.1, 'Black pod rot': 2.4, 'Healthy': 1.2 },
-    description: 'Moniliophthora perniciosa infection causing broom-like vegetative growth. Advanced stage.',
-    actions: [
-      'Prune all infected brooms at least 30cm below infection',
-      'Disinfect pruning tools between cuts',
-      'Apply systemic fungicide to affected trees',
-      'Flag plot for intensive monitoring',
-    ],
-    history: [
-      { date: '2024-11-08', disease: "Witches' broom", severity: 'Moderate' },
-      { date: '2024-10-19', disease: "Witches' broom", severity: 'Low' },
-    ],
-  },
-  {
-    id: 'SC005', pod_id: 'POD-2024-0031', disease: 'Black pod rot',
-    severity: 'Moderate', confidence: 85.7, scanned_at: '2024-11-22',
-    region: 'Guinea - Central',
-    scores: { 'Black pod rot': 85.7, 'Frosty pod rot': 8.9, "Witches' broom": 3.5, 'Healthy': 1.9 },
-    description: 'Early-stage Phytophthora infection. Brown lesions appearing on lower third of pod.',
-    actions: [
-      'Apply copper fungicide as preventative measure',
-      'Improve drainage around affected trees',
-      'Remove mulch near base to reduce humidity',
-    ],
-    history: [{ date: '2024-10-30', disease: 'Healthy', severity: 'Low' }],
-  },
-  {
-    id: 'SC006', pod_id: 'POD-2024-0029', disease: 'Healthy',
-    severity: 'Low', confidence: 96.1, scanned_at: '2024-11-20',
-    region: 'Ghana - Western',
-    scores: { 'Healthy': 96.1, 'Black pod rot': 2.3, 'Frosty pod rot': 1.0, "Witches' broom": 0.6 },
-    description: 'Pod is healthy with no detectable pathogen signatures.',
-    actions: ['Maintain current management practices', 'Continue bi-weekly scanning routine'],
-    history: [{ date: '2024-10-28', disease: 'Healthy', severity: 'Low' }],
-  },
-  {
-    id: 'SC007', pod_id: 'POD-2024-0026', disease: 'Frosty pod rot',
-    severity: 'High', confidence: 93.4, scanned_at: '2024-11-19',
-    region: 'Sierra Leone - East',
-    scores: { 'Frosty pod rot': 93.4, 'Black pod rot': 4.2, "Witches' broom": 1.9, 'Healthy': 0.5 },
-    description: 'Advanced Moniliophthora roreri. Extensive sporulation visible. High spread risk.',
-    actions: [
-      'Immediate removal and safe disposal of pod',
-      'Quarantine a 5m radius around affected tree',
-      'Apply fungicide to all pods within quarantine zone',
-      'Notify field manager and log incident',
-    ],
-    history: [{ date: '2024-11-05', disease: 'Frosty pod rot', severity: 'Moderate' }],
-  },
-  {
-    id: 'SC008', pod_id: 'POD-2024-0023', disease: "Witches' broom",
-    severity: 'Low', confidence: 79.2, scanned_at: '2024-11-18',
-    region: 'Senegal - South',
-    scores: { "Witches' broom": 79.2, 'Healthy': 12.3, 'Black pod rot': 5.1, 'Frosty pod rot': 3.4 },
-    description: 'Possible early indicators of Witches\' broom. Confidence moderate — recommend rescan.',
-    actions: ['Schedule rescan in 5 days for confirmation', 'Mark tree for close observation'],
-    history: [{ date: '2024-10-25', disease: 'Healthy', severity: 'Low' }],
-  },
-  {
-    id: 'SC009', pod_id: 'POD-2024-0020', disease: 'Healthy',
-    severity: 'Low', confidence: 98.3, scanned_at: '2024-11-16',
-    region: 'Mali - South',
-    scores: { 'Healthy': 98.3, 'Black pod rot': 0.9, 'Frosty pod rot': 0.5, "Witches' broom": 0.3 },
-    description: 'Excellent pod condition. No anomalies detected.',
-    actions: ['Continue standard monitoring', 'Record as healthy baseline'],
-    history: [],
-  },
-  {
-    id: 'SC010', pod_id: 'POD-2024-0017', disease: 'Black pod rot',
-    severity: 'High', confidence: 96.8, scanned_at: '2024-11-14',
-    region: 'Ivory Coast - North',
-    scores: { 'Black pod rot': 96.8, 'Frosty pod rot': 2.1, "Witches' broom": 0.8, 'Healthy': 0.3 },
-    description: 'Severe Phytophthora infection. Pod almost entirely necrotic. High contamination risk.',
-    actions: [
-      'Emergency removal — use gloves and mask',
-      'Dispose off-site in sealed bags',
-      'Treat entire tree with copper oxychloride',
-      'Rescan all pods on this tree within 48 hours',
-    ],
-    history: [
-      { date: '2024-11-01', disease: 'Black pod rot', severity: 'Moderate' },
-      { date: '2024-10-18', disease: 'Black pod rot', severity: 'Low' },
-    ],
-  },
-  {
-    id: 'SC011', pod_id: 'POD-2024-0014', disease: 'Frosty pod rot',
-    severity: 'Moderate', confidence: 82.1, scanned_at: '2024-11-12',
-    region: 'Ghana - Volta',
-    scores: { 'Frosty pod rot': 82.1, 'Black pod rot': 10.2, "Witches' broom": 4.8, 'Healthy': 2.9 },
-    description: 'Moderate M. roreri infection with active sporulation zones.',
-    actions: [
-      'Remove pod carefully avoiding spore dispersal',
-      'Apply systemic fungicide to remaining pods on tree',
-      'Increase monitoring frequency to weekly',
-    ],
-    history: [{ date: '2024-10-20', disease: 'Healthy', severity: 'Low' }],
-  },
-  {
-    id: 'SC012', pod_id: 'POD-2024-0011', disease: 'Healthy',
-    severity: 'Low', confidence: 95.5, scanned_at: '2024-11-10',
-    region: 'Burkina Faso - South',
-    scores: { 'Healthy': 95.5, 'Frosty pod rot': 2.8, 'Black pod rot': 1.1, "Witches' broom": 0.6 },
-    description: 'Pod shows healthy development. No treatment required.',
-    actions: ['Maintain fertilization schedule', 'Continue standard monitoring'],
-    history: [{ date: '2024-09-15', disease: 'Healthy', severity: 'Low' }],
+    history: [{ date: '2024-11-01', disease: 'Healthy', severity: 'Mild' }],
   },
 ];
 
@@ -234,13 +124,8 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
   // ── Filter options ────────────────────────────────────────────────────────
   diseaseOptions = ['Black pod rot', 'Frosty pod rot', "Witches' broom", 'Healthy'];
-  severityOptions: Severity[] = ['Low', 'Moderate', 'High'];
-  sortOptions = [
-    { value: 'date-desc', label: 'Newest first' },
-    { value: 'date-asc',  label: 'Oldest first' },
-    { value: 'conf-desc', label: 'Confidence ↓' },
-    { value: 'sev-desc',  label: 'Severity ↓' },
-  ];
+  severityOptions: Severity[] = ['Mild', 'Moderate', 'Severe'];
+
 
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -282,7 +167,7 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
     this.statAvgConf = Math.round(
       this.allScans.reduce((s, x) => s + x.confidence, 0) / this.statTotal
     );
-    this.statHigh    = this.allScans.filter(s => s.severity === 'High').length;
+    this.statHigh    = this.allScans.filter(s => s.severity === 'Severe').length;
     this.statHealthy = this.allScans.filter(s => s.disease  === 'Healthy').length;
   }
 
@@ -293,7 +178,7 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     const q   = this.filters.search.trim().toLowerCase();
-    const sevOrder: Record<Severity, number> = { Low: 1, Moderate: 2, High: 3 };
+    const sevOrder: Record<Severity, number> = { Mild: 1, Moderate: 2, Severe: 3 };
 
     this.filteredScans = this.allScans.filter(s => {
       const mq = !q || s.disease.toLowerCase().includes(q)
@@ -363,11 +248,11 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
   }
 
   severityClass(sev: Severity | string): string {
-    return { High: 'sev-high', Moderate: 'sev-mod', Low: 'sev-low' }[sev as Severity] ?? 'sev-low';
+    return { Severe: 'sev-high', Moderate: 'sev-mod', Mild: 'sev-low' }[sev as Severity] ?? 'sev-low';
   }
 
   severityDotClass(sev: Severity | string): string {
-    return { High: 'dot-high', Moderate: 'dot-mod', Low: 'dot-low' }[sev as Severity] ?? 'dot-low';
+    return { Severe: 'dot-high', Moderate: 'dot-mod', Mild: 'dot-low' }[sev as Severity] ?? 'dot-low';
   }
 
   diseaseBarColor(disease: string): string {
