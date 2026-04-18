@@ -180,10 +180,7 @@
                 }"
               >
                 @if (scan.image_url) {
-<img 
-  [src]="scan.image_url || getDefaultImage(scan.disease)" 
-  [alt]="scan.pod_id" 
-  class="w-full h-full object-cover">
+                  <img [src]="scan.image_url" [alt]="scan.pod_id" class="w-full h-full object-cover">
                 } @else {
                   <svg
                     class="w-10 h-14"
