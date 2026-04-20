@@ -408,7 +408,9 @@ sortedMonths.forEach(month => {
   /**
    * Navigate to heatmap with selected coordinates
    */
-  navigateToMap(coords: string) {
+  navigateToMap(coords?: string) {
     this.router.navigate(['/dashboard/heatmap'], { queryParams: { loc: coords } });
   }
+
+  
 }

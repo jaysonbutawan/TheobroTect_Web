@@ -42,3 +42,34 @@
 .leaflet-container {
   transition: filter 0.5s ease;
 }
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Make the map look more professional */
+#map {
+  filter: saturate(1.2) contrast(1.1);
+  background: #f8fafc;
+}
+
+/* Custom shadow for the legend */
+.shadow-2xl {
+  shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+}
+
+/* This makes the heatmap colors more vibrant against the white map */
+#map {
+  background-color: #f8fafc;
+}
+
+/* Optional: Add a slight contrast boost to the map tiles */
+.leaflet-tile-container {
+  filter: contrast(1.05) brightness(1.02);
+}
+
+/* Ensure the heat layer is visible */
+.leaflet-heatmap-layer {
+  opacity: 0.8;
+}
