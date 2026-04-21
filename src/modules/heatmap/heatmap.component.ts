@@ -1,16 +1,21 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Ensure this is imported for ngModel
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 import 'leaflet.heat';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { ScanDto } from '../dashboard/dashboard.dto';
 
+interface Observation {
+  text: string;
+  time: Date;
+}
+
 @Component({
   selector: 'app-heatmap',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './heatmap.component.html',
   styleUrl: './heatmap.component.css'
 })
@@ -23,18 +28,36 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   errorMessage = '';
 
   // Filter Management
-  allScans: ScanDto[] = []; 
+  allScans: ScanDto[] = [];
   filters = {
     date: '',
-    disease: 'all'
+    disease: 'all',
+    zone: 'all'
   };
+
+  // --- NEW: Selected farmer scan for right panel ---
+  selectedScan: ScanDto | null = null;
+
+  // --- Sync bar state ---
+  lastSyncTime: Date = new Date();
+  scanCoverage: number = 83;
+  isSyncing: boolean = false;
+
+  // --- Field observation log state ---
+  newObservation: string = '';
+  observations: Observation[] = [
+    {
+      text: 'Plot C — Unusual pod discoloration on eastern row.',
+      time: new Date(Date.now() - 1000 * 60 * 88),
+    }
+  ];
 
   private cdr = inject(ChangeDetectorRef);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private dashboardService: DashboardService 
+    private dashboardService: DashboardService
   ) { }
 
   ngOnInit() {
@@ -74,7 +97,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (res) => {
         if (res.data) {
           this.allScans = res.data;
-          this.applyFilters(); // Initial plot
+          this.applyFilters();
         }
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -94,9 +117,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   applyFilters(): void {
     // 1. Remove existing layers to prevent stacking
     this.map.eachLayer((layer) => {
-      // Remove heat layers and our ghost markers
       if (layer instanceof (L as any).HeatLayer || layer instanceof L.CircleMarker) {
-        // Safety check: Don't remove the highlight focus icon if it exists
         if (!layer.getPopup()?.getContent()?.toString().includes('Target Area')) {
           this.map.removeLayer(layer);
         }
@@ -106,8 +127,8 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     // 2. Filter the local data
     const filteredData = this.allScans.filter(scan => {
       const matchesDate = !this.filters.date || scan.created_at?.includes(this.filters.date);
-      const matchesDisease = this.filters.disease === 'all' || 
-                             scan.disease_key?.toLowerCase().includes(this.filters.disease.toLowerCase());
+      const matchesDisease = this.filters.disease === 'all' ||
+        scan.disease_key?.toLowerCase().includes(this.filters.disease.toLowerCase());
       return matchesDate && matchesDisease;
     });
 
@@ -116,7 +137,8 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   resetFilters(): void {
-    this.filters = { date: '', disease: 'all' };
+    this.filters = { date: '', disease: 'all', zone: 'all' };
+    this.selectedScan = null; // also clear right panel
     this.applyFilters();
   }
 
@@ -137,71 +159,85 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       else intensity = 0.4;
 
       heatPoints.push([lat, lng, intensity]);
-      
-      // Add hoverable interaction layer
-      this.addInvisibleInteractionLayer(lat, lng, scan);
+
+      // UPDATED: use clickable marker instead of hover popup
+      this.addClickableMarker(lat, lng, scan);
     });
 
-    // Plotting the Heat with increased visibility
     (L as any).heatLayer(heatPoints, {
-      radius: 50,      // Larger radius for better visibility
-      blur: 25,        // Smooth "cloud" edges
-      max: 1.0,        // Force 1.0 intensity to be Red
-      minOpacity: 0.5, // Ensure mild cases are visible
+      radius: 50,
+      blur: 25,
+      max: 1.0,
+      minOpacity: 0.5,
       gradient: {
-        0.2: '#3b82f6', // Blue
-        0.4: '#10b981', // Green
-        0.6: '#facc15', // Yellow
-        0.8: '#f97316', // Orange
-        1.0: '#ef4444'  // Red
+        0.2: '#3b82f6',
+        0.4: '#10b981',
+        0.6: '#facc15',
+        0.8: '#f97316',
+        1.0: '#ef4444'
       }
     }).addTo(this.map);
   }
 
-  private addInvisibleInteractionLayer(lat: number, lng: number, scan: ScanDto) {
+  // UPDATED: replaced addInvisibleInteractionLayer — now clickable, drives right panel
+  private addClickableMarker(lat: number, lng: number, scan: ScanDto): void {
     const ghostMarker = L.circleMarker([lat, lng], {
       radius: 20,
       stroke: false,
-      fillOpacity: 0 
+      fillColor: '#000',
+      fillOpacity: 0,
     });
 
-    const popupContent = `
-      <div class="p-3 min-w-[180px]">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black">
-            ${scan.user_name?.charAt(0).toUpperCase() || 'U'}
-          </div>
-          <div>
-            <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Farmer Profile</p>
-            <p class="text-sm font-black text-slate-900 leading-none">${scan.user_name || 'Anonymous'}</p>
-          </div>
-        </div>
-        <div class="space-y-1.5 border-t border-slate-100 pt-3">
-          <div class="flex justify-between items-center">
-            <span class="text-[11px] text-slate-500 font-medium">Disease:</span>
-            <span class="text-[11px] font-bold text-slate-800">${scan.disease_key}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-[11px] text-slate-500 font-medium">Severity:</span>
-            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${scan.severity_key === 'Severe' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}">
-              ${scan.severity_key || 'N/A'}
-            </span>
-          </div>
-        </div>
+    ghostMarker.addTo(this.map);
+
+    // Lightweight hover tooltip (name + disease only)
+    ghostMarker.bindTooltip(`
+      <div style="font-size:11px;font-weight:700;padding:2px 4px;white-space:nowrap;">
+        ${scan.user_name || 'Unknown'} &nbsp;·&nbsp; ${scan.disease_key || '—'}
       </div>
-    `;
-
-    ghostMarker.addTo(this.map).bindPopup(popupContent, {
-      className: 'custom-heatmap-popup',
-      closeButton: false,
-      offset: [0, -10]
+    `, {
+      sticky: true,
+      direction: 'top',
+      className: 'custom-heatmap-tooltip'
     });
 
-    ghostMarker.on('mouseover', (e) => e.target.openPopup());
-    ghostMarker.on('mouseout', (e) => e.target.closePopup());
+    // Click: push scan to right panel via Angular state
+    ghostMarker.on('click', () => {
+      this.selectedScan = scan;
+      this.cdr.markForCheck();
+    });
+
+    // Visual cursor hint on hover
+    ghostMarker.on('mouseover', (e) => {
+      (e.target as L.CircleMarker).setStyle({ fillOpacity: 0.08, fillColor: '#1e293b' });
+    });
+    ghostMarker.on('mouseout', (e) => {
+      (e.target as L.CircleMarker).setStyle({ fillOpacity: 0 });
+    });
   }
 
-  // ... (recenterMap, goBack, focusOnLocation, ngOnDestroy remain unchanged)
+  // --- NEW: Dismiss farmer panel, return to detection legend ---
+  clearSelectedScan(): void {
+    this.selectedScan = null;
+    this.cdr.markForCheck();
+  }
+
+  // --- Helper: severity badge Tailwind classes ---
+  getSeverityClass(severity: string | undefined): string {
+    const s = (severity || '').toLowerCase();
+    if (s === 'severe') return 'bg-red-50 text-red-600 border-red-100';
+    if (s === 'moderate') return 'bg-yellow-50 text-yellow-700 border-yellow-100';
+    return 'bg-blue-50 text-blue-600 border-blue-100';
+  }
+
+  // --- Helper: generate initials from name ---
+  getInitials(name: string | undefined): string {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    return parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0][0].toUpperCase();
+  }
 
   public focusOnLocation(lat: number, lng: number): void {
     if (!this.map) return;
@@ -219,6 +255,24 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       L.marker([lat, lng], { icon: highlightIcon }).addTo(this.map)
         .bindPopup(`<b class="text-slate-800">Target Area</b>`).openPopup();
     }, 300);
+  }
+
+  refreshSync(): void {
+    if (this.isSyncing) return;
+    this.isSyncing = true;
+    this.loadScans();
+    setTimeout(() => {
+      this.lastSyncTime = new Date();
+      this.isSyncing = false;
+      this.cdr.markForCheck();
+    }, 1200);
+  }
+
+  addObservation(): void {
+    const text = this.newObservation.trim();
+    if (!text) return;
+    this.observations.unshift({ text, time: new Date() });
+    this.newObservation = '';
   }
 
   recenterMap() { this.map.setView([7.7512, 125.7231], 12); }
