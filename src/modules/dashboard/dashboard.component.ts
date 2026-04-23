@@ -280,7 +280,7 @@ sortedMonths.forEach(month => {
   ).length;
 
   const mealybugCount = scansForMonth.filter(s =>
-    this.normalizeDisease(s.disease_key).includes('mealybug') &&
+    this.normalizeDisease(s.disease_key).includes('mealy bug') &&
     s.severity_key?.toLowerCase().includes('mild')
   ).length;
 
