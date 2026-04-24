@@ -7,6 +7,7 @@ import { HeatmapComponent } from '../modules/heatmap/heatmap.component';
 
 import { FieldReportsComponent } from '../modules/field_reports/field-reports.component';
 import { UserScanHistoryComponent } from '../modules/user_management/user_scan_history/user_scan_history.component';
+import { DiseaseGuidanceComponent } from '../modules/disease-guidance/diease-guidance.component';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -24,6 +25,7 @@ export const routes: Routes = [
       { path: 'field-reports/mealybug', component: FieldReportsComponent },
       { path: 'field-reports/pod-borer', component: FieldReportsComponent },
       { path: 'users', component: UserScanHistoryComponent },
+      { path: 'guide', component: DiseaseGuidanceComponent }
     ],
   },
   { path: '**', redirectTo: '' },

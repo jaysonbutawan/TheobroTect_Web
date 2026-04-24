@@ -7,7 +7,9 @@
     (click)="toggleSidebar()"
     class="flex items-center gap-3 mb-10 px-2 group cursor-pointer justify-start"
   >
-    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center transition-all duration-300">
+    <div
+      class="flex-shrink-0 w-12 h-12 flex items-center justify-center transition-all duration-300"
+    >
       <img
         src="assets/images/theobrotect_logo.png"
         alt="Theobrotect Logo"
@@ -24,33 +26,68 @@
 
   <nav class="flex-1 space-y-1">
     <ng-container
-      *ngTemplateOutlet="navLink; context: {
+      *ngTemplateOutlet="
+        navLink;
+        context: {
           link: '/dashboard',
           exact: true,
           label: 'Dashboard',
           collapsed: isCollapsed,
-          path: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
-        }"
+          path: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+        }
+      "
     ></ng-container>
 
     <ng-container
-      *ngTemplateOutlet="navLink; context: {
+      *ngTemplateOutlet="
+        navLink;
+        context: {
           link: '/dashboard/user-management',
           exact: false,
           label: 'User Management',
           collapsed: isCollapsed,
-          path: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
-        }"
+          path: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+        }
+      "
     ></ng-container>
 
     <ng-container
-      *ngTemplateOutlet="navLink; context: {
+      *ngTemplateOutlet="
+        navLink;
+        context: {
           link: '/dashboard/field-reports',
           exact: false,
           label: 'Field Reports',
           collapsed: isCollapsed,
-          path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-        }"
+          path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+        }
+      "
+    ></ng-container>
+
+    <ng-container
+      *ngTemplateOutlet="
+        navLink;
+        context: {
+          link: '/dashboard/heatmap',
+          exact: false,
+          label: 'Heat Maps',
+          collapsed: isCollapsed,
+          path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+        }
+      "
+    ></ng-container>
+
+    <ng-container
+      *ngTemplateOutlet="
+        navLink;
+        context: {
+          link: '/dashboard/guide',
+          exact: false,
+          label: 'Disease Guide',
+          collapsed: isCollapsed,
+          path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+        }
+      "
     ></ng-container>
   </nav>
 
@@ -62,9 +99,24 @@
       [title]="isCollapsed ? 'Settings' : ''"
     >
       <div class="w-6 flex justify-center">
-        <svg class="w-5 h-5 shrink-0 group-hover:rotate-45 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <svg
+          class="w-5 h-5 shrink-0 group-hover:rotate-45 transition-transform duration-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
         </svg>
       </div>
       @if (!isCollapsed) {
@@ -77,8 +129,18 @@
       [title]="isCollapsed ? 'Sign Out' : ''"
     >
       <div class="w-6 flex justify-center">
-        <svg class="w-5 h-5 shrink-0 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        <svg
+          class="w-5 h-5 shrink-0 group-hover:translate-x-0.5 transition-transform duration-200"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+          />
         </svg>
       </div>
       @if (!isCollapsed) {
@@ -88,10 +150,22 @@
   </div>
 </aside>
 
-<ng-template #navLink let-link="link" let-exact="exact" let-label="label" let-path="path" let-collapsed="collapsed">
+<ng-template
+  #navLink
+  let-link="link"
+  let-exact="exact"
+  let-label="label"
+  let-path="path"
+  let-collapsed="collapsed"
+>
   <a
     [routerLink]="link"
-    [routerLinkActiveOptions]="{ paths: exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
+    [routerLinkActiveOptions]="{
+      paths: exact ? 'exact' : 'subset',
+      queryParams: 'ignored',
+      matrixParams: 'ignored',
+      fragment: 'ignored',
+    }"
     routerLinkActive="active bg-green-700 text-white shadow-md shadow-green-900/20"
     class="group flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 font-semibold text-sm tracking-wide transition-all duration-200 hover:bg-green-50 hover:text-green-800"
     [title]="collapsed ? label : ''"
@@ -99,7 +173,9 @@
     <div class="w-6 flex justify-center shrink-0">
       <svg
         class="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform duration-200"
-        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
       >
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="path" />
       </svg>
