@@ -1,13 +1,24 @@
-<div class="bg-transparent min-h-screen font-sans">
+<div class="bg-transparent min-h-screen font-['DM_Sans',sans-serif] antialiased">
 
-  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6">
+  <!-- Enhanced Pro Header Section -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-6 px-2">
     <div>
-      <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
-      <p class="text-sm text-slate-500 mt-1 font-medium">View, search, and monitor all system access</p>
+      <!-- Modern Breadcrumb -->
+      <nav class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Administration</span>
+        <span class="text-slate-300">/</span>
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#3D683A]">Users</span>
+      </nav>
+
+      <h1 class="font-['DM_Sans',sans-serif] text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+        User <span class="text-[#3D683A]">Management</span>
+      </h1>
+      <p class="text-sm text-slate-500 mt-1 font-medium">Manage system access and monitor user activity across the platform.</p>
     </div>
 
-    <div class="relative group w-full lg:w-[380px]">
-      <span class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 transition-colors text-[22px]">
+    <!-- Search Bar with Refined Styling -->
+    <div class="relative group w-full lg:w-[420px]">
+      <span class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3D683A] transition-colors text-[22px]">
         search
       </span>
       <input
@@ -15,7 +26,7 @@
         placeholder="Search users by name or email..."
         [(ngModel)]="search"
         (input)="onSearchChange()"
-        class="block w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 outline-none transition-all shadow-sm hover:border-slate-300"
+        class="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-[#3D683A]/10 focus:border-[#3D683A] outline-none transition-all shadow-sm hover:border-slate-300 font-['DM_Sans',sans-serif]"
       />
     </div>
   </div>

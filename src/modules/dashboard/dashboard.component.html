@@ -1,81 +1,94 @@
-<div class="mt-8 px-6 pb-12 antialiased">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-    <div
-      class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-transparent hover:border-red-500/30"
-    >
-      <div class="absolute inset-0 z-0">
-        <img
-          src="assets/images/bp.png"
-          alt="Black Pod"
-          class="w-full h-full object-cover blur-[2px] opacity-60 group-hover:scale-110 transition-transform duration-700"
-        />
-        <div
-          class="absolute inset-0 bg-linear-to-br from-slate-900 via-slate-900/40 to-transparent"
-        ></div>
+<!-- Top Branding & Navigation Header -->
+<div class="px-6 pt-8 pb-4 animate-in fade-in slide-in-from-top-4 duration-700">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <!-- Modern Breadcrumb -->
+      <nav class="flex items-center gap-2 mb-2 font-['DM_Sans',sans-serif]">
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Platform</span>
+        <span class="text-slate-300">/</span>
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#3D683A]">Dashboard</span>
+      </nav>
+      
+      <h1 class="font-['DM_Sans',sans-serif] text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+        TheobroTect <span class="text-[#3D683A]">Insights</span>
+      </h1>
+      <p class="text-slate-500 text-sm mt-1 font-medium font-['DM_Sans',sans-serif]">Monitoring cacao health and disease distribution across Sawata Region.</p>
+    </div>
+
+    <!-- Right Side Actions: Date Display -->
+    <!-- <div class="flex items-center gap-3">
+      <div class="hidden sm:flex flex-col items-end mr-2">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Status</span>
+        <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+          <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+          System Live
+        </span>
       </div>
+      <button class="bg-white border border-slate-200 p-3 rounded-2xl shadow-sm hover:shadow-md transition-all">
+        <span class="material-symbols-rounded text-slate-600">calendar_today</span>
+      </button>
+    </div> -->
+  </div>
+</div>
+<div class="mt-8 px-6 pb-12 antialiased font-['DM_Sans',sans-serif]">
+  <!-- Stats Grid with Enhanced Aesthetics -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16 font-['DM_Sans',sans-serif]">
+    
+    <!-- Black Pod Card -->
+    <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2 transition-all duration-500 border border-white/5">
+      <div class="absolute inset-0 z-0">
+        <img src="assets/images/bp.png" alt="Black Pod" class="w-full h-full object-cover blur-[1px] opacity-40 group-hover:scale-110 transition-transform duration-1000" />
+        <!-- Gradient Overlay for Contrast -->
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/60 to-red-900/20"></div>
+      </div>
+      
       <div class="relative z-10">
-        <div class="flex justify-between items-start mb-6">
-          <span
-            class="bg-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-red-500/30"
-            >High Risk</span
-          >
+        <div class="flex justify-between items-center mb-10">
+          <div class="w-12 h-12 bg-red-500/20 backdrop-blur-xl border border-red-500/30 rounded-2xl flex items-center justify-center">
+            <span class="material-symbols-rounded text-red-400">warning</span>
+          </div>
+          <span class="bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-lg shadow-red-900/40">Severe Risk</span>
         </div>
-        <p class="text-[10px] font-black text-white/70 uppercase tracking-[0.2em]">
-          Total Black Pod
-        </p>
-        <h3 class="text-5xl font-black text-white mt-1 tracking-tighter">{{ stats.blackPod }}</h3>
+        <p class="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">Total Black Pod Cases</p>
+        <h3 class="text-6xl font-black text-white mt-2 tracking-tighter drop-shadow-md">{{ stats.blackPod }}</h3>
       </div>
     </div>
-    <div
-      class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-transparent hover:border-blue-500/30"
-    >
+
+    <!-- Mealybug Card -->
+    <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2 transition-all duration-500 border border-white/5">
       <div class="absolute inset-0 z-0">
-        <img
-          src="assets/images/mb.png"
-          alt="Mealybug"
-          class="w-full h-full object-cover blur-[2px] opacity-60 group-hover:scale-110 transition-transform duration-700"
-        />
-        <div
-          class="absolute inset-0 bg-linear-to-br from-slate-900 via-slate-900/40 to-transparent"
-        ></div>
+        <img src="assets/images/mb.png" alt="Mealybug" class="w-full h-full object-cover blur-[1px] opacity-40 group-hover:scale-110 transition-transform duration-1000" />
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/60 to-blue-900/20"></div>
       </div>
+      
       <div class="relative z-10">
-        <div class="flex justify-between items-start mb-6">
-          <span
-            class="bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-blue-500/30"
-            >Monitoring</span
-          >
+        <div class="flex justify-between items-center mb-10">
+          <div class="w-12 h-12 bg-blue-500/20 backdrop-blur-xl border border-blue-500/30 rounded-2xl flex items-center justify-center">
+            <span class="material-symbols-rounded text-blue-400">monitoring</span>
+          </div>
+          <span class="bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border border-blue-500/30">Active Log</span>
         </div>
-        <p class="text-[10px] font-black text-white/70 uppercase tracking-[0.2em]">
-          Total Mealybug
-        </p>
-        <h3 class="text-5xl font-black text-white mt-1 tracking-tighter">{{ stats.mealybug }}</h3>
+        <p class="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">Mealybug Population</p>
+        <h3 class="text-6xl font-black text-white mt-2 tracking-tighter drop-shadow-md">{{ stats.mealybug }}</h3>
       </div>
     </div>
-    <div
-      class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-transparent hover:border-yellow-500/30"
-    >
+
+    <!-- Pod Borer Card -->
+    <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2 transition-all duration-500 border border-white/5">
       <div class="absolute inset-0 z-0">
-        <img
-          src="assets/images/pb.png"
-          alt="Pod Borer"
-          class="w-full h-full object-cover blur-[2px] opacity-60 group-hover:scale-110 transition-transform duration-700"
-        />
-        <div
-          class="absolute inset-0 bg-linear-to-br from-slate-900 via-slate-900/40 to-transparent"
-        ></div>
+        <img src="assets/images/pb.png" alt="Pod Borer" class="w-full h-full object-cover blur-[1px] opacity-40 group-hover:scale-110 transition-transform duration-1000" />
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/60 to-emerald-900/20"></div>
       </div>
+      
       <div class="relative z-10">
-        <div class="flex justify-between items-start mb-6">
-          <span
-            class="bg-yellow-500/20 text-yellow-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-yellow-500/30"
-            >Stable</span
-          >
+        <div class="flex justify-between items-center mb-10">
+          <div class="w-12 h-12 bg-emerald-500/20 backdrop-blur-xl border border-emerald-500/30 rounded-2xl flex items-center justify-center">
+            <span class="material-symbols-rounded text-emerald-400">eco</span>
+          </div>
+          <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border border-emerald-500/30">Stable</span>
         </div>
-        <p class="text-[10px] font-black text-white/70 uppercase tracking-[0.2em]">
-          Total Pod Borer
-        </p>
-        <h3 class="text-5xl font-black text-white mt-1 tracking-tighter">{{ stats.podBorer }}</h3>
+        <p class="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">Pod Borer Density</p>
+        <h3 class="text-6xl font-black text-white mt-2 tracking-tighter drop-shadow-md">{{ stats.podBorer }}</h3>
       </div>
     </div>
   </div>
