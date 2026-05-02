@@ -19,6 +19,7 @@ export class LoginComponent {
 
   errorMessage = '';
   loading = false;
+  showPassword = false;
 
   loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
