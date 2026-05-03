@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <div class="bg-zinc-50 min-h-screen font-sans text-zinc-900" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
   
   <!-- Header Navigation -->
@@ -24,9 +25,18 @@
           Node: Southern Sector C-14
         </span>
       </div>
+=======
+<div class="min-h-screen bg-slate-50 p-8 font-['DM_Sans'] text-slate-800">
+  <div class="max-w-4xl mx-auto bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[2rem] shadow-2xl overflow-hidden">
+    
+    <!-- Header -->
+    <div class="bg-slate-900 p-8 text-white">
+      <h1 class="text-2xl font-bold tracking-tight">Disease Configuration</h1>
+      <p class="text-slate-400 text-sm mt-1">Define monitoring logic and severity-based recommendations.</p>
+>>>>>>> Stashed changes
     </div>
-  </header>
 
+<<<<<<< Updated upstream
   <!-- Main Content -->
   <main class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
     
@@ -76,8 +86,31 @@
                 {{ severity }}
               </button>
             </div>
+=======
+    <form class="p-10 space-y-12">
+      
+      <!-- SECTION 1: GENERAL INFO -->
+      <section>
+        <div class="flex items-center gap-3 mb-6">
+          <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">01</span>
+          <h2 class="text-xl font-bold">General Information</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-sm font-semibold">Name (EN/TL)</label>
+            <input type="text" placeholder="e.g. Black Pod Rot / Bulok na Bunga" 
+                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+>>>>>>> Stashed changes
           </div>
+          <div class="space-y-2 md:col-span-2">
+            <label class="text-sm font-semibold">Description (EN/TL)</label>
+            <textarea rows="3" placeholder="Provide a brief overview..." 
+                      class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"></textarea>
+          </div>
+        </div>
+      </section>
 
+<<<<<<< Updated upstream
           <!-- Monitoring Metrics Grid -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
@@ -136,11 +169,42 @@
                   <div *ngIf="!last" class="h-px bg-zinc-100"></div>
                 </ng-container>
               </div>
+=======
+      <!-- SECTION 2: MONITORING SETUP -->
+      <section>
+        <div class="flex items-center gap-3 mb-6">
+          <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-bold">02</span>
+          <h2 class="text-xl font-bold">Monitoring Setup</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-sm font-semibold">Rescan After (Days)</label>
+            <input type="number" placeholder="7" 
+                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500 outline-none">
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-semibold">Preferred Time</label>
+            <input type="time" 
+                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500 outline-none">
+          </div>
+          <div class="space-y-2 md:col-span-2">
+            <label class="text-sm font-semibold">Guidance Message</label>
+            <textarea placeholder="Instruction for the field worker..." 
+                      class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500 outline-none"></textarea>
+          </div>
+          <!-- Dynamic Checklist Placeholder -->
+          <div class="md:col-span-2 space-y-3">
+            <label class="text-sm font-semibold">Monitoring Checklist</label>
+            <div class="flex gap-2">
+              <input type="text" placeholder="Add task..." class="flex-1 px-4 py-2 rounded-lg border border-slate-200 outline-none">
+              <button class="bg-slate-100 px-4 py-2 rounded-lg font-bold hover:bg-slate-200 transition-colors">+</button>
+>>>>>>> Stashed changes
             </div>
           </div>
         </div>
       </section>
 
+<<<<<<< Updated upstream
       <!-- Strategic Recommendations Section -->
       <section class="space-y-4">
         <h2 class="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">
@@ -194,10 +258,45 @@
               </div>
               <span class="text-sm font-medium text-zinc-700 pt-1">{{ item }}</span>
             </div>
+=======
+      <!-- SECTION 3: RECOMMENDATIONS (PER SEVERITY) -->
+      <section>
+        <div class="flex items-center gap-3 mb-6">
+          <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold">03</span>
+          <h2 class="text-xl font-bold">Recommendations</h2>
+        </div>
+
+        <!-- Severity Tabs -->
+        <div class="flex p-1 bg-slate-100 rounded-2xl mb-8">
+          <button type="button" class="flex-1 py-3 text-sm font-bold rounded-xl bg-white shadow-sm text-green-600">🟢 Mild</button>
+          <button type="button" class="flex-1 py-3 text-sm font-bold text-slate-500">🟡 Moderate</button>
+          <button type="button" class="flex-1 py-3 text-sm font-bold text-slate-500">🔴 Severe</button>
+        </div>
+
+        <!-- Tab Content: Mild (Active) -->
+        <div class="space-y-6 bg-green-50/30 p-6 rounded-2xl border border-green-100">
+          <div class="space-y-3">
+            <label class="text-sm font-bold text-green-700">What to do now</label>
+            <div class="space-y-2">
+              <input type="text" placeholder="Bullet point 1" class="w-full px-4 py-2 rounded-lg border border-white outline-none focus:border-green-500">
+              <button class="text-xs font-bold text-green-600">+ Add Bullet</button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <label class="text-sm font-bold text-green-700">Prevention</label>
+            <textarea placeholder="Long term prevention steps..." class="w-full px-4 py-3 rounded-xl border border-white outline-none focus:border-green-500"></textarea>
+          </div>
+
+          <div class="space-y-3">
+            <label class="text-sm font-bold text-green-700">When to escalate</label>
+            <input type="text" placeholder="Critical signs to watch for..." class="w-full px-4 py-3 rounded-xl border border-white outline-none focus:border-green-500">
+>>>>>>> Stashed changes
           </div>
         </div>
       </section>
 
+<<<<<<< Updated upstream
       <!-- Disease Overview Card -->
       <section class="bg-white border border-zinc-200 rounded-[2.5rem] p-8 shadow-sm">
         <h2 class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-6">
@@ -236,4 +335,15 @@
       </div>
     </div>
   </main>
+=======
+      <!-- Submit Actions -->
+      <div class="flex justify-end gap-4 pt-6 border-t border-slate-100">
+        <button class="px-8 py-3 text-slate-500 font-bold">Cancel</button>
+        <button class="px-12 py-3 bg-green-600 text-white rounded-2xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all transform active:scale-95">
+          Save Guide
+        </button>
+      </div>
+    </form>
+  </div>
+>>>>>>> Stashed changes
 </div>
