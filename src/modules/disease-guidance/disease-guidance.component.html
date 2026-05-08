@@ -1,110 +1,594 @@
-<div class="min-h-screen bg-slate-50 p-8 font-['DM_Sans'] text-slate-800">
-  <div class="max-w-4xl mx-auto bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[2rem] shadow-2xl overflow-hidden">
-    
+<div class="page-wrapper">
+  <div class="form-card">
+
     <!-- Header -->
-    <div class="bg-slate-900 p-8 text-white">
-      <h1 class="text-2xl font-bold tracking-tight">Disease Configuration</h1>
-      <p class="text-slate-400 text-sm mt-1">Define monitoring logic and severity-based recommendations.</p>
+    <div class="card-header">
+      <div class="header-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
+          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <h1>Add Disease</h1>
+        <p>Configure detection labels, monitoring logic, and severity-based guidance. Filipino fields auto-translate as you type.</p>
+      </div>
+      <div class="header-badge">
+        <span class="auto-tl-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+          Auto-translate EN → TL
+        </span>
+      </div>
     </div>
 
-    <form class="p-10 space-y-12">
-      
-      <!-- SECTION 1: GENERAL INFO -->
-      <section>
-        <div class="flex items-center gap-3 mb-6">
-          <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">01</span>
-          <h2 class="text-xl font-bold">General Information</h2>
+    <!-- Progress Bar -->
+    <div class="progress-strip">
+      <div class="progress-steps">
+        <div class="progress-step" [class.done]="progressStep > 1" [class.active]="progressStep === 1">
+          <div class="step-dot"></div>
+          <span>General Info</span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-2">
-            <label class="text-sm font-semibold">Name (EN/TL)</label>
-            <input type="text" placeholder="e.g. Black Pod Rot / Bulok na Bunga" 
-                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-          </div>
-          <div class="space-y-2 md:col-span-2">
-            <label class="text-sm font-semibold">Description (EN/TL)</label>
-            <textarea rows="3" placeholder="Provide a brief overview..." 
-                      class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"></textarea>
-          </div>
+        <div class="progress-connector" [class.done]="progressStep > 1"></div>
+        <div class="progress-step" [class.done]="progressStep > 2" [class.active]="progressStep === 2">
+          <div class="step-dot"></div>
+          <span>Monitoring</span>
         </div>
-      </section>
+        <div class="progress-connector" [class.done]="progressStep > 2"></div>
+        <div class="progress-step" [class.done]="progressStep > 3" [class.active]="progressStep === 3">
+          <div class="step-dot"></div>
+          <span>Recommendations</span>
+        </div>
+        <div class="progress-connector" [class.done]="progressStep > 3"></div>
+        <div class="progress-step" [class.done]="progressStep > 4" [class.active]="progressStep === 4">
+          <div class="step-dot"></div>
+          <span>Review</span>
+        </div>
+      </div>
+    </div>
 
-      <!-- SECTION 2: MONITORING SETUP -->
-      <section>
-        <div class="flex items-center gap-3 mb-6">
-          <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-bold">02</span>
-          <h2 class="text-xl font-bold">Monitoring Setup</h2>
+    <form class="form-body" [formGroup]="form" (ngSubmit)="onSave()">
+
+      <!-- ─── SECTION 01: GENERAL INFO ─── -->
+      <section class="form-section">
+        <div class="section-header">
+          <span class="section-badge badge-blue">01</span>
+          <div>
+            <h2>General Information</h2>
+            <p class="section-sub">Basic identity of the disease for the app.</p>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-2">
-            <label class="text-sm font-semibold">Rescan After (Days)</label>
-            <input type="number" placeholder="7" 
-                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500 outline-none">
+
+        <div class="field-grid two-col">
+          <!-- Name EN -->
+          <div class="field-group">
+            <label class="field-label en-label">
+              <span class="lang-flag">EN</span> Disease Name
+            </label>
+            <input
+              type="text"
+              class="field-input"
+              formControlName="nameEn"
+              placeholder="e.g. Black Pod Disease"
+              (input)="onEnInput('nameEn', 'nameTl')"
+            />
+            <span class="field-hint" *ngIf="form.get('nameEn')?.touched && form.get('nameEn')?.invalid">
+              Name is required.
+            </span>
           </div>
-          <div class="space-y-2">
-            <label class="text-sm font-semibold">Preferred Time</label>
-            <input type="time" 
-                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500 outline-none">
+
+          <!-- Name TL -->
+          <div class="field-group">
+            <label class="field-label tl-label">
+              <span class="lang-flag tl">TL</span> Pangalan sa Filipino
+              <span class="auto-label" *ngIf="translating['nameTl']">
+                <span class="mini-spinner"></span> Nagsasalin...
+              </span>
+              <span class="auto-label done" *ngIf="!translating['nameTl'] && form.get('nameTl')?.value">
+                Auto-translated
+              </span>
+            </label>
+            <div class="tl-input-wrap">
+              <input
+                type="text"
+                class="field-input tl-input"
+                formControlName="nameTl"
+                placeholder="Awtomatikong isasalin..."
+                [class.translating]="translating['nameTl']"
+              />
+            </div>
           </div>
-          <div class="space-y-2 md:col-span-2">
-            <label class="text-sm font-semibold">Guidance Message</label>
-            <textarea placeholder="Instruction for the field worker..." 
-                      class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500 outline-none"></textarea>
+
+          <!-- Description EN -->
+          <div class="field-group col-span-2">
+            <label class="field-label en-label">
+              <span class="lang-flag">EN</span> Description
+            </label>
+            <textarea
+              class="field-input field-textarea"
+              formControlName="descEn"
+              rows="3"
+              placeholder="Brief overview of the disease, how it spreads, what conditions worsen it..."
+              (input)="onEnInput('descEn', 'descTl')"
+            ></textarea>
           </div>
-          <!-- Dynamic Checklist Placeholder -->
-          <div class="md:col-span-2 space-y-3">
-            <label class="text-sm font-semibold">Monitoring Checklist</label>
-            <div class="flex gap-2">
-              <input type="text" placeholder="Add task..." class="flex-1 px-4 py-2 rounded-lg border border-slate-200 outline-none">
-              <button class="bg-slate-100 px-4 py-2 rounded-lg font-bold hover:bg-slate-200 transition-colors">+</button>
+
+          <!-- Description TL -->
+          <div class="field-group col-span-2">
+            <label class="field-label tl-label">
+              <span class="lang-flag tl">TL</span> Paglalarawan sa Filipino
+              <span class="auto-label" *ngIf="translating['descTl']">
+                <span class="mini-spinner"></span> Nagsasalin...
+              </span>
+              <span class="auto-label done" *ngIf="!translating['descTl'] && form.get('descTl')?.value">
+                Auto-translated
+              </span>
+            </label>
+            <div class="tl-input-wrap">
+              <textarea
+                class="field-input field-textarea tl-input"
+                formControlName="descTl"
+                rows="3"
+                placeholder="Awtomatikong isasalin..."
+                [class.translating]="translating['descTl']"
+              ></textarea>
             </div>
           </div>
         </div>
+
+        <!-- Detection Labels -->
+        <div class="sub-section">
+          <label class="field-label">
+            Detection Labels
+            <span class="field-label-hint">Must match your TFLite model's output labels exactly (e.g. <code>black_pod_disease_mild</code>)</span>
+          </label>
+          <div class="label-list">
+            <div class="label-row" *ngFor="let label of detectionLabels; let i = index">
+              <input
+                type="text"
+                class="field-input label-input"
+                [(ngModel)]="detectionLabels[i]"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="e.g. disease_name_mild"
+              />
+              <button type="button" class="btn-icon btn-remove" (click)="removeLabel(i)" aria-label="Remove label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <button type="button" class="btn-add" (click)="addLabel()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+            Add label
+          </button>
+        </div>
       </section>
 
-      <!-- SECTION 3: RECOMMENDATIONS (PER SEVERITY) -->
-      <section>
-        <div class="flex items-center gap-3 mb-6">
-          <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold">03</span>
-          <h2 class="text-xl font-bold">Recommendations</h2>
+      <div class="section-divider"></div>
+
+      <!-- ─── SECTION 02: MONITORING SETUP ─── -->
+      <section class="form-section">
+        <div class="section-header">
+          <span class="section-badge badge-purple">02</span>
+          <div>
+            <h2>Monitoring Setup</h2>
+            <p class="section-sub">Rescan schedule and field worker instructions.</p>
+          </div>
+        </div>
+
+        <div class="field-grid two-col">
+          <div class="field-group">
+            <label class="field-label">Rescan Interval (Days)</label>
+            <input
+              type="number"
+              class="field-input"
+              formControlName="rescanDays"
+              placeholder="7"
+              min="1"
+              max="90"
+            />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Preferred Scan Time</label>
+            <input
+              type="time"
+              class="field-input"
+              formControlName="preferredTime"
+            />
+          </div>
+
+          <!-- Guidance EN -->
+          <div class="field-group col-span-2">
+            <label class="field-label en-label">
+              <span class="lang-flag">EN</span> Guidance Message
+            </label>
+            <textarea
+              class="field-input field-textarea"
+              formControlName="guidanceEn"
+              rows="2"
+              placeholder="Instruction for the field worker, e.g. 'Rescan after 7 days to check if symptoms are improving.'"
+              (input)="onEnInput('guidanceEn', 'guidanceTl')"
+            ></textarea>
+          </div>
+
+          <!-- Guidance TL -->
+          <div class="field-group col-span-2">
+            <label class="field-label tl-label">
+              <span class="lang-flag tl">TL</span> Mensahe sa Filipino
+              <span class="auto-label" *ngIf="translating['guidanceTl']">
+                <span class="mini-spinner"></span> Nagsasalin...
+              </span>
+              <span class="auto-label done" *ngIf="!translating['guidanceTl'] && form.get('guidanceTl')?.value">
+                Auto-translated
+              </span>
+            </label>
+            <div class="tl-input-wrap">
+              <textarea
+                class="field-input field-textarea tl-input"
+                formControlName="guidanceTl"
+                rows="2"
+                placeholder="Awtomatikong isasalin..."
+                [class.translating]="translating['guidanceTl']"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checklist -->
+        <div class="sub-section">
+          <label class="field-label">
+            Monitoring Checklist
+            <span class="field-label-hint">Tasks field workers should check before rescanning.</span>
+          </label>
+          <div class="checklist-list">
+            <div class="checklist-pair" *ngFor="let item of checklistItems; let i = index">
+              <div class="pair-inner">
+                <div class="pair-col">
+                  <span class="pair-lang-tag en">EN</span>
+                  <input
+                    type="text"
+                    class="field-input"
+                    [(ngModel)]="checklistItems[i].en"
+                    [ngModelOptions]="{standalone: true}"
+                    placeholder="Checklist item in English..."
+                    (input)="onBulletEnInput(checklistItems[i], 'en', 'tl')"
+                  />
+                </div>
+                <div class="pair-col">
+                  <span class="pair-lang-tag tl">TL
+                    <span class="mini-spinner" *ngIf="checklistItems[i].translating"></span>
+                  </span>
+                  <input
+                    type="text"
+                    class="field-input tl-input"
+                    [(ngModel)]="checklistItems[i].tl"
+                    [ngModelOptions]="{standalone: true}"
+                    placeholder="Awtomatikong isasalin..."
+                    [class.translating]="checklistItems[i].translating"
+                  />
+                </div>
+                <button type="button" class="btn-icon btn-remove" (click)="removeChecklist(i)" aria-label="Remove">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-add" (click)="addChecklist()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+            Add checklist item
+          </button>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- ─── SECTION 03: RECOMMENDATIONS ─── -->
+      <section class="form-section">
+        <div class="section-header">
+          <span class="section-badge badge-green">03</span>
+          <div>
+            <h2>Recommendations per Severity</h2>
+            <p class="section-sub">Define guidance for Mild, Moderate, and Severe detections.</p>
+          </div>
         </div>
 
         <!-- Severity Tabs -->
-        <div class="flex p-1 bg-slate-100 rounded-2xl mb-8">
-          <button type="button" class="flex-1 py-3 text-sm font-bold rounded-xl bg-white shadow-sm text-green-600">🟢 Mild</button>
-          <button type="button" class="flex-1 py-3 text-sm font-bold text-slate-500">🟡 Moderate</button>
-          <button type="button" class="flex-1 py-3 text-sm font-bold text-slate-500">🔴 Severe</button>
+        <div class="sev-tabs">
+          <button
+            type="button"
+            class="sev-tab"
+            [class.active]="activeSev === 'mild'"
+            [class.tab-mild]="activeSev === 'mild'"
+            (click)="activeSev = 'mild'"
+          >
+            <span class="sev-dot mild-dot"></span> Mild
+          </button>
+          <button
+            type="button"
+            class="sev-tab"
+            [class.active]="activeSev === 'moderate'"
+            [class.tab-moderate]="activeSev === 'moderate'"
+            (click)="activeSev = 'moderate'"
+          >
+            <span class="sev-dot mod-dot"></span> Moderate
+          </button>
+          <button
+            type="button"
+            class="sev-tab"
+            [class.active]="activeSev === 'severe'"
+            [class.tab-severe]="activeSev === 'severe'"
+            (click)="activeSev = 'severe'"
+          >
+            <span class="sev-dot sev-dot-red"></span> Severe
+          </button>
         </div>
 
-        <!-- Tab Content: Mild (Active) -->
-        <div class="space-y-6 bg-green-50/30 p-6 rounded-2xl border border-green-100">
-          <div class="space-y-3">
-            <label class="text-sm font-bold text-green-700">What to do now</label>
-            <div class="space-y-2">
-              <input type="text" placeholder="Bullet point 1" class="w-full px-4 py-2 rounded-lg border border-white outline-none focus:border-green-500">
-              <button class="text-xs font-bold text-green-600">+ Add Bullet</button>
+        <!-- MILD PANEL -->
+        <div class="sev-panel panel-mild" *ngIf="activeSev === 'mild'">
+          <div class="panel-inner">
+            <div class="bullet-section">
+              <label class="sev-field-label mild-color">What to do now</label>
+              <div class="bullet-list">
+                <div class="checklist-pair" *ngFor="let item of sevData.mild.actions; let i = index">
+                  <div class="pair-inner">
+                    <div class="pair-col">
+                      <span class="pair-lang-tag en">EN</span>
+                      <input type="text" class="field-input" [(ngModel)]="sevData.mild.actions[i].en" [ngModelOptions]="{standalone:true}" placeholder="Action step in English..." (input)="onBulletEnInput(sevData.mild.actions[i], 'en', 'tl')" />
+                    </div>
+                    <div class="pair-col">
+                      <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="sevData.mild.actions[i].translating"></span></span>
+                      <input type="text" class="field-input tl-input" [(ngModel)]="sevData.mild.actions[i].tl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="sevData.mild.actions[i].translating" />
+                    </div>
+                    <button type="button" class="btn-icon btn-remove" (click)="sevData.mild.actions.splice(i,1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn-add mild-btn" (click)="addBullet(sevData.mild.actions)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+                Add step
+              </button>
+            </div>
+
+            <div class="bullet-section">
+              <label class="sev-field-label mild-color">Prevention</label>
+              <div class="bullet-list">
+                <div class="checklist-pair" *ngFor="let item of sevData.mild.prevention; let i = index">
+                  <div class="pair-inner">
+                    <div class="pair-col">
+                      <span class="pair-lang-tag en">EN</span>
+                      <input type="text" class="field-input" [(ngModel)]="sevData.mild.prevention[i].en" [ngModelOptions]="{standalone:true}" placeholder="Prevention tip in English..." (input)="onBulletEnInput(sevData.mild.prevention[i], 'en', 'tl')" />
+                    </div>
+                    <div class="pair-col">
+                      <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="sevData.mild.prevention[i].translating"></span></span>
+                      <input type="text" class="field-input tl-input" [(ngModel)]="sevData.mild.prevention[i].tl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="sevData.mild.prevention[i].translating" />
+                    </div>
+                    <button type="button" class="btn-icon btn-remove" (click)="sevData.mild.prevention.splice(i,1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn-add mild-btn" (click)="addBullet(sevData.mild.prevention)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+                Add tip
+              </button>
+            </div>
+
+            <div class="bullet-section">
+              <label class="sev-field-label mild-color">When to Escalate</label>
+              <div class="pair-inner no-remove">
+                <div class="pair-col">
+                  <span class="pair-lang-tag en">EN</span>
+                  <input type="text" class="field-input" [(ngModel)]="sevData.mild.escalateEn" [ngModelOptions]="{standalone:true}" placeholder="Signs that indicate escalation to moderate..." (input)="onSingleEnInput($event, 'mild', 'escalate')" />
+                </div>
+                <div class="pair-col">
+                  <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="translating['mild_escalate']"></span></span>
+                  <input type="text" class="field-input tl-input" [(ngModel)]="sevData.mild.escalateTl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="translating['mild_escalate']" />
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="space-y-3">
-            <label class="text-sm font-bold text-green-700">Prevention</label>
-            <textarea placeholder="Long term prevention steps..." class="w-full px-4 py-3 rounded-xl border border-white outline-none focus:border-green-500"></textarea>
+        <!-- MODERATE PANEL -->
+        <div class="sev-panel panel-moderate" *ngIf="activeSev === 'moderate'">
+          <div class="panel-inner">
+            <div class="bullet-section">
+              <label class="sev-field-label mod-color">What to do now</label>
+              <div class="bullet-list">
+                <div class="checklist-pair" *ngFor="let item of sevData.moderate.actions; let i = index">
+                  <div class="pair-inner">
+                    <div class="pair-col">
+                      <span class="pair-lang-tag en">EN</span>
+                      <input type="text" class="field-input" [(ngModel)]="sevData.moderate.actions[i].en" [ngModelOptions]="{standalone:true}" placeholder="Action step in English..." (input)="onBulletEnInput(sevData.moderate.actions[i], 'en', 'tl')" />
+                    </div>
+                    <div class="pair-col">
+                      <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="sevData.moderate.actions[i].translating"></span></span>
+                      <input type="text" class="field-input tl-input" [(ngModel)]="sevData.moderate.actions[i].tl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="sevData.moderate.actions[i].translating" />
+                    </div>
+                    <button type="button" class="btn-icon btn-remove" (click)="sevData.moderate.actions.splice(i,1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn-add mod-btn" (click)="addBullet(sevData.moderate.actions)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+                Add step
+              </button>
+            </div>
+
+            <div class="bullet-section">
+              <label class="sev-field-label mod-color">Prevention</label>
+              <div class="bullet-list">
+                <div class="checklist-pair" *ngFor="let item of sevData.moderate.prevention; let i = index">
+                  <div class="pair-inner">
+                    <div class="pair-col">
+                      <span class="pair-lang-tag en">EN</span>
+                      <input type="text" class="field-input" [(ngModel)]="sevData.moderate.prevention[i].en" [ngModelOptions]="{standalone:true}" placeholder="Prevention tip in English..." (input)="onBulletEnInput(sevData.moderate.prevention[i], 'en', 'tl')" />
+                    </div>
+                    <div class="pair-col">
+                      <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="sevData.moderate.prevention[i].translating"></span></span>
+                      <input type="text" class="field-input tl-input" [(ngModel)]="sevData.moderate.prevention[i].tl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="sevData.moderate.prevention[i].translating" />
+                    </div>
+                    <button type="button" class="btn-icon btn-remove" (click)="sevData.moderate.prevention.splice(i,1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn-add mod-btn" (click)="addBullet(sevData.moderate.prevention)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+                Add tip
+              </button>
+            </div>
+
+            <div class="bullet-section">
+              <label class="sev-field-label mod-color">Seek Help Guidance</label>
+              <div class="pair-inner no-remove">
+                <div class="pair-col">
+                  <span class="pair-lang-tag en">EN</span>
+                  <input type="text" class="field-input" [(ngModel)]="sevData.moderate.seekHelpEn" [ngModelOptions]="{standalone:true}" placeholder="e.g. Consult DA/municipal agriculturist..." (input)="onSingleEnInput($event, 'moderate', 'seekHelp')" />
+                </div>
+                <div class="pair-col">
+                  <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="translating['moderate_seekHelp']"></span></span>
+                  <input type="text" class="field-input tl-input" [(ngModel)]="sevData.moderate.seekHelpTl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="translating['moderate_seekHelp']" />
+                </div>
+              </div>
+            </div>
+
+            <div class="bullet-section">
+              <label class="sev-field-label mod-color">When to Escalate</label>
+              <div class="pair-inner no-remove">
+                <div class="pair-col">
+                  <span class="pair-lang-tag en">EN</span>
+                  <input type="text" class="field-input" [(ngModel)]="sevData.moderate.escalateEn" [ngModelOptions]="{standalone:true}" placeholder="Signs that indicate escalation to severe..." (input)="onSingleEnInput($event, 'moderate', 'escalate')" />
+                </div>
+                <div class="pair-col">
+                  <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="translating['moderate_escalate']"></span></span>
+                  <input type="text" class="field-input tl-input" [(ngModel)]="sevData.moderate.escalateTl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="translating['moderate_escalate']" />
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div class="space-y-3">
-            <label class="text-sm font-bold text-green-700">When to escalate</label>
-            <input type="text" placeholder="Critical signs to watch for..." class="w-full px-4 py-3 rounded-xl border border-white outline-none focus:border-green-500">
+        <!-- SEVERE PANEL -->
+        <div class="sev-panel panel-severe" *ngIf="activeSev === 'severe'">
+          <div class="panel-inner">
+            <div class="bullet-section">
+              <label class="sev-field-label sev-color">What to do now</label>
+              <div class="bullet-list">
+                <div class="checklist-pair" *ngFor="let item of sevData.severe.actions; let i = index">
+                  <div class="pair-inner">
+                    <div class="pair-col">
+                      <span class="pair-lang-tag en">EN</span>
+                      <input type="text" class="field-input" [(ngModel)]="sevData.severe.actions[i].en" [ngModelOptions]="{standalone:true}" placeholder="Action step in English..." (input)="onBulletEnInput(sevData.severe.actions[i], 'en', 'tl')" />
+                    </div>
+                    <div class="pair-col">
+                      <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="sevData.severe.actions[i].translating"></span></span>
+                      <input type="text" class="field-input tl-input" [(ngModel)]="sevData.severe.actions[i].tl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="sevData.severe.actions[i].translating" />
+                    </div>
+                    <button type="button" class="btn-icon btn-remove" (click)="sevData.severe.actions.splice(i,1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn-add sev-btn" (click)="addBullet(sevData.severe.actions)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+                Add step
+              </button>
+            </div>
+
+            <div class="bullet-section">
+              <label class="sev-field-label sev-color">Prevention</label>
+              <div class="bullet-list">
+                <div class="checklist-pair" *ngFor="let item of sevData.severe.prevention; let i = index">
+                  <div class="pair-inner">
+                    <div class="pair-col">
+                      <span class="pair-lang-tag en">EN</span>
+                      <input type="text" class="field-input" [(ngModel)]="sevData.severe.prevention[i].en" [ngModelOptions]="{standalone:true}" placeholder="Prevention tip in English..." (input)="onBulletEnInput(sevData.severe.prevention[i], 'en', 'tl')" />
+                    </div>
+                    <div class="pair-col">
+                      <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="sevData.severe.prevention[i].translating"></span></span>
+                      <input type="text" class="field-input tl-input" [(ngModel)]="sevData.severe.prevention[i].tl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="sevData.severe.prevention[i].translating" />
+                    </div>
+                    <button type="button" class="btn-icon btn-remove" (click)="sevData.severe.prevention.splice(i,1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn-add sev-btn" (click)="addBullet(sevData.severe.prevention)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+                Add tip
+              </button>
+            </div>
+
+            <div class="bullet-section">
+              <label class="sev-field-label sev-color">Seek Help Guidance</label>
+              <div class="pair-inner no-remove">
+                <div class="pair-col">
+                  <span class="pair-lang-tag en">EN</span>
+                  <input type="text" class="field-input" [(ngModel)]="sevData.severe.seekHelpEn" [ngModelOptions]="{standalone:true}" placeholder="e.g. Contact DA/municipal agriculturist for urgent field assessment..." (input)="onSingleEnInput($event, 'severe', 'seekHelp')" />
+                </div>
+                <div class="pair-col">
+                  <span class="pair-lang-tag tl">TL <span class="mini-spinner" *ngIf="translating['severe_seekHelp']"></span></span>
+                  <input type="text" class="field-input tl-input" [(ngModel)]="sevData.severe.seekHelpTl" [ngModelOptions]="{standalone:true}" placeholder="Awtomatikong isasalin..." [class.translating]="translating['severe_seekHelp']" />
+                </div>
+              </div>
+            </div>
+
+            <div class="alert-note">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              Severe cases always require expert consultation. Ensure the seek help guidance field is filled.
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Submit Actions -->
-      <div class="flex justify-end gap-4 pt-6 border-t border-slate-100">
-        <button class="px-8 py-3 text-slate-500 font-bold">Cancel</button>
-        <button class="px-12 py-3 bg-green-600 text-white rounded-2xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all transform active:scale-95">
-          Save Guide
-        </button>
+      <div class="section-divider"></div>
+
+      <!-- ─── SECTION 04: JSON PREVIEW ─── -->
+      <section class="form-section">
+        <div class="section-header">
+          <span class="section-badge badge-amber">04</span>
+          <div>
+            <h2>JSON Preview</h2>
+            <p class="section-sub">Generated output based on your inputs. Copy directly into your config.</p>
+          </div>
+          <button type="button" class="btn-refresh" (click)="generatePreview()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div class="json-preview-block">
+          <pre class="json-content">{{ jsonPreview }}</pre>
+          <button type="button" class="btn-copy" (click)="copyJson()" [class.copied]="jsonCopied">
+            <svg *ngIf="!jsonCopied" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <svg *ngIf="jsonCopied" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            {{ jsonCopied ? 'Copied!' : 'Copy JSON' }}
+          </button>
+        </div>
+      </section>
+
+      <!-- ─── FOOTER ACTIONS ─── -->
+      <div class="form-footer">
+        <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+        <div class="footer-right">
+          <button type="button" class="btn-preview" (click)="generatePreview()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            Preview JSON
+          </button>
+          <button type="submit" class="btn-save" [disabled]="form.invalid || isSaving">
+            <span class="mini-spinner white" *ngIf="isSaving"></span>
+            <svg *ngIf="!isSaving" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            {{ isSaving ? 'Saving...' : 'Save Disease' }}
+          </button>
+        </div>
       </div>
+
     </form>
   </div>
 </div>
