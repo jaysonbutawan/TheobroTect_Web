@@ -68,7 +68,7 @@ function newSeveritySection(): SeveritySection {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './disease-guidance.component.html',
-    styleUrls: ['./disease-guidance.component.scss'],
+    // styleUrls: ['./disease-guidance.component.scss'],
 
 })
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
