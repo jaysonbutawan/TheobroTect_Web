@@ -3,6 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment.prod';
 import { Observable } from 'rxjs';
 
+import {
+  ApiResponse,
+  DiseaseDto
+} from './disease-guidance.dto';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,23 +17,49 @@ export class DiseaseGuideService {
 
   private readonly baseUrl = `${environment.apiUrl}/diseases`;
 
-  createDisease(data: any): Observable<any> {
-    return this.http.post(this.baseUrl, data);
+  createDisease(
+    data: DiseaseDto
+  ): Observable<ApiResponse<DiseaseDto>> {
+
+    return this.http.post<ApiResponse<DiseaseDto>>(
+      this.baseUrl,
+      data
+    );
   }
 
-  getDiseases(): Observable<any> {
-    return this.http.get(this.baseUrl);
+  getDisease(): Observable<ApiResponse<DiseaseDto[]>> {
+
+    return this.http.get<ApiResponse<DiseaseDto[]>>(
+      this.baseUrl
+    );
   }
 
-  getDisease(id: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${id}`);
+  getDiseaseById(
+    id: number
+  ): Observable<ApiResponse<DiseaseDto>> {
+
+    return this.http.get<ApiResponse<DiseaseDto>>(
+      `${this.baseUrl}/${id}`
+    );
   }
 
-  updateDisease(id: number, data: any): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${id}`, data);
+  updateDisease(
+    id: number,
+    data: DiseaseDto
+  ): Observable<ApiResponse<DiseaseDto>> {
+
+    return this.http.put<ApiResponse<DiseaseDto>>(
+      `${this.baseUrl}/${id}`,
+      data
+    );
   }
 
-  deleteDisease(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+  deleteDisease(
+    id: number
+  ): Observable<ApiResponse<null>> {
+
+    return this.http.delete<ApiResponse<null>>(
+      `${this.baseUrl}/${id}`
+    );
   }
 }
