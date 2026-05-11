@@ -73,17 +73,17 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   translating: Record<string, boolean> = {};
 
   detectionLabels: string[] = [
-    "black_pod_disease_mild",
-    "black_pod_disease_moderate",
-    "black_pod_disease_severe",
-    "cacao_pod_borer_mild",
-    "cacao_pod_borer_moderate",
-    "cacao_pod_borer_severe",
-    "healthy",
-    "mealybug_mild",
-    "mealybug_moderate",
-    "mealybug_severe",
-    "non_cacao"
+      "black_pod_disease_mild",
+      "black_pod_disease_moderate",
+      "black_pod_disease_severe",
+      "cacao_pod_borer_mild",
+      "cacao_pod_borer_moderate",
+      "cacao_pod_borer_severe",
+      "healthy",
+      "mealybug_mild",
+      "mealybug_moderate",
+      "mealybug_severe",
+      "non_cacao"
   ];
 
   checklistItems: ChecklistItem[] = [newChecklist()];
@@ -93,11 +93,11 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     moderate: { ...newSeveritySection(), seekHelpEn: '', seekHelpTl: '' },
     severe: { ...newSeveritySection(), seekHelpEn: '', seekHelpTl: '' },
   };
+  private diseaseService = inject(DiseaseGuideService);
 
 
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
   private destroy$ = new Subject<void>();
-  private diseaseService = inject(DiseaseGuideService);
 
   get progressStep(): number {
     const f = this.form?.value;
@@ -111,18 +111,18 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private translationService: TranslationService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      nameEn: ['', Validators.required],
-      nameTl: [''],
-      descEn: ['', Validators.required],
-      descTl: [''],
-      rescanDays: [7, [Validators.required, Validators.min(1), Validators.max(90)]],
-      preferredTime: ['09:00', Validators.required],
-      guidanceEn: ['', Validators.required],
-      guidanceTl: [''],
+      nameEn:       ['', Validators.required],
+      nameTl:       [''],
+      descEn:       ['', Validators.required],
+      descTl:       [''],
+      rescanDays:   [7, [Validators.required, Validators.min(1), Validators.max(90)]],
+      preferredTime:['09:00', Validators.required],
+      guidanceEn:   ['', Validators.required],
+      guidanceTl:   [''],
     });
   }
 
@@ -131,7 +131,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
     Object.values(this.debounceTimers).forEach(clearTimeout);
   }
-  selectedLabel: string = '';
 
   onEnInput(sourceControlName: string, targetControlName: string): void {
     const text = this.form.get(sourceControlName)?.value?.trim();
@@ -156,51 +155,56 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       }
     }, 900);
   }
-  onSave() {
 
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
 
-    const payload = {
+  selectedLabel: string = '';
 
-      disease_key: this.form.value.nameEn
-        ?.toLowerCase()
-        .replace(/\s+/g, '_'),
+onSave() {
 
-      display_name: {
-        en: this.form.value.nameEn,
-        tl: this.form.value.nameTl
-      },
-
-      description: {
-        en: this.form.value.descEn,
-        tl: this.form.value.descTl
-      },
-
-      locale: 'en'
-    };
-
-    console.log(payload);
-
-    this.diseaseService.createDisease(payload).subscribe({
-
-      next: (response) => {
-
-        console.log('Saved successfully', response);
-
-        alert('Disease saved successfully');
-
-        this.form.reset();
-      },
-
-      error: (error) => {
-
-        console.error('Save failed', error);
-
-        alert('Failed to save disease');
-      }
-    });
+  if (this.form.invalid) {
+    this.form.markAllAsTouched();
+    return;
   }
+
+  const payload = {
+
+    disease_key: this.form.value.nameEn
+      ?.toLowerCase()
+      .replace(/\s+/g, '_'),
+
+    display_name: {
+      en: this.form.value.nameEn,
+      tl: this.form.value.nameTl
+    },
+
+    description: {
+      en: this.form.value.descEn,
+      tl: this.form.value.descTl
+    },
+
+    locale: 'en'
+  };
+
+  console.log(payload);
+
+  this.diseaseService.createDisease(payload).subscribe({
+
+    next: (response) => {
+
+      console.log('Saved successfully', response);
+
+      alert('Disease saved successfully');
+
+      this.form.reset();
+    },
+
+    error: (error) => {
+
+      console.error('Save failed', error);
+
+      alert('Failed to save disease');
+    }
+  });
+}
+
 }
