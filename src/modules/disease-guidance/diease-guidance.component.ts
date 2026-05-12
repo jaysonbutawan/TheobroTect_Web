@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { TranslationService } from './translation.service';
 import { DiseaseGuideService } from './disease-guidance.service';
@@ -31,9 +32,15 @@ export interface ChecklistItem {
   templateUrl: './disease-guidance.component.html',
 })
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
+  // ─── FORM & TRANSLATION STATE ───
   form!: FormGroup;
   selectedLabel: string = '';
   translating: Record<string, boolean> = {};
+
+  // ─── SPLIT-PANE UI STATE ───
+  existingRecords: DiseaseDto[] = []; // Holds the data for the right panel
+  isEditMode: boolean = false;
+  currentEditId: string | null = null;
 
   // Step 2 dynamic checklist
   checklistItems: ChecklistItem[] = [];
@@ -59,8 +66,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   private translationService = inject(TranslationService);
   private diseaseService = inject(DiseaseGuideService);
 
-
-
   // ─── LIFECYCLE ───
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -71,20 +76,66 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       descTl: ['', Validators.required],
 
       // Step 2 Fields
-      rescanDays: ['', [Validators.required, Validators.min(1)]],
-      preferredTime: ['', Validators.required],
-      guidanceEn: ['', Validators.required],
-      guidanceTl: ['', Validators.required]
+      monitoringFreq: ['weekly', Validators.required],
+      severityThreshold: ['', [Validators.required, Validators.min(1)]],
+
+      rescanDays: [''],
+      preferredTime: [''],
+      guidanceEn: [''],
+      guidanceTl: ['']
     });
 
-    // Start with one empty checklist item in Step 2
     this.addChecklist();
+    this.fetchExistingDiseases();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     Object.values(this.debounceTimers).forEach(clearTimeout);
+  }
+
+  // ─── DATA FETCHING & EDITING ───
+  fetchExistingDiseases(): void {
+    this.diseaseService.getDisease()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          this.existingRecords = response.data || response || [];
+        },
+        error: (error) => {
+          console.error('Failed to fetch existing diseases', error);
+        }
+      });
+  }
+
+  loadRecordForEditing(record: any): void {
+    this.isEditMode = true;
+    this.currentEditId = record.id || record._id || record.disease_key;
+
+    this.form.patchValue({
+      nameEn: record.display_name?.en || record.nameEn || '',
+      nameTl: record.display_name?.tl || record.nameTl || '',
+      descEn: record.description?.en || record.descEn || '',
+      descTl: record.description?.tl || record.descTl || '',
+      monitoringFreq: record.monitoring_setup?.frequency || 'weekly',
+      severityThreshold: record.monitoring_setup?.threshold || '',
+    });
+
+    this.selectedLabel = record.disease_key || record.label || '';
+
+    if (record.monitoring_setup?.checklist?.length) {
+      this.checklistItems = [...record.monitoring_setup.checklist];
+    }
+  }
+
+  cancelEdit(): void {
+    this.isEditMode = false;
+    this.currentEditId = null;
+    this.selectedLabel = '';
+    this.checklistItems = [];
+    this.addChecklist();
+    this.form.reset({ monitoringFreq: 'weekly' });
   }
 
   // ─── CHECKLIST LOGIC ───
@@ -152,13 +203,10 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Filter out completely empty checklist rows before saving
     const validChecklists = this.checklistItems
       .filter(item => item.en.trim() !== '')
       .map(item => ({ en: item.en, tl: item.tl }));
 
-    // Assemble the complete payload
-    // Note: Ensure your DiseaseDto in 'disease-guidance.dto.ts' accepts monitoring_setup if you pass it!
     const payload: any = {
       disease_key: this.selectedLabel,
       locale: 'en',
@@ -171,6 +219,8 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         tl: this.form.value.descTl
       },
       monitoring_setup: {
+        frequency: this.form.value.monitoringFreq,
+        threshold: this.form.value.severityThreshold,
         rescan_days: this.form.value.rescanDays,
         preferred_time: this.form.value.preferredTime,
         guidance: {
@@ -181,23 +231,21 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       }
     };
 
-    console.log('Submitting payload:', payload);
-
-    this.diseaseService.createDisease(payload).subscribe({
-      next: (response) => {
-        console.log('Disease saved successfully', response);
-        alert('Disease saved successfully');
-
-        // Reset the form and wizard state
-        this.form.reset();
-        this.selectedLabel = '';
-        this.checklistItems = [];
-        this.addChecklist(); // Add one blank checklist item back
-      },
-      error: (error) => {
-        console.error('Failed to save disease', error);
-        alert('Failed to save disease');
-      }
-    });
+    if (this.isEditMode && this.currentEditId) {
+      console.log('Updating record...', payload);
+      // this.diseaseService.updateDisease(this.currentEditId, payload).subscribe({ ... })
+    } else {
+      this.diseaseService.createDisease(payload).subscribe({
+        next: (response) => {
+          alert('Disease saved successfully');
+          this.fetchExistingDiseases();
+          this.cancelEdit();
+        },
+        error: (error) => {
+          console.error('Failed to save disease', error);
+          alert('Failed to save disease');
+        }
+      });
+    }
   }
 }

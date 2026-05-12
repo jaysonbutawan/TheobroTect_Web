@@ -4,6 +4,7 @@ export interface LocalizedText {
 }
 
 export interface DiseaseDto {
+  id: number;
   disease_key: string;
   display_name: LocalizedText;
   description: LocalizedText;
