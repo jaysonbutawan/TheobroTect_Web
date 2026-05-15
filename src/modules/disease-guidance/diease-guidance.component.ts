@@ -1,11 +1,7 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-  FormsModule
-} from '@angular/forms';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { DiseaseSidebarComponent } from './disease-sidebar.component';
+import { MonitoringSetupComponent } from './monitoring-setup.component'; // IMPORT HERE
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,8 +9,8 @@ import { takeUntil } from 'rxjs/operators';
 import { TranslationService } from './translation.service';
 import { DiseaseGuideService } from './disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
+import { RecommendationsSetupComponent, SeverityData } from './recommendations-setup.component';
 
-// Interface for the dynamic checklist
 export interface ChecklistItem {
   en: string;
   tl: string;
@@ -27,22 +23,24 @@ export interface ChecklistItem {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    DiseaseSidebarComponent,
+    MonitoringSetupComponent,
+    RecommendationsSetupComponent
   ],
   templateUrl: './disease-guidance.component.html',
 })
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
-  // ─── FORM & TRANSLATION STATE ───
   form!: FormGroup;
   selectedLabel: string = '';
   translating: Record<string, boolean> = {};
 
-  // ─── SPLIT-PANE UI STATE ───
-  existingRecords: DiseaseDto[] = []; // Holds the data for the right panel
+  existingRecords: DiseaseDto[] = [];
   isEditMode: boolean = false;
   currentEditId: string | null = null;
+  selectedDisease: any = null;
+  currentStep: number = 1;
 
-  // Step 2 dynamic checklist
   checklistItems: ChecklistItem[] = [];
 
   detectionLabels: string[] = [
@@ -59,14 +57,20 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     'non_cacao'
   ];
 
+  sevData: SeverityData = {
+    mild: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
+    moderate: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
+    severe: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' }
+  };
+
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
   private destroy$ = new Subject<void>();
+  private cdr = inject(ChangeDetectorRef);
 
   private fb = inject(FormBuilder);
   private translationService = inject(TranslationService);
   private diseaseService = inject(DiseaseGuideService);
 
-  // ─── LIFECYCLE ───
   ngOnInit(): void {
     this.form = this.fb.group({
       // Step 1 Fields
@@ -78,14 +82,13 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       // Step 2 Fields
       monitoringFreq: ['weekly', Validators.required],
       severityThreshold: ['', [Validators.required, Validators.min(1)]],
-
       rescanDays: [''],
       preferredTime: [''],
       guidanceEn: [''],
       guidanceTl: ['']
     });
 
-    this.addChecklist();
+    this.resetChecklist();
     this.fetchExistingDiseases();
   }
 
@@ -94,14 +97,22 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
     Object.values(this.debounceTimers).forEach(clearTimeout);
   }
+   setStep(step: number): void {
+    this.currentStep = step;
+  }
 
-  // ─── DATA FETCHING & EDITING ───
+  onSidebarDiseaseSelected(disease: any): void {
+    this.selectedDisease = disease;
+    this.loadRecordForEditing(disease);
+  }
+
   fetchExistingDiseases(): void {
     this.diseaseService.getDisease()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
           this.existingRecords = response.data || response || [];
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Failed to fetch existing diseases', error);
@@ -127,27 +138,24 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     if (record.monitoring_setup?.checklist?.length) {
       this.checklistItems = [...record.monitoring_setup.checklist];
     }
+    this.cdr.detectChanges();
   }
 
   cancelEdit(): void {
     this.isEditMode = false;
     this.currentEditId = null;
     this.selectedLabel = '';
-    this.checklistItems = [];
-    this.addChecklist();
+    this.selectedDisease = null;
+    this.resetChecklist();
     this.form.reset({ monitoringFreq: 'weekly' });
   }
 
-  // ─── CHECKLIST LOGIC ───
-  addChecklist(): void {
-    this.checklistItems.push({ en: '', tl: '', translating: false });
+  // Used for initialization and cancellation
+  private resetChecklist(): void {
+    this.checklistItems = [{ en: '', tl: '', translating: false }];
   }
 
-  removeChecklist(index: number): void {
-    this.checklistItems.splice(index, 1);
-  }
-
-  // ─── TRANSLATION LOGIC ───
+  // ─── TRANSLATION LOGIC FOR SECTION 1 (Name & Description) ───
   onEnInput(sourceControlName: string, targetControlName: string): void {
     const text = this.form.get(sourceControlName)?.value?.trim();
     clearTimeout(this.debounceTimers[targetControlName]);
@@ -167,31 +175,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         console.error(`Translation failed for ${targetControlName}`, error);
       } finally {
         this.translating[targetControlName] = false;
-      }
-    }, 900);
-  }
-
-  onBulletEnInput(item: ChecklistItem, sourceKey: 'en', targetKey: 'tl'): void {
-    const text = item[sourceKey]?.trim();
-    const timerKey = `checklist_${this.checklistItems.indexOf(item)}`;
-
-    clearTimeout(this.debounceTimers[timerKey]);
-
-    if (!text) {
-      item[targetKey] = '';
-      return;
-    }
-
-    item.translating = true;
-
-    this.debounceTimers[timerKey] = setTimeout(async () => {
-      try {
-        const translated = await this.translationService.translate(text);
-        item[targetKey] = translated;
-      } catch (error) {
-        console.error('Translation failed for checklist item', error);
-      } finally {
-        item.translating = false;
       }
     }, 900);
   }

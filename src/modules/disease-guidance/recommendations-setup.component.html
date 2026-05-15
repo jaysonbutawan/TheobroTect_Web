@@ -1,0 +1,775 @@
+<section class="px-8 py-7">
+  <div class="flex items-start gap-3 mb-6">
+    <span
+      class="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-bold"
+      >03</span
+    >
+    <div>
+      <h2 class="text-base font-semibold text-slate-800">Recommendations per Severity</h2>
+      <p class="text-sm text-slate-500 mt-0.5">
+        Define guidance for Mild, Moderate, and Severe detections.
+      </p>
+    </div>
+  </div>
+
+  <!-- Severity Tabs -->
+  <div class="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
+    <button
+      type="button"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        activeSev === 'mild'
+          ? 'bg-white shadow-sm text-emerald-600'
+          : 'text-slate-500 hover:text-slate-700'
+      "
+      (click)="activeSev = 'mild'"
+    >
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Mild
+    </button>
+    <button
+      type="button"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        activeSev === 'moderate'
+          ? 'bg-white shadow-sm text-amber-600'
+          : 'text-slate-500 hover:text-slate-700'
+      "
+      (click)="activeSev = 'moderate'"
+    >
+      <span class="w-2 h-2 rounded-full bg-amber-400"></span> Moderate
+    </button>
+    <button
+      type="button"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        activeSev === 'severe'
+          ? 'bg-white shadow-sm text-red-600'
+          : 'text-slate-500 hover:text-slate-700'
+      "
+      (click)="activeSev = 'severe'"
+    >
+      <span class="w-2 h-2 rounded-full bg-red-400"></span> Severe
+    </button>
+  </div>
+
+  <!-- MILD PANEL -->
+  @if (activeSev === 'mild') {
+    <div
+      class="rounded-xl border border-emerald-100 bg-emerald-50/30 p-5 flex flex-col gap-5 animate-fade-in"
+    >
+      <!-- What to do now -->
+      <div>
+        <label class="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2 block"
+          >What to do now</label
+        >
+        <div class="flex flex-col gap-2">
+          @for (item of sevData.mild.actions; track $index; let i = $index) {
+            <div class="rounded-lg border border-emerald-100 bg-white overflow-hidden">
+              <div class="flex items-center">
+                <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+                  <span
+                    class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                    >EN</span
+                  >
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.en"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Action step in English..."
+                    (input)="onBulletEnInput(item, 'en', 'tl')"
+                  />
+                </div>
+                <div class="flex items-center gap-2 flex-1 px-3 py-2">
+                  <span
+                    class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+                  >
+                    TL
+                    @if (item.translating) {
+                      <span
+                        class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                      ></span>
+                    }
+                  </span>
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.tl"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Awtomatikong isasalin..."
+                    [class.opacity-50]="item.translating"
+                  />
+                </div>
+                <button
+                aria-label="remove"
+                  type="button"
+                  class="flex-shrink-0 w-8 flex items-center justify-center py-2 border-l border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
+                  (click)="removeBullet(sevData.mild.actions, i)"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-emerald-300 text-xs font-medium text-emerald-600 hover:bg-emerald-50 transition"
+          (click)="addBullet(sevData.mild.actions)"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
+          Add step
+        </button>
+      </div>
+
+      <!-- Prevention -->
+      <div>
+        <label class="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2 block"
+          >Prevention</label
+        >
+        <div class="flex flex-col gap-2">
+          @for (item of sevData.mild.prevention; track $index; let i = $index) {
+            <div class="rounded-lg border border-emerald-100 bg-white overflow-hidden">
+              <div class="flex items-center">
+                <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+                  <span
+                    class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                    >EN</span
+                  >
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.en"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Prevention tip in English..."
+                    (input)="onBulletEnInput(item, 'en', 'tl')"
+                  />
+                </div>
+                <div class="flex items-center gap-2 flex-1 px-3 py-2">
+                  <span
+                    class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+                  >
+                    TL
+                    @if (item.translating) {
+                      <span
+                        class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                      ></span>
+                    }
+                  </span>
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.tl"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Awtomatikong isasalin..."
+                    [class.opacity-50]="item.translating"
+                  />
+                </div>
+                <button
+                  aria-label="Remove tip"
+                  type="button"
+                  class="flex-shrink-0 w-8 flex items-center justify-center py-2 border-l border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
+                  (click)="removeBullet(sevData.mild.prevention, i)"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-emerald-300 text-xs font-medium text-emerald-600 hover:bg-emerald-50 transition"
+          (click)="addBullet(sevData.mild.prevention)"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
+          Add tip
+        </button>
+      </div>
+
+      <!-- When to Escalate -->
+      <div>
+        <label class="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2 block"
+          >When to Escalate</label
+        >
+        <div class="rounded-lg border border-emerald-100 bg-white overflow-hidden">
+          <div class="flex items-center">
+            <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+              <span
+                class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                >EN</span
+              >
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.mild.escalateEn"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Signs that indicate escalation to moderate..."
+                (input)="onSingleEnInput($event, 'mild', 'escalate')"
+              />
+            </div>
+            <div class="flex items-center gap-2 flex-1 px-3 py-2">
+              <span
+                class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+              >
+                TL
+                @if (translating['mild_escalate']) {
+                  <span
+                    class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                  ></span>
+                }
+              </span>
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.mild.escalateTl"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Awtomatikong isasalin..."
+                [class.opacity-50]="translating['mild_escalate']"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODERATE PANEL -->
+  @if (activeSev === 'moderate') {
+    <div
+      class="rounded-xl border border-amber-100 bg-amber-50/30 p-5 flex flex-col gap-5 animate-fade-in"
+    >
+      <!-- What to do now -->
+      <div>
+        <label class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2 block"
+          >What to do now</label
+        >
+        <div class="flex flex-col gap-2">
+          @for (item of sevData.moderate.actions; track $index; let i = $index) {
+            <div class="rounded-lg border border-amber-100 bg-white overflow-hidden">
+              <div class="flex items-center">
+                <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+                  <span
+                    class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                    >EN</span
+                  >
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.en"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Action step in English..."
+                    (input)="onBulletEnInput(item, 'en', 'tl')"
+                  />
+                </div>
+                <div class="flex items-center gap-2 flex-1 px-3 py-2">
+                  <span
+                    class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+                  >
+                    TL
+                    @if (item.translating) {
+                      <span
+                        class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                      ></span>
+                    }
+                  </span>
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.tl"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Awtomatikong isasalin..."
+                    [class.opacity-50]="item.translating"
+                  />
+                </div>
+                <button
+                  aria-label="Remove step"
+                  type="button"
+                  class="flex-shrink-0 w-8 flex items-center justify-center py-2 border-l border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
+                  (click)="removeBullet(sevData.moderate.actions, i)"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-amber-300 text-xs font-medium text-amber-600 hover:bg-amber-50 transition"
+          (click)="addBullet(sevData.moderate.actions)"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
+          Add step
+        </button>
+      </div>
+
+      <!-- Prevention -->
+      <div>
+        <label class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2 block"
+          >Prevention</label
+        >
+        <div class="flex flex-col gap-2">
+          @for (item of sevData.moderate.prevention; track $index; let i = $index) {
+            <div class="rounded-lg border border-amber-100 bg-white overflow-hidden">
+              <div class="flex items-center">
+                <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+                  <span
+                    class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                    >EN</span
+                  >
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.en"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Prevention tip in English..."
+                    (input)="onBulletEnInput(item, 'en', 'tl')"
+                  />
+                </div>
+                <div class="flex items-center gap-2 flex-1 px-3 py-2">
+                  <span
+                    class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+                  >
+                    TL
+                    @if (item.translating) {
+                      <span
+                        class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                      ></span>
+                    }
+                  </span>
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.tl"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Awtomatikong isasalin..."
+                    [class.opacity-50]="item.translating"
+                  />
+                </div>
+                <button
+                  aria-label="Remove tip"
+                  type="button"
+                  class="flex-shrink-0 w-8 flex items-center justify-center py-2 border-l border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
+                  (click)="removeBullet(sevData.moderate.prevention, i)"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-amber-300 text-xs font-medium text-amber-600 hover:bg-amber-50 transition"
+          (click)="addBullet(sevData.moderate.prevention)"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
+          Add tip
+        </button>
+      </div>
+
+      <!-- Seek Help -->
+      <div>
+        <label class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2 block"
+          >Seek Help Guidance</label
+        >
+        <div class="rounded-lg border border-amber-100 bg-white overflow-hidden">
+          <div class="flex items-center">
+            <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+              <span
+                class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                >EN</span
+              >
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.moderate.seekHelpEn"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="e.g. Consult DA/municipal agriculturist..."
+                (input)="onSingleEnInput($event, 'moderate', 'seekHelp')"
+              />
+            </div>
+            <div class="flex items-center gap-2 flex-1 px-3 py-2">
+              <span
+                class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+              >
+                TL
+                @if (translating['moderate_seekHelp']) {
+                  <span
+                    class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                  ></span>
+                }
+              </span>
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.moderate.seekHelpTl"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Awtomatikong isasalin..."
+                [class.opacity-50]="translating['moderate_seekHelp']"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- When to Escalate -->
+      <div>
+        <label class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2 block"
+          >When to Escalate</label
+        >
+        <div class="rounded-lg border border-amber-100 bg-white overflow-hidden">
+          <div class="flex items-center">
+            <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+              <span
+                class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                >EN</span
+              >
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.moderate.escalateEn"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Signs that indicate escalation to severe..."
+                (input)="onSingleEnInput($event, 'moderate', 'escalate')"
+              />
+            </div>
+            <div class="flex items-center gap-2 flex-1 px-3 py-2">
+              <span
+                class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+              >
+                TL
+                @if (translating['moderate_escalate']) {
+                  <span
+                    class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                  ></span>
+                }
+              </span>
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.moderate.escalateTl"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Awtomatikong isasalin..."
+                [class.opacity-50]="translating['moderate_escalate']"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- SEVERE PANEL -->
+  @if (activeSev === 'severe') {
+    <div
+      class="rounded-xl border border-red-100 bg-red-50/30 p-5 flex flex-col gap-5 animate-fade-in"
+    >
+      <!-- What to do now -->
+      <div>
+        <label class="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2 block"
+          >What to do now</label
+        >
+        <div class="flex flex-col gap-2">
+          @for (item of sevData.severe.actions; track $index; let i = $index) {
+            <div class="rounded-lg border border-red-100 bg-white overflow-hidden">
+              <div class="flex items-center">
+                <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+                  <span
+                    class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                    >EN</span
+                  >
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.en"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Action step in English..."
+                    (input)="onBulletEnInput(item, 'en', 'tl')"
+                  />
+                </div>
+                <div class="flex items-center gap-2 flex-1 px-3 py-2">
+                  <span
+                    class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+                  >
+                    TL
+                    @if (item.translating) {
+                      <span
+                        class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                      ></span>
+                    }
+                  </span>
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.tl"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Awtomatikong isasalin..."
+                    [class.opacity-50]="item.translating"
+                  />
+                </div>
+                <button
+                  aria-label="Remove step"
+                  type="button"
+                  class="flex-shrink-0 w-8 flex items-center justify-center py-2 border-l border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
+                  (click)="removeBullet(sevData.severe.actions, i)"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-red-300 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+          (click)="addBullet(sevData.severe.actions)"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
+          Add step
+        </button>
+      </div>
+
+      <!-- Prevention -->
+      <div>
+        <label class="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2 block"
+          >Prevention</label
+        >
+        <div class="flex flex-col gap-2">
+          @for (item of sevData.severe.prevention; track $index; let i = $index) {
+            <div class="rounded-lg border border-red-100 bg-white overflow-hidden">
+              <div class="flex items-center">
+                <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+                  <span
+                    class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                    >EN</span
+                  >
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.en"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Prevention tip in English..."
+                    (input)="onBulletEnInput(item, 'en', 'tl')"
+                  />
+                </div>
+                <div class="flex items-center gap-2 flex-1 px-3 py-2">
+                  <span
+                    class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+                  >
+                    TL
+                    @if (item.translating) {
+                      <span
+                        class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                      ></span>
+                    }
+                  </span>
+                  <input
+                    type="text"
+                    class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                    [(ngModel)]="item.tl"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Awtomatikong isasalin..."
+                    [class.opacity-50]="item.translating"
+                  />
+                </div>
+                <button
+                  aria-label="Remove tip"
+                  type="button"
+                  class="flex-shrink-0 w-8 flex items-center justify-center py-2 border-l border-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
+                  (click)="removeBullet(sevData.severe.prevention, i)"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-red-300 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+          (click)="addBullet(sevData.severe.prevention)"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
+          Add tip
+        </button>
+      </div>
+
+      <!-- Seek Help -->
+      <div>
+        <label class="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2 block"
+          >Seek Help Guidance</label
+        >
+        <div class="rounded-lg border border-red-100 bg-white overflow-hidden">
+          <div class="flex items-center">
+            <div class="flex items-center gap-2 flex-1 px-3 py-2 border-r border-slate-100">
+              <span
+                class="flex-shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+                >EN</span
+              >
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.severe.seekHelpEn"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="e.g. Contact DA/municipal agriculturist for urgent field assessment..."
+                (input)="onSingleEnInput($event, 'severe', 'seekHelp')"
+              />
+            </div>
+
+            <!-- BUG FIX: This is now a single standard input instead of a loop over moderate actions -->
+            <div class="flex items-center gap-2 flex-1 px-3 py-2">
+              <span
+                class="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+              >
+                TL
+                @if (translating['severe_seekHelp']) {
+                  <span
+                    class="w-2 h-2 border border-amber-500 border-t-transparent rounded-full animate-spin"
+                  ></span>
+                }
+              </span>
+              <input
+                type="text"
+                class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                [(ngModel)]="sevData.severe.seekHelpTl"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Awtomatikong isasalin..."
+                [class.opacity-50]="translating['severe_seekHelp']"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert note -->
+      <div
+        class="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-100 text-red-700 text-xs"
+      >
+        <svg
+          class="flex-shrink-0 mt-0.5"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v4M12 16h.01" />
+        </svg>
+        Severe cases always require expert consultation. Ensure the seek help guidance field is
+        filled.
+      </div>
+    </div>
+  }
+</section>
