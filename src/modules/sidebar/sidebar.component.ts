@@ -2,16 +2,55 @@ import { Component } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
+interface NavItem {
+  link: string;
+  exact: boolean;
+  label: string;
+  icon: string;
+}
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterModule, CommonModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css' 
 })
 export class SidebarComponent {
   isCollapsed = false;
   isReportsOpen = false;
+
+  navItems: NavItem[] = [
+    {
+      link: '/dashboard',
+      exact: true,
+      label: 'Dashboard',
+      icon: 'pi pi-th-large',
+    },
+    {
+      link: '/dashboard/user-management',
+      exact: false,
+      label: 'User Management',
+      icon: 'pi pi-users',
+    },
+    {
+      link: '/dashboard/field-reports',
+      exact: false,
+      label: 'Field Reports',
+      icon: 'pi pi-file',
+    },
+    {
+      link: '/dashboard/heatmap',
+      exact: false,
+      label: 'Heat Maps',
+      icon: 'pi pi-map',
+    },
+    {
+      link: '/dashboard/guide',
+      exact: false,
+      label: 'Disease Guide',
+      icon: 'pi pi-book',
+    },
+  ];
 
   constructor(private router: Router) {}
 
@@ -27,18 +66,4 @@ export class SidebarComponent {
   toggleReports() {
     this.isReportsOpen = !this.isReportsOpen;
   }
-
-  logout() {
-  const confirmed = confirm('Are you sure you want to sign out?');
-
-  if (confirmed) {
-    // Clear stored data
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.clear();
-
-    // Redirect to login
-    this.router.navigate(['/login']);
-  }
-}
 }
