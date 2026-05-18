@@ -34,7 +34,7 @@ import { DiseaseDto } from './disease-guidance.dto';
                 [class.text-violet-900]="selectedDisease?.id === disease.id"
                 [class.text-slate-700]="selectedDisease?.id !== disease.id"
               >
-                {{ disease.display_name?.en }}
+                {{ disease.display_name!.en }}
               </h3>
 
               @if (selectedDisease?.id === disease.id) {
@@ -50,7 +50,7 @@ import { DiseaseDto } from './disease-guidance.dto';
               [class.text-violet-600]="selectedDisease?.id === disease.id"
               [class.text-slate-500]="selectedDisease?.id !== disease.id"
             >
-              {{ disease.description?.en || 'No description available' }}
+              {{ disease.description!.en || 'No description available' }}
             </p>
 
             <span
