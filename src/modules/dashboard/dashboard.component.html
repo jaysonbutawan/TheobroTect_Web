@@ -32,65 +32,59 @@
 </div>
 <div class="mt-8 px-6 pb-12 antialiased font-['DM_Sans',sans-serif]">
   <!-- Stats Grid with Enhanced Aesthetics -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16 font-['DM_Sans',sans-serif]">
-    
-    <!-- Black Pod Card -->
-    <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2 transition-all duration-500 border border-white/5">
-      <div class="absolute inset-0 z-0">
-        <img src="assets/images/bp.png" alt="Black Pod" class="w-full h-full object-cover blur-[1px] opacity-40 group-hover:scale-110 transition-transform duration-1000" />
-        <!-- Gradient Overlay for Contrast -->
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/60 to-red-900/20"></div>
-      </div>
-      
-      <div class="relative z-10">
-        <div class="flex justify-between items-center mb-10">
-          <div class="w-12 h-12 bg-red-500/20 backdrop-blur-xl border border-red-500/30 rounded-2xl flex items-center justify-center">
-            <span class="material-symbols-rounded text-red-400">warning</span>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 font-['DM_Sans',sans-serif]">
+
+    <div class="group relative h-[180px] rounded-[2.5rem] overflow-hidden shadow-lg shadow-emerald-950/5 border border-slate-200/40 bg-slate-900 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-950/10">
+      <div class="absolute inset-0 bg-[url('assets/images/bp.png')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"></div>
+      <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-transparent backdrop-blur-[1px]"></div>
+      <div class="absolute inset-0 p-6 flex flex-col justify-between z-10">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-xl flex items-center justify-center text-red-400 shadow-inner">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
           </div>
-          <span class="bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-lg shadow-red-900/40">Severe Risk</span>
+          <span class="px-3 py-1 bg-red-600 text-white text-[10px] font-black tracking-wider uppercase rounded-full shadow-md shadow-red-900/40">Severe Risk</span>
         </div>
-        <p class="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">Total Black Pod Cases</p>
-        <h3 class="text-6xl font-black text-white mt-2 tracking-tighter drop-shadow-md">{{ stats.blackPod }}</h3>
+        <div>
+          <p class="text-slate-400 text-[11px] font-bold uppercase tracking-[1.5px] mb-0.5">Total Black Pod Cases</p>
+          <p class="text-4xl font-black text-white tracking-tight drop-shadow-sm">{{ stats.blackPod }}</p>
+        </div>
       </div>
     </div>
 
-    <!-- Mealybug Card -->
-    <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2 transition-all duration-500 border border-white/5">
-      <div class="absolute inset-0 z-0">
-        <img src="assets/images/mb.png" alt="Mealybug" class="w-full h-full object-cover blur-[1px] opacity-40 group-hover:scale-110 transition-transform duration-1000" />
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/60 to-blue-900/20"></div>
-      </div>
-      
-      <div class="relative z-10">
-        <div class="flex justify-between items-center mb-10">
-          <div class="w-12 h-12 bg-blue-500/20 backdrop-blur-xl border border-blue-500/30 rounded-2xl flex items-center justify-center">
-            <span class="material-symbols-rounded text-blue-400">monitoring</span>
+    <div class="group relative h-[180px] rounded-[2.5rem] overflow-hidden shadow-lg shadow-emerald-950/5 border border-slate-200/40 bg-slate-900 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/10">
+      <div class="absolute inset-0 bg-[url('assets/images/mb.png')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"></div>
+      <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-transparent backdrop-blur-[1px]"></div>
+      <div class="absolute inset-0 p-6 flex flex-col justify-between z-10">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 bg-blue-500/10 backdrop-blur-md border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 shadow-inner">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
           </div>
-          <span class="bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border border-blue-500/30">Active Log</span>
+          <span class="px-3 py-1 bg-blue-600 text-white text-[10px] font-black tracking-wider uppercase rounded-full shadow-md shadow-blue-900/40">Active Log</span>
         </div>
-        <p class="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">Mealybug Population</p>
-        <h3 class="text-6xl font-black text-white mt-2 tracking-tighter drop-shadow-md">{{ stats.mealybug }}</h3>
+        <div>
+          <p class="text-slate-400 text-[11px] font-bold uppercase tracking-[1.5px] mb-0.5">Mealybug Population</p>
+          <p class="text-4xl font-black text-white tracking-tight drop-shadow-sm">{{ stats.mealybug }}</p>
+        </div>
       </div>
     </div>
 
-    <!-- Pod Borer Card -->
-    <div class="group relative bg-slate-900 rounded-[2.5rem] p-8 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2 transition-all duration-500 border border-white/5">
-      <div class="absolute inset-0 z-0">
-        <img src="assets/images/pb.png" alt="Pod Borer" class="w-full h-full object-cover blur-[1px] opacity-40 group-hover:scale-110 transition-transform duration-1000" />
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/60 to-emerald-900/20"></div>
-      </div>
-      
-      <div class="relative z-10">
-        <div class="flex justify-between items-center mb-10">
-          <div class="w-12 h-12 bg-emerald-500/20 backdrop-blur-xl border border-emerald-500/30 rounded-2xl flex items-center justify-center">
-            <span class="material-symbols-rounded text-emerald-400">eco</span>
+    <div class="group relative h-[180px] rounded-[2.5rem] overflow-hidden shadow-lg shadow-emerald-950/5 border border-slate-200/40 bg-slate-900 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/10">
+      <div class="absolute inset-0 bg-[url('assets/images/pb.png')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"></div>
+      <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-transparent backdrop-blur-[1px]"></div>
+      <div class="absolute inset-0 p-6 flex flex-col justify-between z-10">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 shadow-inner">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           </div>
-          <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border border-emerald-500/30">Stable</span>
+          <span class="px-3 py-1 bg-emerald-600 text-white text-[10px] font-black tracking-wider uppercase rounded-full shadow-md shadow-emerald-900/40">Stable</span>
         </div>
-        <p class="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">Pod Borer Density</p>
-        <h3 class="text-6xl font-black text-white mt-2 tracking-tighter drop-shadow-md">{{ stats.podBorer }}</h3>
+        <div>
+          <p class="text-slate-400 text-[11px] font-bold uppercase tracking-[1.5px] mb-0.5">Pod Borer Density</p>
+          <p class="text-4xl font-black text-white tracking-tight drop-shadow-sm">{{ stats.podBorer }}</p>
+        </div>
       </div>
     </div>
+
   </div>
   <div class="mt-8 grid grid-cols-1 gap-6">
     <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
