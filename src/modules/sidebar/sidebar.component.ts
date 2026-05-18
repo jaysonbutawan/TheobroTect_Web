@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [RouterModule, CommonModule],
   templateUrl: './sidebar.component.html',
+  styleUrl: './sidebar.component.css' 
 })
 export class SidebarComponent {
   isCollapsed = false;
@@ -26,4 +27,18 @@ export class SidebarComponent {
   toggleReports() {
     this.isReportsOpen = !this.isReportsOpen;
   }
+
+  logout() {
+  const confirmed = confirm('Are you sure you want to sign out?');
+
+  if (confirmed) {
+    // Clear stored data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.clear();
+
+    // Redirect to login
+    this.router.navigate(['/login']);
+  }
+}
 }

@@ -1,0 +1,52 @@
+/* Container structures ensuring positioning context */
+aside nav {
+  position: relative;
+}
+
+/* Inverted Corner Architecture */
+.active-curve {
+  position: relative;
+  font-weight: 700 !important;
+  z-index: 20; /* Places active container layout over standard links */
+}
+
+/* Top Curved Connection Component */
+.active-curve::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  right: -2px; /* Pull slightly right to hide parent container bleed-through */
+  width: 24px; /* Widened slightly to guarantee overlap protection */
+  height: 20px;
+  background: transparent;
+  border-bottom-right-radius: 20px;
+  box-shadow: 6px 6px 0 6px #f5f5f7; /* Matches dashboard layout gray canvas */
+  pointer-events: none;
+  z-index: 50; /* Forces the curve vector to render over everything else */
+}
+
+/* Bottom Curved Connection Component */
+.active-curve::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  right: -2px; /* Pull slightly right to hide parent container bleed-through */
+  width: 24px; /* Widened slightly to guarantee overlap protection */
+  height: 20px;
+  background: transparent;
+  border-top-right-radius: 20px;
+  box-shadow: 6px -6px 0 6px #f5f5f7; /* Matches dashboard layout gray canvas */
+  pointer-events: none;
+  z-index: 50; /* Forces the curve vector to render over everything else */
+}
+
+/* Enhances text rendering smoothness against the dark green background */
+aside {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optional text-shadow tweak to match the neon-clean feel of your UI panels */
+.sub-heading-glow {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+}
