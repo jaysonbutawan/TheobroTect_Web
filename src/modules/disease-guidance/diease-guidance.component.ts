@@ -63,7 +63,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
 
     this.fetchExistingDiseases();
   }
-  // For the Step 2 and Step 3 child components
   checklistItems: ChecklistItem[] = [];
   sevData: SeverityData = {
     mild: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
@@ -115,7 +114,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         console.error(`Translation failed for ${targetControlName}`, error);
       } finally {
         this.translating[targetControlName] = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     }, 900);
   }
@@ -133,15 +132,28 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     return this.form.invalid || !this.selectedLabel;
   }
 
-  // ✅ SINGLE SOURCE OF TRUTH
+// ✅ SINGLE SOURCE OF TRUTH
   onDiseaseKeyChange(key: string): void {
     this.selectedLabel = key;
     this.selectedDiseaseKey = key;
 
-    const match = this.existingRecords.find(d => d.disease_key === key);
+    const match: any = this.existingRecords.find(d => d.disease_key === key);
 
     this.isEditMode = !!match;
     this.currentEditId = match?.id ?? null;
+
+    // ✅ THE FIX: Update the form values if a match is found
+    if (match) {
+      this.form.patchValue({
+        nameEn: match.display_name?.en || '',
+        nameTl: match.display_name?.tl || '',
+        descEn: match.description?.en || '',
+        descTl: match.description?.tl || ''
+      });
+    } else {
+      // Optional: Clear the form if no match is found (e.g., selecting a brand new disease key)
+      this.form.reset();
+    }
   }
 
   fetchExistingDiseases(): void {
@@ -150,9 +162,11 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res: any) => {
           this.existingRecords = res.data || res || [];
+        this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Fetch error:', err);
+          this.cdr.markForCheck();
         }
       });
   }
