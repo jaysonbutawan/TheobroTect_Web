@@ -363,7 +363,9 @@
         <app-monitoring-setup
           [form]="form"
           [checklistItems]="checklistItems"
-        ></app-monitoring-setup>
+          [diseaseId]="currentEditId"
+        >
+        </app-monitoring-setup>
       }
 
       @if (currentStep === 3) {
