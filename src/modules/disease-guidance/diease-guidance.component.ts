@@ -119,42 +119,38 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     }, 900);
   }
 
-  onSidebarDiseaseSelected(disease: any): void {
+onSidebarDiseaseSelected(disease: any): void {
     this.selectedDisease = disease;
+
     if (disease?.disease_key) {
-      this.onDiseaseKeyChange(disease.disease_key);
+      // 1. Update the UI dropdown labels
+      this.selectedLabel = disease.disease_key;
+      this.selectedDiseaseKey = disease.disease_key;
+
+      // 2. Lock in Edit Mode so the app knows we are updating, not creating
+      this.isEditMode = true;
+      this.currentEditId = disease.id;
+
+      // 3. Safely populate the form fields
+      this.form.patchValue({
+        nameEn: disease.display_name?.en || '',
+        nameTl: disease.display_name?.tl || '',
+        descEn: disease.description?.en || '',
+        descTl: disease.description?.tl || ''
+      });
     }
   }
 
-  // ─── SAVE BUTTON DISABLED STATE ───
-  // Evaluates the [disabled]="isSaveDisabled" condition
+
+  onDiseaseKeyChange(key: string): void {
+    this.selectedLabel = key;
+    this.selectedDiseaseKey = key;
+  }
+
   get isSaveDisabled(): boolean {
     return this.form.invalid || !this.selectedLabel;
   }
 
-// ✅ SINGLE SOURCE OF TRUTH
-  onDiseaseKeyChange(key: string): void {
-    this.selectedLabel = key;
-    this.selectedDiseaseKey = key;
-
-    const match: any = this.existingRecords.find(d => d.disease_key === key);
-
-    this.isEditMode = !!match;
-    this.currentEditId = match?.id ?? null;
-
-    // ✅ THE FIX: Update the form values if a match is found
-    if (match) {
-      this.form.patchValue({
-        nameEn: match.display_name?.en || '',
-        nameTl: match.display_name?.tl || '',
-        descEn: match.description?.en || '',
-        descTl: match.description?.tl || ''
-      });
-    } else {
-      // Optional: Clear the form if no match is found (e.g., selecting a brand new disease key)
-      this.form.reset();
-    }
-  }
 
   fetchExistingDiseases(): void {
     this.diseaseService.getDisease()

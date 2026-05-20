@@ -2,7 +2,7 @@ import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { TranslationService } from './translation.service';
-import { ChecklistItem } from './diease-guidance.component'; 
+import { ChecklistItem } from './diease-guidance.component';
 
 @Component({
   selector: 'app-monitoring-setup',
@@ -11,6 +11,45 @@ import { ChecklistItem } from './diease-guidance.component';
   template: `
     <!-- We wrap the section in [formGroup]="form" to link it to the parent's form -->
     <div [formGroup]="form">
+        <!-- Severity Tabs -->
+  <div class="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
+    <button
+      type="button"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        activeSev === 'mild'
+          ? 'bg-white shadow-sm text-emerald-600'
+          : 'text-slate-500 hover:text-slate-700'
+      "
+      (click)="activeSev = 'mild'"
+    >
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Mild
+    </button>
+    <button
+      type="button"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        activeSev === 'moderate'
+          ? 'bg-white shadow-sm text-amber-600'
+          : 'text-slate-500 hover:text-slate-700'
+      "
+      (click)="activeSev = 'moderate'"
+    >
+      <span class="w-2 h-2 rounded-full bg-amber-400"></span> Moderate
+    </button>
+    <button
+      type="button"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        activeSev === 'severe'
+          ? 'bg-white shadow-sm text-red-600'
+          : 'text-slate-500 hover:text-slate-700'
+      "
+      (click)="activeSev = 'severe'"
+    >
+      <span class="w-2 h-2 rounded-full bg-red-400"></span> Severe
+    </button>
+  </div>
       <section class="px-8 py-7">
         <div class="flex items-start gap-3 mb-6">
           <span class="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg bg-violet-50 text-violet-600 text-xs font-bold">02</span>
@@ -156,6 +195,7 @@ export class MonitoringSetupComponent {
   translating: Record<string, boolean> = {};
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
   private translationService = inject(TranslationService);
+    activeSev: 'mild' | 'moderate' | 'severe' = 'mild';
 
   // ─── CHECKLIST LOGIC ───
   addChecklist(): void {
