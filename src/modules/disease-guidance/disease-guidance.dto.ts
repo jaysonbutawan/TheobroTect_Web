@@ -11,6 +11,18 @@ export interface DiseaseDto {
   locale: string;
 }
 
+export interface CreateDiseaseDto {
+  disease_key: string;
+  locale: string;
+  display_name: LocalizedText;
+  description: LocalizedText;
+}
+export interface UpdateDiseaseDto {
+  disease_key?: string;
+  locale?: string;
+  display_name?: LocalizedText;
+  description?: LocalizedText;
+}
 
 export interface ApiResponse<T> {
   success: boolean;

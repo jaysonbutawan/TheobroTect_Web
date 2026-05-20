@@ -5,7 +5,9 @@ import { Observable } from 'rxjs';
 
 import {
   ApiResponse,
-  DiseaseDto
+  DiseaseDto,
+  CreateDiseaseDto,
+  UpdateDiseaseDto
 } from './disease-guidance.dto';
 
 @Injectable({
@@ -18,9 +20,8 @@ export class DiseaseGuideService {
   private readonly baseUrl = `${environment.apiUrl}/diseases`;
 
   createDisease(
-    data: DiseaseDto
+    data: CreateDiseaseDto
   ): Observable<ApiResponse<DiseaseDto>> {
-
     return this.http.post<ApiResponse<DiseaseDto>>(
       this.baseUrl,
       data
@@ -28,7 +29,6 @@ export class DiseaseGuideService {
   }
 
   getDisease(): Observable<ApiResponse<DiseaseDto[]>> {
-
     return this.http.get<ApiResponse<DiseaseDto[]>>(
       this.baseUrl
     );
@@ -37,7 +37,6 @@ export class DiseaseGuideService {
   getDiseaseById(
     id: number
   ): Observable<ApiResponse<DiseaseDto>> {
-
     return this.http.get<ApiResponse<DiseaseDto>>(
       `${this.baseUrl}/${id}`
     );
@@ -45,14 +44,14 @@ export class DiseaseGuideService {
 
   updateDisease(
     id: number,
-    data: DiseaseDto
+    data: UpdateDiseaseDto
   ): Observable<ApiResponse<DiseaseDto>> {
-
     return this.http.put<ApiResponse<DiseaseDto>>(
       `${this.baseUrl}/${id}`,
       data
     );
   }
+
 
   deleteDisease(
     id: number

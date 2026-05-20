@@ -1,15 +1,15 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { DiseaseSidebarComponent } from './disease-sidebar.component';
-import { MonitoringSetupComponent } from './monitoring-setup.component'; // IMPORT HERE
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { DiseaseSidebarComponent } from './disease-sidebar.component';
+import { MonitoringSetupComponent } from './monitoring-setup.component';
+import { RecommendationsSetupComponent, SeverityData } from './recommendations-setup.component';
 import { TranslationService } from './translation.service';
 import { DiseaseGuideService } from './disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
-import { RecommendationsSetupComponent, SeverityData } from './recommendations-setup.component';
 
 export interface ChecklistItem {
   en: string;
@@ -32,130 +32,70 @@ export interface ChecklistItem {
 })
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   form!: FormGroup;
-  selectedLabel: string = '';
+
   translating: Record<string, boolean> = {};
 
+  selectedLabel: string = '';
+  selectedDiseaseKey: string | null = null;
+
   existingRecords: DiseaseDto[] = [];
+
   isEditMode: boolean = false;
-  currentEditId: string | null = null;
-  selectedDisease: any = null;
+  currentEditId:  number | null = null;
+    selectedDisease: any = null;
   currentStep: number = 1;
 
+  private destroy$ = new Subject<void>();
+  private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+
+  private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
+  private diseaseService = inject(DiseaseGuideService);
+  private translationService = inject(TranslationService);
+
+  ngOnInit(): void {
+    this.form = this.fb.group({
+      nameEn: ['', Validators.required],
+      nameTl: ['', Validators.required],
+      descEn: ['', Validators.required],
+      descTl: ['', Validators.required],
+    });
+
+    this.fetchExistingDiseases();
+  }
+  // For the Step 2 and Step 3 child components
   checklistItems: ChecklistItem[] = [];
-
-  detectionLabels: string[] = [
-    'black_pod_disease_mild',
-    'black_pod_disease_moderate',
-    'black_pod_disease_severe',
-    'cacao_pod_borer_mild',
-    'cacao_pod_borer_moderate',
-    'cacao_pod_borer_severe',
-    'healthy',
-    'mealybug_mild',
-    'mealybug_moderate',
-    'mealybug_severe',
-    'non_cacao'
-  ];
-
   sevData: SeverityData = {
     mild: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
     moderate: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
     severe: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' }
   };
 
-  private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
-  private destroy$ = new Subject<void>();
-  private cdr = inject(ChangeDetectorRef);
 
-  private fb = inject(FormBuilder);
-  private translationService = inject(TranslationService);
-  private diseaseService = inject(DiseaseGuideService);
-
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      // Step 1 Fields
-      nameEn: ['', Validators.required],
-      nameTl: ['', Validators.required],
-      descEn: ['', Validators.required],
-      descTl: ['', Validators.required],
-
-      // Step 2 Fields
-      monitoringFreq: ['weekly', Validators.required],
-      severityThreshold: ['', [Validators.required, Validators.min(1)]],
-      rescanDays: [''],
-      preferredTime: [''],
-      guidanceEn: [''],
-      guidanceTl: ['']
-    });
-
-    this.resetChecklist();
-    this.fetchExistingDiseases();
-  }
+  diseaseKeys: string[] = [
+    'black_pod_disease',
+    'cacao_pod_borer',
+    'mealybug',
+    'healthy',
+    'non_cacao'
+  ];
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     Object.values(this.debounceTimers).forEach(clearTimeout);
   }
-   setStep(step: number): void {
+
+  // ─── STEP NAVIGATION ───
+  setStep(step: number): void {
     this.currentStep = step;
   }
 
-  onSidebarDiseaseSelected(disease: any): void {
-    this.selectedDisease = disease;
-    this.loadRecordForEditing(disease);
+  formatLabel(key: string): string {
+    if (!key) return '';
+    return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   }
 
-  fetchExistingDiseases(): void {
-    this.diseaseService.getDisease()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          this.existingRecords = response.data || response || [];
-          this.cdr.detectChanges();
-        },
-        error: (error) => {
-          console.error('Failed to fetch existing diseases', error);
-        }
-      });
-  }
-
-  loadRecordForEditing(record: any): void {
-    this.isEditMode = true;
-    this.currentEditId = record.id || record._id || record.disease_key;
-
-    this.form.patchValue({
-      nameEn: record.display_name?.en || record.nameEn || '',
-      nameTl: record.display_name?.tl || record.nameTl || '',
-      descEn: record.description?.en || record.descEn || '',
-      descTl: record.description?.tl || record.descTl || '',
-      monitoringFreq: record.monitoring_setup?.frequency || 'weekly',
-      severityThreshold: record.monitoring_setup?.threshold || '',
-    });
-
-    this.selectedLabel = record.disease_key || record.label || '';
-
-    if (record.monitoring_setup?.checklist?.length) {
-      this.checklistItems = [...record.monitoring_setup.checklist];
-    }
-    this.cdr.detectChanges();
-  }
-
-  cancelEdit(): void {
-    this.isEditMode = false;
-    this.currentEditId = null;
-    this.selectedLabel = '';
-    this.selectedDisease = null;
-    this.resetChecklist();
-    this.form.reset({ monitoringFreq: 'weekly' });
-  }
-
-  // Used for initialization and cancellation
-  private resetChecklist(): void {
-    this.checklistItems = [{ en: '', tl: '', translating: false }];
-  }
-
-  // ─── TRANSLATION LOGIC FOR SECTION 1 (Name & Description) ───
   onEnInput(sourceControlName: string, targetControlName: string): void {
     const text = this.form.get(sourceControlName)?.value?.trim();
     clearTimeout(this.debounceTimers[targetControlName]);
@@ -175,23 +115,69 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         console.error(`Translation failed for ${targetControlName}`, error);
       } finally {
         this.translating[targetControlName] = false;
+        this.cdr.detectChanges();
       }
     }, 900);
   }
 
-  // ─── SUBMISSION ───
+  onSidebarDiseaseSelected(disease: any): void {
+    this.selectedDisease = disease;
+    if (disease?.disease_key) {
+      this.onDiseaseKeyChange(disease.disease_key);
+    }
+  }
+
+  // ─── SAVE BUTTON DISABLED STATE ───
+  // Evaluates the [disabled]="isSaveDisabled" condition
+  get isSaveDisabled(): boolean {
+    return this.form.invalid || !this.selectedLabel;
+  }
+
+  // ✅ SINGLE SOURCE OF TRUTH
+  onDiseaseKeyChange(key: string): void {
+    this.selectedLabel = key;
+    this.selectedDiseaseKey = key;
+
+    const match = this.existingRecords.find(d => d.disease_key === key);
+
+    this.isEditMode = !!match;
+    this.currentEditId = match?.id ?? null;
+  }
+
+  fetchExistingDiseases(): void {
+    this.diseaseService.getDisease()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          this.existingRecords = res.data || res || [];
+        },
+        error: (err) => {
+          console.error('Fetch error:', err);
+        }
+      });
+  }
+
+  cancelEdit(): void {
+    this.isEditMode = false;
+    this.currentEditId = null;
+    this.selectedLabel = '';
+    this.selectedDiseaseKey = null;
+
+    this.form.reset({
+      monitoringFreq: 'weekly'
+    });
+  }
+
+  // ✅ SAVE LOGIC (CLEAN + SAFE)
   onSave(): void {
-    if (this.form.invalid || !this.selectedLabel) {
+    if (this.form.invalid || !this.selectedDiseaseKey) {
       this.form.markAllAsTouched();
+      console.warn('[SAVE BLOCKED] Missing form or disease selection');
       return;
     }
 
-    const validChecklists = this.checklistItems
-      .filter(item => item.en.trim() !== '')
-      .map(item => ({ en: item.en, tl: item.tl }));
-
-    const payload: any = {
-      disease_key: this.selectedLabel,
+    const payload = {
+      disease_key: this.selectedDiseaseKey,
       locale: 'en',
       display_name: {
         en: this.form.value.nameEn,
@@ -200,35 +186,41 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       description: {
         en: this.form.value.descEn,
         tl: this.form.value.descTl
-      },
-      monitoring_setup: {
-        frequency: this.form.value.monitoringFreq,
-        threshold: this.form.value.severityThreshold,
-        rescan_days: this.form.value.rescanDays,
-        preferred_time: this.form.value.preferredTime,
-        guidance: {
-          en: this.form.value.guidanceEn,
-          tl: this.form.value.guidanceTl
-        },
-        checklist: validChecklists
       }
     };
 
-    if (this.isEditMode && this.currentEditId) {
-      console.log('Updating record...', payload);
-      // this.diseaseService.updateDisease(this.currentEditId, payload).subscribe({ ... })
-    } else {
-      this.diseaseService.createDisease(payload).subscribe({
-        next: (response) => {
-          alert('Disease saved successfully');
-          this.fetchExistingDiseases();
-          this.cancelEdit();
-        },
-        error: (error) => {
-          console.error('Failed to save disease', error);
-          alert('Failed to save disease');
-        }
-      });
-    }
+    console.group('[DISEASE SAVE]');
+    console.log('Mode:', this.isEditMode ? 'UPDATE' : 'CREATE');
+    console.log('Payload:', payload);
+    console.groupEnd();
+
+    const request$ =
+      this.isEditMode && this.currentEditId
+        ? this.diseaseService.updateDisease(this.currentEditId, payload)
+        : this.diseaseService.createDisease(payload);
+
+    request$.subscribe({
+      next: (res: any) => {
+        const saved = res?.data ?? res;
+
+        console.group('[SAVE SUCCESS]');
+        console.log(saved);
+        console.groupEnd();
+
+        alert(
+          this.isEditMode
+            ? `Updated: ${saved.display_name?.en}`
+            : `Created: ${saved.display_name?.en}`
+        );
+
+        this.fetchExistingDiseases();
+        this.cancelEdit();
+      },
+
+      error: (err) => {
+        console.error('[SAVE ERROR]', err);
+        alert('Save failed. Check console.');
+      }
+    });
   }
 }
