@@ -14,7 +14,8 @@ import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
   template: `
     <div [formGroup]="form" class="space-y-6">
 
-  <div>
+
+   <div *ngIf="showSeverity">
     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3 ml-1">
       Select Target Severity Level
     </label>
@@ -22,7 +23,7 @@ import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <button
         type="button"
-        (click)="activeSev = 'mild'"
+        (click)="onSeveritySelect('mild')"
         class="flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group focus:outline-none focus:ring-4"
         [class]="
           activeSev === 'mild'
@@ -42,10 +43,9 @@ import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-
         <div class="flex-1 min-w-0">
           <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'mild' ? 'text-emerald-700' : 'text-slate-700'">
-            Mild Severity
+            Mild
           </span>
           <span class="block text-xs text-slate-400 mt-0.5 font-normal">Early or low-impact signs</span>
         </div>
@@ -53,7 +53,7 @@ import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
 
       <button
         type="button"
-        (click)="activeSev = 'moderate'"
+        (click)="onSeveritySelect('moderate')"
         class="flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group focus:outline-none focus:ring-4"
         [class]="
           activeSev === 'moderate'
@@ -73,10 +73,9 @@ import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-
         <div class="flex-1 min-w-0">
           <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'moderate' ? 'text-amber-700' : 'text-slate-700'">
-            Moderate Severity
+            Moderate
           </span>
           <span class="block text-xs text-slate-400 mt-0.5 font-normal">Spreading, structural threat</span>
         </div>
@@ -84,7 +83,7 @@ import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
 
       <button
         type="button"
-        (click)="activeSev = 'severe'"
+        (click)="onSeveritySelect('severe')"
         class="flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group focus:outline-none focus:ring-4"
         [class]="
           activeSev === 'severe'
@@ -104,10 +103,9 @@ import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-
         <div class="flex-1 min-w-0">
           <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'severe' ? 'text-red-700' : 'text-slate-700'">
-            Severe Level
+            Severe
           </span>
           <span class="block text-xs text-slate-400 mt-0.5 font-normal">Critical, immediate action needed</span>
         </div>
@@ -194,29 +192,28 @@ export class MonitoringSetupComponent implements OnChanges {
   @Input({ required: true }) form!: FormGroup;
   @Input() checklistItems: ChecklistItem[] = [];
   @Input() diseaseId: number | null = null;
+  @Input() diseaseKey: string | null = null;
 
   activeSev: 'mild' | 'moderate' | 'severe' = 'mild';
-
-  // Cached severities from backend
   existingSeverities: any[] = [];
-
   translating: Record<string, boolean> = {};
-  private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
-
-  private translationService = inject(TranslationService);
   private severityService = inject(DiseaseSeverityService);
 
-  ngOnChanges(changes: SimpleChanges): void {
+  // ─────────────────────────────────────────────
+  // CONDITIONAL VIEW CONFIGURATION GETTER
+  // ─────────────────────────────────────────────
+  get showSeverity(): boolean {
+    if (!this.diseaseKey) return true;
+    const key = this.diseaseKey.toLowerCase().trim();
+    return key !== 'healthy' && key !== 'non_cacao';
+  }
 
+  ngOnChanges(changes: SimpleChanges): void {
     console.log('[MonitoringSetup] ngOnChanges triggered:', changes);
 
     // Refetch whenever disease changes
     if (changes['diseaseId'] && this.diseaseId) {
-
-      console.log(
-        `[MonitoringSetup] Active Disease ID changed -> ${this.diseaseId}`
-      );
-
+      console.log(`[MonitoringSetup] Active Disease ID changed -> ${this.diseaseId}`);
       this.fetchSeverities();
     }
   }
@@ -224,196 +221,115 @@ export class MonitoringSetupComponent implements OnChanges {
   // ─────────────────────────────────────────────
   // FETCH ALL EXISTING SEVERITIES
   // ─────────────────────────────────────────────
-fetchSeverities(): void {
+  fetchSeverities(): void {
+    console.log(`[MonitoringSetup] Fetching severities for Disease ID: ${this.diseaseId}`);
 
-  console.log(
-    `[MonitoringSetup] Fetching severities for Disease ID: ${this.diseaseId}`
-  );
+    this.severityService.getSeverities().subscribe({
+      next: (res: any) => {
+        this.existingSeverities = res?.data ?? res ?? [];
+        console.log('[MonitoringSetup] All Severities:', this.existingSeverities);
 
-  this.severityService.getSeverities().subscribe({
+        // Filter ONLY current disease
+        const diseaseSeverities = this.existingSeverities.filter(
+          (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
+        );
 
-    next: (res: any) => {
+        console.log(`[MonitoringSetup] Existing for Disease ${this.diseaseId}:`, diseaseSeverities);
 
-      this.existingSeverities = res?.data ?? res ?? [];
-
-      console.log(
-        '[MonitoringSetup] All Severities:',
-        this.existingSeverities
-      );
-
-      // Filter ONLY current disease
-      const diseaseSeverities = this.existingSeverities.filter(
-        (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
-      );
-
-      console.log(
-        `[MonitoringSetup] Existing for Disease ${this.diseaseId}:`,
-        diseaseSeverities
-      );
-
-      // ✅ AUTO CHECK ALL REQUIRED SEVERITIES
-      this.autoCreateMissingSeverities(diseaseSeverities);
-    },
-
-    error: (err) => {
-      console.error('[MonitoringSetup] Failed to fetch severities:', err);
-    }
-  });
-}
-  private autoCreateMissingSeverities(diseaseSeverities: any[]): void {
-
-  const requiredSeverities: Array<'mild' | 'moderate' | 'severe'> = [
-    'mild',
-    'moderate',
-    'severe'
-  ];
-
-  requiredSeverities.forEach(level => {
-
-    const exists = diseaseSeverities.some(
-      (sev: any) =>
-        sev.severity_level?.toLowerCase() === level.toLowerCase()
-    );
-
-    if (!exists) {
-
-      console.log(
-        `[MonitoringSetup] Missing "${level}" → Creating for disease ${this.diseaseId}`
-      );
-
-    const diseaseId = this.diseaseId;
-
-if (!diseaseId) return;
-
-const payload: CreateDiseaseSeverityDto = {
-  disease_id: diseaseId,
-  severity_level: level
-};
-
-      this.severityService.createSeverity(payload).subscribe({
-
-        next: (res: any) => {
-
-          console.log(
-            `[MonitoringSetup] Auto-created "${level}" severity`,
-            res
-          );
-
-          this.existingSeverities.push(res?.data ?? res);
-        },
-
-        error: (err) => {
-          console.error(
-            `[MonitoringSetup] Failed auto-creating "${level}"`,
-            err
-          );
+        // 🛡️ CRITICAL GUARD: Only auto-create backend entities if severity is required
+        if (this.showSeverity) {
+          this.autoCreateMissingSeverities(diseaseSeverities);
+        } else {
+          console.log('[MonitoringSetup] Skipping background auto-creation: Severity layout is disabled for healthy/non_cacao profiles.');
         }
-      });
+      },
+      error: (err) => {
+        console.error('[MonitoringSetup] Failed to fetch severities:', err);
+      }
+    });
+  }
 
-    } else {
+  private autoCreateMissingSeverities(diseaseSeverities: any[]): void {
+    const requiredSeverities: Array<'mild' | 'moderate' | 'severe'> = ['mild', 'moderate', 'severe'];
 
-      console.log(
-        `[MonitoringSetup] "${level}" already exists for this disease`
-      );
-    }
-  });
-}
-
-  // ─────────────────────────────────────────────
-  // AUTO CREATE IF NOT EXIST
-  // ─────────────────────────────────────────────
-  onSeveritySelect(
-    level: 'mild' | 'moderate' | 'severe'
-  ): void {
-
-    console.log(
-      `[MonitoringSetup] Severity Selected -> ${level}`
-    );
-
-    this.activeSev = level;
-
-    if (!this.diseaseId) {
-
-      console.warn(
-        '[MonitoringSetup] Cannot create severity. No disease selected.'
+    requiredSeverities.forEach(level => {
+      const exists = diseaseSeverities.some(
+        (sev: any) => sev.severity_level?.toLowerCase() === level.toLowerCase()
       );
 
+      if (!exists) {
+        console.log(`[MonitoringSetup] Missing "${level}" → Creating for disease ${this.diseaseId}`);
+        const diseaseId = this.diseaseId;
+        if (!diseaseId) return;
+
+        const payload: CreateDiseaseSeverityDto = {
+          disease_id: diseaseId,
+          severity_level: level
+        };
+
+        this.severityService.createSeverity(payload).subscribe({
+          next: (res: any) => {
+            console.log(`[MonitoringSetup] Auto-created "${level}" severity`, res);
+            this.existingSeverities.push(res?.data ?? res);
+          },
+          error: (err) => {
+            console.error(`[MonitoringSetup] Failed auto-creating "${level}"`, err);
+          }
+        });
+      } else {
+        console.log(`[MonitoringSetup] "${level}" already exists for this disease`);
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  // MANUAL/INTERACTIVE CREATE SEVERITY
+  // ─────────────────────────────────────────────
+  onSeveritySelect(level: 'mild' | 'moderate' | 'severe'): void {
+    // 🛡️ CRITICAL GUARD: Instantly exit if selected plant layout doesn't use severities
+    if (!this.showSeverity) {
+      console.warn('[MonitoringSetup] Selection rejected. Severities do not apply to healthy/non_cacao records.');
       return;
     }
 
-    console.log(
-      `[MonitoringSetup] Checking if "${level}" already exists for Disease ID ${this.diseaseId}`
-    );
+    console.log(`[MonitoringSetup] Severity Selected -> ${level}`);
+    this.activeSev = level;
 
-    // IMPORTANT:
-    // your backend uses severity_level
-    // not level
+    if (!this.diseaseId) {
+      console.warn('[MonitoringSetup] Cannot create severity. No disease selected.');
+      return;
+    }
+
+    console.log(`[MonitoringSetup] Checking if "${level}" already exists for Disease ID ${this.diseaseId}`);
+
     const matchExists = this.existingSeverities.some(
-      (sev: any) =>
-        sev.disease_id === this.diseaseId &&
-        sev.severity_level === level
+      (sev: any) => sev.disease_id === this.diseaseId && sev.severity_level === level
     );
 
-    console.log(
-      `[MonitoringSetup] Severity Exists? -> ${matchExists}`
-    );
+    console.log(`[MonitoringSetup] Severity Exists? -> ${matchExists}`);
 
-    // IF NOT EXIST → CREATE
     if (!matchExists) {
-
-      console.log(
-        `[MonitoringSetup] "${level}" severity NOT FOUND. Creating now...`
-      );
-
-      // Match backend validation structure
+      console.log(`[MonitoringSetup] "${level}" severity NOT FOUND. Creating now...`);
       const payload = {
         disease_id: this.diseaseId,
         severity_level: level
       };
 
-      console.log(
-        '[MonitoringSetup] Create Severity Payload:',
-        payload
-      );
+      console.log('[MonitoringSetup] Create Severity Payload:', payload);
 
       this.severityService.createSeverity(payload).subscribe({
-
         next: (res: any) => {
-
-          console.log(
-            '[MonitoringSetup] Create Severity API Response:',
-            res
-          );
-
+          console.log('[MonitoringSetup] Create Severity API Response:', res);
           const newlyCreated = res?.data ?? res;
-
           this.existingSeverities.push(newlyCreated);
-
-          console.log(
-            `[MonitoringSetup] "${level}" severity successfully created.`,
-            newlyCreated
-          );
-
-          console.log(
-            '[MonitoringSetup] Updated Cached Severities:',
-            this.existingSeverities
-          );
+          console.log(`[MonitoringSetup] "${level}" severity successfully created.`, newlyCreated);
         },
-
         error: (err) => {
-
-          console.error(
-            `[MonitoringSetup] Failed creating "${level}" severity.`,
-            err
-          );
+          console.error(`[MonitoringSetup] Failed creating "${level}" severity.`, err);
         }
       });
-
     } else {
-
-      console.log(
-        `[MonitoringSetup] "${level}" severity already exists. No creation needed.`
-      );
+      console.log(`[MonitoringSetup] "${level}" severity already exists. No creation needed.`);
     }
   }
 
@@ -421,10 +337,7 @@ const payload: CreateDiseaseSeverityDto = {
     return key.charAt(0).toUpperCase() + key.slice(1);
   }
 
-  onEnInput(
-    sourceControlName: string,
-    targetControlName: string
-  ): void {
+  onEnInput(sourceControlName: string, targetControlName: string): void {
     /* your implementation */
   }
 }
