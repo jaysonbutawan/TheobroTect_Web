@@ -1,192 +1,19 @@
-import { Component, Input, inject,  SimpleChanges,
-  OnChanges } from '@angular/core';
+import {
+  Component, Input, inject, SimpleChanges,
+  OnChanges
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { TranslationService } from './translation.service';
 import { ChecklistItem } from './diease-guidance.component';
 import { DiseaseSeverityService } from './disease-severity.service';
-import { CreateDiseaseSeverityDto } from './disease-guidance.dto';
+import { CreateDiseaseSeverityDto, CreateMonitoringPlanDto, MonitoringPlanDto } from './disease-guidance.dto';
+import { MonitoringSetupService } from './monitoring-setup.service';
 
 @Component({
   selector: 'app-monitoring-setup',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
-  template: `
-    <div [formGroup]="form" class="space-y-6">
-
-
-   <div *ngIf="showSeverity">
-    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3 ml-1">
-      Select Target Severity Level
-    </label>
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <button
-        type="button"
-        (click)="onSeveritySelect('mild')"
-        class="flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group focus:outline-none focus:ring-4"
-        [class]="
-          activeSev === 'mild'
-            ? 'bg-emerald-50/40 border-emerald-500 shadow-sm ring-2 ring-emerald-500/10 focus:ring-emerald-500/20'
-            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 focus:ring-slate-500/10'
-        "
-      >
-        <div
-          class="w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 flex-shrink-0"
-          [class]="
-            activeSev === 'mild'
-              ? 'bg-emerald-500 border-emerald-500 text-white'
-              : 'bg-white border-slate-300 group-hover:border-slate-400'
-          "
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" *ngIf="activeSev === 'mild'">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'mild' ? 'text-emerald-700' : 'text-slate-700'">
-            Mild
-          </span>
-          <span class="block text-xs text-slate-400 mt-0.5 font-normal">Early or low-impact signs</span>
-        </div>
-      </button>
-
-      <button
-        type="button"
-        (click)="onSeveritySelect('moderate')"
-        class="flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group focus:outline-none focus:ring-4"
-        [class]="
-          activeSev === 'moderate'
-            ? 'bg-amber-50/40 border-amber-500 shadow-sm ring-2 ring-amber-500/10 focus:ring-amber-500/20'
-            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 focus:ring-slate-500/10'
-        "
-      >
-        <div
-          class="w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 flex-shrink-0"
-          [class]="
-            activeSev === 'moderate'
-              ? 'bg-amber-500 border-amber-500 text-white'
-              : 'bg-white border-slate-300 group-hover:border-slate-400'
-          "
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" *ngIf="activeSev === 'moderate'">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'moderate' ? 'text-amber-700' : 'text-slate-700'">
-            Moderate
-          </span>
-          <span class="block text-xs text-slate-400 mt-0.5 font-normal">Spreading, structural threat</span>
-        </div>
-      </button>
-
-      <button
-        type="button"
-        (click)="onSeveritySelect('severe')"
-        class="flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group focus:outline-none focus:ring-4"
-        [class]="
-          activeSev === 'severe'
-            ? 'bg-red-50/40 border-red-500 shadow-sm ring-2 ring-red-500/10 focus:ring-red-500/20'
-            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 focus:ring-slate-500/10'
-        "
-      >
-        <div
-          class="w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 flex-shrink-0"
-          [class]="
-            activeSev === 'severe'
-              ? 'bg-red-500 border-red-500 text-white'
-              : 'bg-white border-slate-300 group-hover:border-slate-400'
-          "
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" *ngIf="activeSev === 'severe'">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'severe' ? 'text-red-700' : 'text-slate-700'">
-            Severe
-          </span>
-          <span class="block text-xs text-slate-400 mt-0.5 font-normal">Critical, immediate action needed</span>
-        </div>
-      </button>
-    </div>
-  </div>
-
-  <section class="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
-    <div class="flex items-start gap-3 mb-6">
-      <span class="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg bg-violet-50 text-violet-600 text-xs font-bold">02</span>
-      <div>
-        <h2 class="text-base font-semibold text-slate-800">Monitoring Setup</h2>
-        <p class="text-sm text-slate-500 mt-0.5">Rescan schedule and field worker instructions.</p>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          Rescan Interval (Days) <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="number"
-          class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-violet-500/10 focus:border-violet-400 transition-all duration-200"
-          formControlName="rescanDays"
-          placeholder="7"
-          min="1"
-          max="90"
-        />
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          Preferred Scan Time <span class="text-red-500">*</span>
-        </label>
-        <input
-          aria-label="Preferred Scan Time"
-          type="time"
-          class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-4 focus:ring-violet-500/10 focus:border-violet-400 transition-all duration-200"
-          formControlName="preferredTime"
-        />
-      </div>
-
-      <div class="col-span-1 md:col-span-2 flex flex-col gap-1.5">
-        <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
-          Guidance Message <span class="text-red-500">*</span>
-        </label>
-        <textarea
-          class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-violet-500/10 focus:border-violet-400 transition-all duration-200 resize-none"
-          formControlName="guidanceEn"
-          rows="2"
-          placeholder="Instruction for the field worker, e.g. 'Rescan after 7 days to check if symptoms are improving.'"
-          (input)="onEnInput('guidanceEn', 'guidanceTl')"
-        ></textarea>
-      </div>
-
-      <div class="col-span-1 md:col-span-2 flex flex-col gap-1.5">
-        <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
-          Mensahe sa Filipino <span class="text-red-500">*</span>
-
-          <span class="ml-auto flex items-center gap-1 text-[10px] font-normal text-violet-500 normal-case tracking-normal" *ngIf="translating['guidanceTl']">
-            <span class="w-2.5 h-2.5 border border-violet-400 border-t-transparent rounded-full animate-spin"></span>
-            Nagsasalin...
-          </span>
-          <span class="ml-auto text-[10px] font-normal text-emerald-500 normal-case tracking-normal" *ngIf="!translating['guidanceTl'] && form.get('guidanceTl')?.value">
-            Auto-translated
-          </span>
-        </label>
-        <textarea
-          class="w-full px-3 py-2 text-sm rounded-lg border border-amber-200 bg-amber-50/30 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 transition-all duration-200 resize-none"
-          formControlName="guidanceTl"
-          rows="2"
-          placeholder="Awtomatikong isasalin..."
-          [class.opacity-60]="translating['guidanceTl']"
-        ></textarea>
-      </div>
-    </div>
-  </section>
-</div>
-  `
+  templateUrl: './monitoring-setup.component.html',
 })
 export class MonitoringSetupComponent implements OnChanges {
   @Input({ required: true }) form!: FormGroup;
@@ -196,12 +23,12 @@ export class MonitoringSetupComponent implements OnChanges {
 
   activeSev: 'mild' | 'moderate' | 'severe' = 'mild';
   existingSeverities: any[] = [];
+
   translating: Record<string, boolean> = {};
   private severityService = inject(DiseaseSeverityService);
+  private monitoringService = inject(MonitoringSetupService);
+  currentMonitoringPlan: MonitoringPlanDto | null = null;
 
-  // ─────────────────────────────────────────────
-  // CONDITIONAL VIEW CONFIGURATION GETTER
-  // ─────────────────────────────────────────────
   get showSeverity(): boolean {
     if (!this.diseaseKey) return true;
     const key = this.diseaseKey.toLowerCase().trim();
@@ -211,16 +38,116 @@ export class MonitoringSetupComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     console.log('[MonitoringSetup] ngOnChanges triggered:', changes);
 
-    // Refetch whenever disease changes
     if (changes['diseaseId'] && this.diseaseId) {
       console.log(`[MonitoringSetup] Active Disease ID changed -> ${this.diseaseId}`);
       this.fetchSeverities();
     }
   }
 
-  // ─────────────────────────────────────────────
-  // FETCH ALL EXISTING SEVERITIES
-  // ─────────────────────────────────────────────
+  loadMonitoringPlan(): void {
+    if (!this.diseaseKey) return;
+
+    this.monitoringService.getMonitoringPlans().subscribe({
+      next: (res: any) => {
+        const plans = res?.data ?? res ?? [];
+
+        if (!this.showSeverity) {
+          this.currentMonitoringPlan = plans.find(
+            (plan: any) => plan.disease_key === this.diseaseKey
+          ) || null;
+        } else {
+          const matchingSeverity = this.existingSeverities.find(
+            (sev: any) =>
+              Number(sev.disease_id) === Number(this.diseaseId) &&
+              sev.severity_level?.toLowerCase() === this.activeSev.toLowerCase()
+          );
+
+          if (matchingSeverity) {
+            this.currentMonitoringPlan = plans.find(
+              (plan: any) => Number(plan.disease_severity_id) === Number(matchingSeverity.id)
+            ) || null;
+          } else {
+            this.currentMonitoringPlan = null;
+          }
+        }
+        if (this.currentMonitoringPlan) {
+          this.form.patchValue({
+            rescanDays: this.currentMonitoringPlan.rescan_after_days,
+            preferredTime: this.currentMonitoringPlan.preferred_time_hour,
+            guidanceEn: this.currentMonitoringPlan.message?.en ?? '',
+            guidanceTl: this.currentMonitoringPlan.message?.tl ?? ''
+          });
+        } else {
+          this.form.patchValue({ rescanDays: '', preferredTime: '', guidanceEn: '', guidanceTl: '' });
+        }
+      },
+      error: (err) => console.error('[MonitoringSetup] Error reading plans:', err)
+    });
+  }
+
+saveMonitoringPlan(): void {
+  if (this.form.invalid || !this.diseaseKey) return;
+
+  const formValue = this.form.value;
+  let severityId: number | null = null;
+
+  if (this.showSeverity) {
+    const matchingSeverity = this.existingSeverities.find(
+      (sev: any) =>
+        Number(sev.disease_id) === Number(this.diseaseId) &&
+        sev.severity_level?.toLowerCase() === this.activeSev.toLowerCase()
+    );
+    if (!matchingSeverity) return;
+    severityId = matchingSeverity.id;
+  }
+  const formattedChecklist = (this.checklistItems || []).map(item => ({
+    id: (item as any).id?.toString(),
+    task: (item as any).task || (item as any).name || (item as any).title || '',
+    checked: (item as any).checked || (item as any).completed || false
+  }));
+
+  const payload: CreateMonitoringPlanDto = {
+    disease_key: this.diseaseKey,
+    disease_severity_id: severityId,
+    rescan_after_days: Number(formValue.rescanDays),
+    preferred_time_hour: formValue.preferredTime,
+    message: {
+      en: formValue.guidanceEn,
+      tl: formValue.guidanceTl
+    },
+    checklist: formattedChecklist
+  };
+
+  if (this.currentMonitoringPlan?.id) {
+    this.monitoringService.updateMonitoringPlan(this.currentMonitoringPlan.id, payload).subscribe({
+      next: () => {
+        console.log('[MonitoringSetup] Plan updated successfully.');
+        this.loadMonitoringPlan();
+      }
+    });
+  } else {
+    this.monitoringService.createMonitoringPlan(payload).subscribe({
+      next: () => {
+        console.log('[MonitoringSetup] Plan created successfully.');
+        this.loadMonitoringPlan();
+      }
+    });
+  }
+}
+
+  deleteMonitoringPlan(): void {
+    if (!this.currentMonitoringPlan?.id) return;
+
+    this.monitoringService.deleteMonitoringPlan(this.currentMonitoringPlan.id).subscribe({
+      next: () => {
+        console.log('[MonitoringSetup] Plan removed successfully.');
+        this.currentMonitoringPlan = null;
+        this.form.patchValue({ rescanDays: '', preferredTime: '', guidanceEn: '', guidanceTl: '' });
+      },
+      error: (err) => console.error('[MonitoringSetup] Delete failed:', err)
+    });
+  }
+
   fetchSeverities(): void {
     console.log(`[MonitoringSetup] Fetching severities for Disease ID: ${this.diseaseId}`);
 
@@ -228,15 +155,11 @@ export class MonitoringSetupComponent implements OnChanges {
       next: (res: any) => {
         this.existingSeverities = res?.data ?? res ?? [];
         console.log('[MonitoringSetup] All Severities:', this.existingSeverities);
-
-        // Filter ONLY current disease
         const diseaseSeverities = this.existingSeverities.filter(
           (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
         );
 
         console.log(`[MonitoringSetup] Existing for Disease ${this.diseaseId}:`, diseaseSeverities);
-
-        // 🛡️ CRITICAL GUARD: Only auto-create backend entities if severity is required
         if (this.showSeverity) {
           this.autoCreateMissingSeverities(diseaseSeverities);
         } else {
@@ -282,11 +205,8 @@ export class MonitoringSetupComponent implements OnChanges {
     });
   }
 
-  // ─────────────────────────────────────────────
-  // MANUAL/INTERACTIVE CREATE SEVERITY
-  // ─────────────────────────────────────────────
   onSeveritySelect(level: 'mild' | 'moderate' | 'severe'): void {
-    // 🛡️ CRITICAL GUARD: Instantly exit if selected plant layout doesn't use severities
+    //CRITICAL GUARD: Instantly exit if selected plant layout doesn't use severities
     if (!this.showSeverity) {
       console.warn('[MonitoringSetup] Selection rejected. Severities do not apply to healthy/non_cacao records.');
       return;

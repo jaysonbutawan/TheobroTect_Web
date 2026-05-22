@@ -24,26 +24,17 @@ export interface UpdateDiseaseDto {
   description?: LocalizedText;
 }
 
-export interface MonitoringPlanDto {
-  id: number;
-  title?: string;
-  description?: string;
+export interface ChecklistItemSchema {
+  id?: string;
+  task: string;
+  checked: boolean;
 }
-
-export interface RecommendationDto {
-  id: number;
-  recommendation?: string;
-}
-
 export interface DiseaseSeverityDto {
   id: number;
   disease_id: number;
   severity_level: string;
 
   disease?: DiseaseDto;
-  monitoring_plan?: MonitoringPlanDto;
-  recommendations?: RecommendationDto[];
-
   created_at?: string;
   updated_at?: string;
 }
@@ -56,6 +47,37 @@ export interface CreateDiseaseSeverityDto {
 export interface UpdateDiseaseSeverityDto {
   disease_id?: number;
   severity_level?: string;
+}
+
+export interface MonitoringPlanDto {
+  id: number;
+  disease_key: string;
+  disease_severity_id: number | null;
+  rescan_after_days: number;
+  preferred_time_hour: number | null;
+  message: LocalizedText;
+  checklist: ChecklistItemSchema[];
+  locale: string | null;
+  severity?: DiseaseSeverityDto;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateMonitoringPlanDto {
+  disease_key: string;
+  disease_severity_id: number | null;
+  rescan_after_days: number;
+  preferred_time_hour: number | null;
+  message: LocalizedText;
+  checklist: ChecklistItemSchema[];
+  locale?: string | null;
+}
+export interface UpdateMonitoringPlanDto {
+  rescan_after_days?: number;
+  preferred_time_hour?: number | null;
+  message?: LocalizedText;
+  checklist?: ChecklistItemSchema[];
+  locale?: string | null;
 }
 
 export interface ApiResponse<T> {
