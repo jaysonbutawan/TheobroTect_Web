@@ -1,10 +1,7 @@
-<!-- Main Layout Wrapper -->
 <div class="flex flex-col lg:flex-row items-start justify-center gap-6 p-4 md:p-8">
-  <!-- LEFT: Main Form Content -->
   <div
     class="w-full max-w-3xl flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
   >
-    <!-- Header -->
     <div class="flex items-start gap-4 px-8 py-6 border-b border-slate-100">
       <div class="flex-shrink-0 w-10 h-10">
         <img
@@ -48,6 +45,7 @@
       class="px-10 py-6 bg-white/40 backdrop-blur-xl border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.01)]"
     >
       <div class="max-w-4xl mx-auto flex items-center justify-between relative">
+
         <button
           type="button"
           (click)="setStep(1)"
@@ -59,9 +57,7 @@
               'bg-gradient-to-tr from-green-600 to-green-500 text-white border-transparent shadow-[0_4px_12px_rgba(34,197,94,0.3)] scale-105':
                 currentStep === 1,
               'bg-green-50 text-green-600 border-green-200/60 shadow-[inset_0_2px_4px_rgba(255,255,255,1)]':
-                currentStep > 1,
-              'bg-white/80 text-slate-400 border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]':
-                currentStep < 1,
+                currentStep > 1
             }"
           >
             @if (currentStep > 1) {
@@ -74,8 +70,7 @@
             class="text-xs font-semibold tracking-wide transition-colors duration-300"
             [ngClass]="{
               'text-slate-800 font-bold': currentStep === 1,
-              'text-green-700/80': currentStep > 1,
-              'text-slate-400 group-hover:text-slate-600': currentStep < 1,
+              'text-green-700/80': currentStep > 1
             }"
           >
             General Info
@@ -94,7 +89,10 @@
         <button
           type="button"
           (click)="setStep(2)"
+          [disabled]="!isDiseaseContextActive"
           class="flex items-center gap-3 group focus:outline-none z-10 transition-all duration-300"
+          [ngClass]="{'pointer-events-none opacity-40 cursor-not-allowed': !isDiseaseContextActive}"
+          [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
         >
           <div
             class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
@@ -104,11 +102,13 @@
               'bg-green-50 text-green-600 border-green-200/60 shadow-[inset_0_2px_4px_rgba(255,255,255,1)]':
                 currentStep > 2,
               'bg-white/80 text-slate-400 border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]':
-                currentStep < 2,
+                currentStep < 2
             }"
           >
             @if (currentStep > 2) {
               <i class="pi pi-check text-[10px] stroke-[3px]"></i>
+            } @else if (!isDiseaseContextActive) {
+              <span class="text-[10px]">🔒</span>
             } @else {
               2
             }
@@ -118,7 +118,7 @@
             [ngClass]="{
               'text-slate-800 font-bold': currentStep === 2,
               'text-green-700/80': currentStep > 2,
-              'text-slate-400 group-hover:text-slate-600': currentStep < 2,
+              'text-slate-400 group-hover:text-slate-600': currentStep < 2
             }"
           >
             Monitoring
@@ -137,37 +137,46 @@
         <button
           type="button"
           (click)="setStep(3)"
+          [disabled]="!isDiseaseContextActive"
           class="flex items-center gap-3 group focus:outline-none z-10 transition-all duration-300"
+          [ngClass]="{'pointer-events-none opacity-40 cursor-not-allowed': !isDiseaseContextActive}"
+          [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
         >
           <div
             class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
             [ngClass]="{
               'bg-gradient-to-tr from-green-600 to-green-500 text-white border-transparent shadow-[0_4px_12px_rgba(34,197,94,0.3)] scale-105':
                 currentStep === 3,
-              'bg-green-50 text-green-600 border-green-200/60 shadow-[inset_0_2px_4px_rgba(255,255,255,1)]':
-                currentStep > 3,
               'bg-white/80 text-slate-400 border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]':
-                currentStep < 3,
+                currentStep < 3
             }"
           >
-            3
+            @if (!isDiseaseContextActive) {
+              <span class="text-[10px]">🔒</span>
+            } @else {
+              3
+            }
           </div>
           <span
             class="text-xs font-semibold tracking-wide transition-colors duration-300"
             [ngClass]="{
               'text-slate-800 font-bold': currentStep === 3,
-              'text-slate-400 group-hover:text-slate-600': currentStep < 3,
+              'text-slate-400 group-hover:text-slate-600': currentStep < 3
             }"
           >
             Recommendations
           </span>
         </button>
       </div>
+
+      @if (!isDiseaseContextActive) {
+        <p class="text-center text-xs text-amber-600 mt-3 font-medium bg-amber-50 rounded-lg py-1 border border-amber-100">
+          ⚠️ Please select an entry from the sidebar or fill in general information and click "Save Configuration" to unlock subsequent setup modules.
+        </p>
+      }
     </div>
 
-    <!-- Combined Form -->
     <form class="divide-y divide-slate-100" [formGroup]="form" (ngSubmit)="onSave()">
-      <!-- ─── SECTION 01: GENERAL INFO ─── -->
       @if (currentStep === 1) {
         <section class="px-8 py-7">
           <div class="flex items-start gap-3 mb-6">
@@ -184,7 +193,6 @@
           </div>
 
           <div class="grid grid-cols-2 gap-x-5 gap-y-5">
-            <!-- Name EN -->
             <div class="flex flex-col gap-1.5">
               <label
                 class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide"
@@ -202,7 +210,6 @@
               />
             </div>
 
-            <!-- Name TL -->
             <div class="flex flex-col gap-1.5">
               <label
                 class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide"
@@ -239,7 +246,6 @@
               />
             </div>
 
-            <!-- Description EN -->
             <div class="col-span-2 flex flex-col gap-1.5">
               <label
                 class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide"
@@ -258,7 +264,6 @@
               ></textarea>
             </div>
 
-            <!-- Description TL -->
             <div class="col-span-2 flex flex-col gap-1.5">
               <label
                 class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide"
@@ -362,11 +367,9 @@
       @if (currentStep === 2) {
         <app-monitoring-setup
           [form]="form"
-          [checklistItems]="checklistItems"
           [diseaseId]="currentEditId"
           [diseaseKey]="selectedDiseaseKey"
         ></app-monitoring-setup>
-        
       }
 
       @if (currentStep === 3) {
@@ -374,8 +377,8 @@
           <app-recommendations-setup [sevData]="sevData"></app-recommendations-setup>
         </div>
       }
-      <!-- ─── FOOTER ACTIONS ─── -->
-      <div class="px-8 py-4 bg-slate-50 flex items-center justify-end gap-3">
+
+      <div class="px-8 py-4 bg-slate-50 flex items-center justify-between gap-3">
         <div>
           @if (currentStep > 1) {
             <button
@@ -397,12 +400,13 @@
             Cancel
           </button>
 
-          <!-- If not on the last step, show 'Next', otherwise show 'Save Configuration' -->
-          @if (currentStep < 2) {
+          @if (currentStep < 3) {
             <button
               type="button"
               (click)="setStep(currentStep + 1)"
-              class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 transition shadow-sm"
+              class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              [disabled]="currentStep === 1 && !isDiseaseContextActive"
+              [title]="(currentStep === 1 && !isDiseaseContextActive) ? 'Save disease before proceeding' : ''"
             >
               Next Step
             </button>
@@ -412,7 +416,6 @@
     </form>
   </div>
 
-  <!-- RIGHT: Sidebar Component -->
   <app-disease-sidebar
     [existingRecords]="existingRecords"
     [selectedDisease]="selectedDisease"

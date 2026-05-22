@@ -41,8 +41,8 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   existingRecords: DiseaseDto[] = [];
 
   isEditMode: boolean = false;
-  currentEditId:  number | null = null;
-    selectedDisease: any = null;
+  currentEditId: number | null = null;
+  selectedDisease: any = null;
   currentStep: number = 1;
 
   private destroy$ = new Subject<void>();
@@ -63,13 +63,12 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
 
     this.fetchExistingDiseases();
   }
-  checklistItems: ChecklistItem[] = [];
+
   sevData: SeverityData = {
     mild: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
     moderate: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
     severe: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' }
   };
-
 
   diseaseKeys: string[] = [
     'black_pod_disease',
@@ -85,8 +84,21 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     Object.values(this.debounceTimers).forEach(clearTimeout);
   }
 
+  /**
+   * Helper getter to verify if a valid disease configuration context
+   * has been saved or chosen out of the structural list.
+   */
+  get isDiseaseContextActive(): boolean {
+    return !!this.currentEditId && !!this.selectedDiseaseKey;
+  }
+
   // ─── STEP NAVIGATION ───
   setStep(step: number): void {
+    // If attempting to access step 2 or 3 without an active disease context, block action
+    if (step > 1 && !this.isDiseaseContextActive) {
+      console.warn('[NAVIGATION BLOCKED] Select or Save a disease profile row first before arranging rules.');
+      return;
+    }
     this.currentStep = step;
   }
 
@@ -119,19 +131,16 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     }, 900);
   }
 
-onSidebarDiseaseSelected(disease: any): void {
+  onSidebarDiseaseSelected(disease: any): void {
     this.selectedDisease = disease;
 
     if (disease?.disease_key) {
-      // 1. Update the UI dropdown labels
       this.selectedLabel = disease.disease_key;
       this.selectedDiseaseKey = disease.disease_key;
 
-      // 2. Lock in Edit Mode so the app knows we are updating, not creating
       this.isEditMode = true;
       this.currentEditId = disease.id;
 
-      // 3. Safely populate the form fields
       this.form.patchValue({
         nameEn: disease.display_name?.en || '',
         nameTl: disease.display_name?.tl || '',
@@ -140,7 +149,6 @@ onSidebarDiseaseSelected(disease: any): void {
       });
     }
   }
-
 
   onDiseaseKeyChange(key: string): void {
     this.selectedLabel = key;
@@ -151,14 +159,13 @@ onSidebarDiseaseSelected(disease: any): void {
     return this.form.invalid || !this.selectedLabel;
   }
 
-
   fetchExistingDiseases(): void {
     this.diseaseService.getDisease()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: any) => {
           this.existingRecords = res.data || res || [];
-        this.cdr.markForCheck();
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Fetch error:', err);
@@ -172,13 +179,12 @@ onSidebarDiseaseSelected(disease: any): void {
     this.currentEditId = null;
     this.selectedLabel = '';
     this.selectedDiseaseKey = null;
+    this.selectedDisease = null;
 
-    this.form.reset({
-      monitoringFreq: 'weekly'
-    });
+    this.form.reset();
+    this.currentStep = 1; // Always route back to safety layout baseline step 1
   }
 
-  // ✅ SAVE LOGIC (CLEAN + SAFE)
   onSave(): void {
     if (this.form.invalid || !this.selectedDiseaseKey) {
       this.form.markAllAsTouched();
@@ -223,10 +229,12 @@ onSidebarDiseaseSelected(disease: any): void {
             : `Created: ${saved.display_name?.en}`
         );
 
-        this.fetchExistingDiseases();
-        this.cancelEdit();
-      },
+        // Lock in context properties immediately so they can now proceed onto Steps 2 & 3 without losing state
+        this.currentEditId = saved.id;
+        this.isEditMode = true;
 
+        this.fetchExistingDiseases();
+      },
       error: (err) => {
         console.error('[SAVE ERROR]', err);
         alert('Save failed. Check console.');
