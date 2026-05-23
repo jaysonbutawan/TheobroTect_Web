@@ -53,9 +53,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   diseaseSeverities: any[] = [];
   isSaving: boolean = false;
 
-  // Track created recommendation IDs to prevent duplicates if user saves multiple times
   private savedRecommendationIds: Record<string, number> = {};
-
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
   private translationService = inject(TranslationService);
   private severityService = inject(DiseaseSeverityService);
@@ -132,7 +130,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   }
 
   ngOnDestroy(): void {
-    // Prevent memory leaks by clearing any pending translation timeouts
     Object.values(this.debounceTimers).forEach(timer => clearTimeout(timer));
   }
 
@@ -161,7 +158,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         ) {
           this.activeSev = this.displaySeverities[0];
         }
-
+        this.loadExistingRecommendations();
         this.cdr.markForCheck();
       },
       error: () => {
@@ -178,7 +175,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   }
 
   onSaveRecommendations() {
-    const diseaseKey = 'canker'; // Replace or bind dynamically based on your parent state
+    const diseaseKey = '';
     this.isSaving = true;
 
     this.saveRecommendationsForDisease(diseaseKey).then(() => {
@@ -199,7 +196,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     list.splice(index, 1);
   }
 
-  // ─── TRANSLATE ARRAY ITEMS (Actions, Prevention) ───
   onBulletEnInput(item: ChecklistItem, sourceKey: 'en', targetKey: 'tl'): void {
     const text = item[sourceKey]?.trim();
     const timerKey = `bullet_${Math.random()}`;
@@ -254,9 +250,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     }, 900);
   }
 
-  /**
-   * Saves all recommendations for the currently selected disease.
-   */
   async saveRecommendationsForDisease(diseaseKey: string): Promise<void> {
     if (!this.diseaseId) {
       console.error('[saveRecommendations] No disease ID provided.');
@@ -331,10 +324,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     console.log('[saveRecommendations] All recommendations saved successfully.');
   }
 
-  /**
-   * Helper that decides whether to POST (create) or PUT (update)
-   * to prevent duplicating records during the same session.
-   */
   private async upsertRecommendationItem(
     diseaseKey: string,
     severityId: number,
@@ -375,7 +364,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           this.recommendationService.createRecommendation(createDto)
         );
 
-        // Track the newly created ID to prevent duplicate POSTs in future saves
         if (response && response.id) {
           this.savedRecommendationIds[mapKey] = response.id;
         }
@@ -385,6 +373,65 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     } catch (err) {
       console.error(`[saveRecommendations] Failed to upsert ${categoryKey}:`, err);
       throw err;
+    }
+  }
+
+  async loadExistingRecommendations(): Promise<void> {
+    try {
+      // Fetch all recommendations
+      const recommendations = await firstValueFrom(
+        this.recommendationService.getRecommendations()
+      );
+
+      // Create a reverse map to easily find which SeverityType (mild/moderate/severe)
+      // corresponds to a given database severity ID.
+      const severityIdToLevelMap: Record<number, SeverityType> = {};
+      this.diseaseSeverities.forEach(sev => {
+        const level = (sev.severity_level || sev.severity || sev.level || sev.name || '')
+          .toLowerCase()
+          .trim();
+        if (['mild', 'moderate', 'severe'].includes(level)) {
+          severityIdToLevelMap[sev.id] = level as SeverityType;
+        }
+      });
+
+      // Loop through fetched recommendations and populate the UI state
+      recommendations.forEach((rec: any) => {
+        const level = severityIdToLevelMap[rec.disease_severity_id];
+
+        // Only process recommendations that belong to the current disease's severities
+        if (level && this.sevData[level]) {
+
+          // 1. Save the ID to our tracking map so future saves trigger a PUT request
+          const mapKey = `${rec.disease_severity_id}_${rec.category_key}`;
+          this.savedRecommendationIds[mapKey] = rec.id;
+
+          // 2. Map the DB content back into the Angular component's UI state
+          switch (rec.category_key) {
+            case 'action_items':
+              this.sevData[level].actions = Array.isArray(rec.content) ? rec.content : [];
+              break;
+            case 'prevention_items':
+              this.sevData[level].prevention = Array.isArray(rec.content) ? rec.content : [];
+              break;
+            case 'escalate_text':
+              this.sevData[level].escalateEn = rec.content?.en || '';
+              this.sevData[level].escalateTl = rec.content?.tl || '';
+              break;
+            case 'seek_help_text':
+              this.sevData[level].seekHelpEn = rec.content?.en || '';
+              this.sevData[level].seekHelpTl = rec.content?.tl || '';
+              break;
+          }
+        }
+      });
+
+      // Trigger change detection to update the view with the fetched data
+      this.cdr.markForCheck();
+      console.log('[RecommendationsSetup] Successfully loaded existing recommendations.');
+
+    } catch (error) {
+      console.error('[RecommendationsSetup] Failed to load existing recommendations', error);
     }
   }
 }
