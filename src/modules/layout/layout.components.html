@@ -1,7 +1,20 @@
 <div class="flex min-h-screen bg-[#F5FAF3] text-white overflow-x-hidden">
-  <app-sidebar class="hidden md:flex w-64 h-screen fixed left-0 top-0 shrink-0 z-20"></app-sidebar>
+  
+  <!-- Dynamic Width Assignment based on sideCollapsed state -->
+  <app-sidebar 
+    [isCollapsed]="sideCollapsed"
+    (collapseChanged)="sideCollapsed = $event"
+    [class.w-64]="!sideCollapsed"
+    [class.w-[90px]]="sideCollapsed"
+    class="hidden md:flex h-screen fixed left-0 top-0 shrink-0 z-20 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
+  </app-sidebar>
 
-  <main class="flex-1 flex flex-col min-w-0 ml-0 md:ml-64 transition-all duration-300">
+  <!-- Dynamic Left Margin Assignment based on sideCollapsed state -->
+  <main 
+    [class.md:ml-64]="!sideCollapsed" 
+    [class.md:ml-[90px]]="sideCollapsed"
+    class="flex-1 flex flex-col min-w-0 ml-0 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
+    
     <header
       class="md:hidden flex h-16 border-b border-white/5 items-center justify-between px-6 bg-[#F5FAF3] sticky top-0 z-30"
     >
@@ -28,11 +41,13 @@
         </svg>
       </button>
     </header>
+
     <div class="p-4 md:p-10 lg:p-14">
       <router-outlet></router-outlet>
     </div>
   </main>
 
+  <!-- Mobile Overlay Menu Drawer Framework -->
   @if (isMobileMenuOpen) {
     <div class="fixed inset-0 z-100 md:hidden">
       <div
@@ -64,7 +79,8 @@
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-        <app-sidebar class="w-full h-full"></app-sidebar>
+        <!-- Keep Mobile instances expanded/unstyled defaults -->
+        <app-sidebar [isCollapsed]="false" class="w-full h-full"></app-sidebar>
       </div>
     </div>
   }

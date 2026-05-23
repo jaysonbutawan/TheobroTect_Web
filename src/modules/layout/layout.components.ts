@@ -11,32 +11,33 @@ import { HostListener } from '@angular/core';
   templateUrl: './layout.components.html',
 })
 export class LayoutComponent {
-     isMobileMenuOpen = false;
-    private touchStartX = 0;
+  isMobileMenuOpen = false;
+  sideCollapsed = false;
+  private touchStartX = 0;
 
-    toggleMobileMenu() {
-        this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  swipeStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+
+  swipeEnd(event: TouchEvent) {
+    const touchEndX = event.changedTouches[0].screenX;
+    if (this.touchStartX - touchEndX > 50) {
+      this.isMobileMenuOpen = false;
     }
+  }
 
-    swipeStart(event: TouchEvent) {
-        this.touchStartX = event.changedTouches[0].screenX;
+  @HostListener('window:keydown.escape', ['$event'])
+  handleKeyDown(event: any) {
+    if (this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
     }
+  }
 
-    swipeEnd(event: TouchEvent) {
-        const touchEndX = event.changedTouches[0].screenX;
-        if (this.touchStartX - touchEndX > 50) {
-            this.isMobileMenuOpen = false;
-        }
-    }
-
-    @HostListener('window:keydown.escape', ['$event'])
-    handleKeyDown(event: any) {
-        if (this.isMobileMenuOpen) {
-            this.isMobileMenuOpen = false;
-        }
-    }
-
-    closeMenu(): void {
+  closeMenu(): void {
     this.isMobileMenuOpen = false;
   }
 }

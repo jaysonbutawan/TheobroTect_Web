@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core'; //  Added Input, Output, and EventEmitter
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -16,7 +16,12 @@ interface NavItem {
   templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent {
-  isCollapsed = false;
+  // 1. Turned this into an @Input to accept the state from LayoutComponent
+  @Input() isCollapsed = false; 
+  
+  // 2. Added @Output to emit the state changes back up to LayoutComponent
+  @Output() collapseChanged = new EventEmitter<boolean>(); 
+
   isReportsOpen = false;
 
   navItems: NavItem[] = [
@@ -61,6 +66,9 @@ export class SidebarComponent {
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
     if (this.isCollapsed) this.isReportsOpen = false;
+    
+    // 3. Emit the updated state so the main content container resizes instantly!
+    this.collapseChanged.emit(this.isCollapsed); 
   }
 
   toggleReports() {
