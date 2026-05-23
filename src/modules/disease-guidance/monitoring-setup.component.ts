@@ -63,6 +63,30 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
     }
   }
 
+  fetchSeverities(): void {
+    console.log(`[MonitoringSetup] Fetching severities for Disease ID: ${this.diseaseId}`);
+
+    this.severityService.getSeverities().subscribe({
+      next: (res: any) => {
+        this.existingSeverities = res?.data ?? res ?? [];
+        const diseaseSeverities = this.existingSeverities.filter(
+          (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
+        );
+
+        if (this.showSeverity) {
+          this.autoCreateMissingSeverities(diseaseSeverities);
+        } else {
+          this.loadMonitoringPlan();
+        }
+
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('❌ [MonitoringSetup Error] Unable to trace reference list records from service endpoints:', err);
+      }
+    });
+  }
+
   loadMonitoringPlan(): void {
     if (!this.diseaseKey) {
       console.warn('⚠️ [MonitoringSetup] loadMonitoringPlan aborted: missing diseaseKey.');
@@ -227,7 +251,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       });
     }
   }
-  
+
   deleteMonitoringPlan(): void {
     if (!this.currentMonitoringPlan?.id) {
       console.warn('⚠️ [MonitoringSetup] Delete operations aborted: context parameters target layout does not provide key variables.');
@@ -244,30 +268,6 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       },
       error: (err) => {
         console.error(`❌ [MonitoringSetup Error] Delete service sequence failed on target item ${planIdToDelete}:`, err);
-      }
-    });
-  }
-
-  fetchSeverities(): void {
-    console.log(`[MonitoringSetup] Fetching severities for Disease ID: ${this.diseaseId}`);
-
-    this.severityService.getSeverities().subscribe({
-      next: (res: any) => {
-        this.existingSeverities = res?.data ?? res ?? [];
-        const diseaseSeverities = this.existingSeverities.filter(
-          (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
-        );
-
-        if (this.showSeverity) {
-          this.autoCreateMissingSeverities(diseaseSeverities);
-        } else {
-          this.loadMonitoringPlan();
-        }
-
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('❌ [MonitoringSetup Error] Unable to trace reference list records from service endpoints:', err);
       }
     });
   }

@@ -1,6 +1,6 @@
 <div [formGroup]="form" class="space-y-6">
-
-  <div *ngIf="showSeverity">
+@if (showSeverity) {
+  <div>
     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3 ml-1">
       Select Target Severity Level
     </label>
@@ -24,15 +24,29 @@
               : 'bg-white border-slate-300 group-hover:border-slate-400'
           "
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" *ngIf="activeSev === 'mild'">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+          @if (activeSev === 'mild') {
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          }
         </div>
         <div class="flex-1 min-w-0">
-          <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'mild' ? 'text-emerald-700' : 'text-slate-700'">
+          <span
+            class="block text-sm font-semibold transition-colors"
+            [class]="activeSev === 'mild' ? 'text-emerald-700' : 'text-slate-700'"
+          >
             Mild
           </span>
-          <span class="block text-xs text-slate-400 mt-0.5 font-normal">Early or low-impact signs</span>
+          <span class="block text-xs text-slate-400 mt-0.5 font-normal">
+            Early or low-impact signs
+          </span>
         </div>
       </button>
 
@@ -54,15 +68,29 @@
               : 'bg-white border-slate-300 group-hover:border-slate-400'
           "
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" *ngIf="activeSev === 'moderate'">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+          @if (activeSev === 'moderate') {
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          }
         </div>
         <div class="flex-1 min-w-0">
-          <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'moderate' ? 'text-amber-700' : 'text-slate-700'">
+          <span
+            class="block text-sm font-semibold transition-colors"
+            [class]="activeSev === 'moderate' ? 'text-amber-700' : 'text-slate-700'"
+          >
             Moderate
           </span>
-          <span class="block text-xs text-slate-400 mt-0.5 font-normal">Spreading, structural threat</span>
+          <span class="block text-xs text-slate-400 mt-0.5 font-normal">
+            Spreading, structural threat
+          </span>
         </div>
       </button>
 
@@ -84,23 +112,43 @@
               : 'bg-white border-slate-300 group-hover:border-slate-400'
           "
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" *ngIf="activeSev === 'severe'">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+          @if (activeSev === 'severe') {
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          }
         </div>
         <div class="flex-1 min-w-0">
-          <span class="block text-sm font-semibold transition-colors" [class]="activeSev === 'severe' ? 'text-red-700' : 'text-slate-700'">
+          <span
+            class="block text-sm font-semibold transition-colors"
+            [class]="activeSev === 'severe' ? 'text-red-700' : 'text-slate-700'"
+          >
             Severe
           </span>
-          <span class="block text-xs text-slate-400 mt-0.5 font-normal">Critical, immediate action needed</span>
+          <span class="block text-xs text-slate-400 mt-0.5 font-normal">
+            Critical, immediate action needed
+          </span>
         </div>
       </button>
     </div>
   </div>
+}
 
-  <section class="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
+  <section
+    class="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.01)]"
+  >
     <div class="flex items-start gap-3 mb-6">
-      <span class="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg bg-violet-50 text-violet-600 text-xs font-bold">02</span>
+      <span
+        class="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg bg-violet-50 text-violet-600 text-xs font-bold"
+        >02</span
+      >
       <div>
         <h2 class="text-base font-semibold text-slate-800">Monitoring Setup</h2>
         <p class="text-sm text-slate-500 mt-0.5">Rescan schedule and field worker instructions.</p>
@@ -134,8 +182,12 @@
       </div>
 
       <div class="col-span-1 md:col-span-2 flex flex-col gap-1.5">
-        <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
+        <label
+          class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide"
+        >
+          <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
+            >EN</span
+          >
           Guidance Message <span class="text-red-500">*</span>
         </label>
         <textarea
@@ -148,17 +200,31 @@
       </div>
 
       <div class="col-span-1 md:col-span-2 flex flex-col gap-1.5">
-        <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide">
-          <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
+        <label
+          class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wide"
+        >
+          <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
+            >TL</span
+          >
           Mensahe sa Filipino <span class="text-red-500">*</span>
 
-          <span class="ml-auto flex items-center gap-1 text-[10px] font-normal text-violet-500 normal-case tracking-normal" *ngIf="translating['guidanceTl']">
-            <span class="w-2.5 h-2.5 border border-violet-400 border-t-transparent rounded-full animate-spin"></span>
-            Nagsasalin...
-          </span>
-          <span class="ml-auto text-[10px] font-normal text-emerald-500 normal-case tracking-normal" *ngIf="!translating['guidanceTl'] && form.get('guidanceTl')?.value">
-            Auto-translated
-          </span>
+          @if (translating['guidanceTl']) {
+            <span
+              class="ml-auto flex items-center gap-1 text-[10px] font-normal text-violet-500 normal-case tracking-normal"
+            >
+              <span
+                class="w-2.5 h-2.5 border border-violet-400 border-t-transparent rounded-full animate-spin"
+              ></span>
+              Nagsasalin...
+            </span>
+          }
+          @if (!translating['guidanceTl'] && form.get('guidanceTl')?.value) {
+            <span
+              class="ml-auto text-[10px] font-normal text-emerald-500 normal-case tracking-normal"
+            >
+              Auto-translated
+            </span>
+          }
         </label>
         <textarea
           class="w-full px-3 py-2 text-sm rounded-lg border border-amber-200 bg-amber-50/30 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 transition-all duration-200 resize-none"
@@ -169,29 +235,43 @@
         ></textarea>
       </div>
 
-      <div class="col-span-1 md:col-span-2 flex justify-end items-center gap-3 pt-3 border-t border-slate-50 mt-2">
-        <span *ngIf="form.invalid && form.touched" class="text-xs text-red-400 italic">
-          Mangyaring punan nang tama ang lahat ng kinakailangang impormasyon.
-        </span>
+      <div
+        class="col-span-1 md:col-span-2 flex justify-end items-center gap-3 pt-3 border-t border-slate-50 mt-2"
+      >
+        @if (form.invalid && form.touched) {
+          <span class="text-xs text-red-400 italic">
+            Mangyaring punan nang tama ang lahat ng kinakailangang impormasyon.
+          </span>
+        }
 
         <button
           type="button"
           (click)="saveMonitoringPlan()"
           [disabled]="form.invalid"
           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 shadow-sm shadow-violet-500/10 focus:outline-none focus:ring-4"
-          [class]="form.invalid
-            ? 'bg-slate-200 border border-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-            : 'bg-violet-600 border border-violet-600 hover:bg-violet-700 hover:border-violet-700 active:scale-98 focus:ring-violet-500/20'"
+          [class]="
+            form.invalid
+              ? 'bg-slate-200 border border-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+              : 'bg-violet-600 border border-violet-600 hover:bg-violet-700 hover:border-violet-700 active:scale-98 focus:ring-violet-500/20'
+          "
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/>
-            <polyline points="7 3 7 8 15 8"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
           </svg>
           {{ currentMonitoringPlan?.id ? 'I-update ang Plan' : 'I-save ang Plan' }}
         </button>
       </div>
-
     </div>
   </section>
 </div>

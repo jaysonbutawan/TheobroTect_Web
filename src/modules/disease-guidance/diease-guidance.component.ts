@@ -141,6 +141,9 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       this.isEditMode = true;
       this.currentEditId = disease.id;
 
+      console.log('Selected Disease ID:', disease.id);
+      console.log('currentEditId:', this.currentEditId);
+
       this.form.patchValue({
         nameEn: disease.display_name?.en || '',
         nameTl: disease.display_name?.tl || '',
