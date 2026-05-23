@@ -189,12 +189,6 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       severityId = matchingSeverity.id;
     }
 
-    const formattedChecklist = (this.checklistItems || []).map(item => ({
-      id: (item as any).id?.toString() || null,
-      task: (item as any).task || (item as any).name || (item as any).title || '',
-      checked: (item as any).checked || (item as any).completed || false
-    }));
-
     let hourInteger: number | null = null;
     if (formValue.preferredTime) {
       const parts = formValue.preferredTime.split(':');
@@ -203,21 +197,41 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
 
     // Structural payload tailored for your Laravel architecture
     const payload: any = {
-      disease_key: this.diseaseKey,
-      disease_severity_id: severityId,
+
+      disease_key: this.showSeverity
+        ? null
+        : this.diseaseKey,
+
+      disease_severity_id: this.showSeverity
+        ? severityId
+        : null,
 
       rescan_after_days: (() => {
-        const rawValue = formValue.rescanDays !== undefined ? formValue.rescanDays : formValue.rescan_after_days;
+        const rawValue =
+          formValue.rescanDays !== undefined
+            ? formValue.rescanDays
+            : formValue.rescan_after_days;
+
         const parsed = parseInt(rawValue, 10);
+
         return isNaN(parsed) ? 0 : parsed;
       })(),
 
       preferred_time_hour: hourInteger,
+
       message: {
-        en: (formValue.guidanceEn !== undefined ? formValue.guidanceEn : formValue.guidance_en) || '',
-        tl: (formValue.guidanceTl !== undefined ? formValue.guidanceTl : formValue.guidance_tl) || ''
+        en: (
+          formValue.guidanceEn !== undefined
+            ? formValue.guidanceEn
+            : formValue.guidance_en
+        ) || '',
+
+        tl: (
+          formValue.guidanceTl !== undefined
+            ? formValue.guidanceTl
+            : formValue.guidance_tl
+        ) || ''
       },
-      checklist: formattedChecklist
     };
 
     // --- CRITICAL INSPECTION POINT ---

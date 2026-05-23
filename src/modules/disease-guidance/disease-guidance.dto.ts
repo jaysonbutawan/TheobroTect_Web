@@ -69,14 +69,12 @@ export interface CreateMonitoringPlanDto {
   rescan_after_days: number;
   preferred_time_hour: number | null;
   message: LocalizedText;
-  checklist: ChecklistItemSchema[];
   locale?: string | null;
 }
 export interface UpdateMonitoringPlanDto {
   rescan_after_days?: number;
   preferred_time_hour?: number | null;
   message?: LocalizedText;
-  checklist?: ChecklistItemSchema[];
   locale?: string | null;
 }
 
