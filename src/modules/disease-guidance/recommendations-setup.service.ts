@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment.prod';
@@ -29,10 +29,17 @@ export class RecommendationSetupService {
     );
   }
 
-  getRecommendations(): Observable<RecommendationDto[]> {
+ getRecommendations(diseaseId?: number): Observable<RecommendationDto[]> {
+    let params = new HttpParams();
+
+    // If a disease ID is passed in, attach it to the request url: ?disease_id=5
+    if (diseaseId) {
+      params = params.set('disease_id', diseaseId.toString());
+    }
 
     return this.http.get<RecommendationDto[]>(
-      this.baseUrl
+      this.baseUrl,
+      { params }
     );
   }
 

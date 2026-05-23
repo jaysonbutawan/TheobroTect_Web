@@ -45,7 +45,6 @@
       class="px-10 py-6 bg-white/40 backdrop-blur-xl border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.01)]"
     >
       <div class="max-w-4xl mx-auto flex items-center justify-between relative">
-
         <button
           type="button"
           (click)="setStep(1)"
@@ -57,7 +56,7 @@
               'bg-gradient-to-tr from-green-600 to-green-500 text-white border-transparent shadow-[0_4px_12px_rgba(34,197,94,0.3)] scale-105':
                 currentStep === 1,
               'bg-green-50 text-green-600 border-green-200/60 shadow-[inset_0_2px_4px_rgba(255,255,255,1)]':
-                currentStep > 1
+                currentStep > 1,
             }"
           >
             @if (currentStep > 1) {
@@ -70,7 +69,7 @@
             class="text-xs font-semibold tracking-wide transition-colors duration-300"
             [ngClass]="{
               'text-slate-800 font-bold': currentStep === 1,
-              'text-green-700/80': currentStep > 1
+              'text-green-700/80': currentStep > 1,
             }"
           >
             General Info
@@ -91,7 +90,9 @@
           (click)="setStep(2)"
           [disabled]="!isDiseaseContextActive"
           class="flex items-center gap-3 group focus:outline-none z-10 transition-all duration-300"
-          [ngClass]="{'pointer-events-none opacity-40 cursor-not-allowed': !isDiseaseContextActive}"
+          [ngClass]="{
+            'pointer-events-none opacity-40 cursor-not-allowed': !isDiseaseContextActive,
+          }"
           [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
         >
           <div
@@ -102,7 +103,7 @@
               'bg-green-50 text-green-600 border-green-200/60 shadow-[inset_0_2px_4px_rgba(255,255,255,1)]':
                 currentStep > 2,
               'bg-white/80 text-slate-400 border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]':
-                currentStep < 2
+                currentStep < 2,
             }"
           >
             @if (currentStep > 2) {
@@ -118,7 +119,7 @@
             [ngClass]="{
               'text-slate-800 font-bold': currentStep === 2,
               'text-green-700/80': currentStep > 2,
-              'text-slate-400 group-hover:text-slate-600': currentStep < 2
+              'text-slate-400 group-hover:text-slate-600': currentStep < 2,
             }"
           >
             Monitoring
@@ -139,7 +140,9 @@
           (click)="setStep(3)"
           [disabled]="!isDiseaseContextActive"
           class="flex items-center gap-3 group focus:outline-none z-10 transition-all duration-300"
-          [ngClass]="{'pointer-events-none opacity-40 cursor-not-allowed': !isDiseaseContextActive}"
+          [ngClass]="{
+            'pointer-events-none opacity-40 cursor-not-allowed': !isDiseaseContextActive,
+          }"
           [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
         >
           <div
@@ -148,7 +151,7 @@
               'bg-gradient-to-tr from-green-600 to-green-500 text-white border-transparent shadow-[0_4px_12px_rgba(34,197,94,0.3)] scale-105':
                 currentStep === 3,
               'bg-white/80 text-slate-400 border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]':
-                currentStep < 3
+                currentStep < 3,
             }"
           >
             @if (!isDiseaseContextActive) {
@@ -161,7 +164,7 @@
             class="text-xs font-semibold tracking-wide transition-colors duration-300"
             [ngClass]="{
               'text-slate-800 font-bold': currentStep === 3,
-              'text-slate-400 group-hover:text-slate-600': currentStep < 3
+              'text-slate-400 group-hover:text-slate-600': currentStep < 3,
             }"
           >
             Recommendations
@@ -170,8 +173,11 @@
       </div>
 
       @if (!isDiseaseContextActive) {
-        <p class="text-center text-xs text-amber-600 mt-3 font-medium bg-amber-50 rounded-lg py-1 border border-amber-100">
-          ⚠️ Please select an entry from the sidebar or fill in general information and click "Save Configuration" to unlock subsequent setup modules.
+        <p
+          class="text-center text-xs text-amber-600 mt-3 font-medium bg-amber-50 rounded-lg py-1 border border-amber-100"
+        >
+          ⚠️ Please select an entry from the sidebar or fill in general information and click "Save
+          Configuration" to unlock subsequent setup modules.
         </p>
       }
     </div>
@@ -374,7 +380,11 @@
 
       @if (currentStep === 3) {
         <div class="animate-fade-in">
-          <app-recommendations-setup [sevData]="sevData"  [diseaseId]="currentEditId"></app-recommendations-setup>
+          <app-recommendations-setup
+            [diseaseKey]="selectedDiseaseKey??'' "
+            [sevData]="sevData"
+            [diseaseId]="currentEditId"
+          ></app-recommendations-setup>
         </div>
       }
 
@@ -406,7 +416,9 @@
               (click)="setStep(currentStep + 1)"
               class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               [disabled]="currentStep === 1 && !isDiseaseContextActive"
-              [title]="(currentStep === 1 && !isDiseaseContextActive) ? 'Save disease before proceeding' : ''"
+              [title]="
+                currentStep === 1 && !isDiseaseContextActive ? 'Save disease before proceeding' : ''
+              "
             >
               Next Step
             </button>

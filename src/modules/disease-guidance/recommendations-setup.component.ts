@@ -44,6 +44,7 @@ type SeverityType = 'mild' | 'moderate' | 'severe';
 export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestroy {
   @Input({ required: true }) sevData!: SeverityData;
   @Input() diseaseId: number | null = null;
+  @Input() diseaseKey: string = ''; // ✅ ADD THIS
   @Input() allowedSeverities: SeverityType[] = ['mild', 'moderate', 'severe'];
 
   activeSev: SeverityType = 'mild';
@@ -111,7 +112,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+ ngOnChanges(changes: SimpleChanges): void {
     if (changes['allowedSeverities']) {
       this.displaySeverities = [...this.allowedSeverities];
 
@@ -120,12 +121,17 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       }
     }
 
-    if (changes['diseaseId']?.currentValue) {
-      console.log(
-        `[RecommendationsSetup] Disease changed ->`,
-        changes['diseaseId'].currentValue
-      );
-      this.Severities();
+    // ✅ Listen for changes to EITHER diseaseId or diseaseKey
+    const diseaseIdChanged = changes['diseaseId'] && !changes['diseaseId'].firstChange;
+    const diseaseKeyChanged = changes['diseaseKey'] && !changes['diseaseKey'].firstChange;
+
+    if (diseaseIdChanged || diseaseKeyChanged) {
+      if (this.diseaseId && this.diseaseKey) {
+        console.log(
+          `[RecommendationsSetup] Disease sync complete -> ID: ${this.diseaseId}, Key: "${this.diseaseKey}"`
+        );
+        this.Severities();
+      }
     }
   }
 
@@ -175,7 +181,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   }
 
   onSaveRecommendations() {
-    const diseaseKey = '';
+    const diseaseKey = this.diseaseKey;
     this.isSaving = true;
 
     this.saveRecommendationsForDisease(diseaseKey).then(() => {
@@ -375,18 +381,29 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       throw err;
     }
   }
+async loadExistingRecommendations(): Promise<void> {
+    // 1. Safety check to ensure we have both keys
+    if (!this.diseaseKey || !this.diseaseId) {
+      console.warn('⚠️ [RecommendationsSetup] loadExistingRecommendations aborted: missing diseaseKey or diseaseId.');
+      return;
+    }
 
-  async loadExistingRecommendations(): Promise<void> {
+    console.group(`[RecommendationsSetup] Loading Data for: "${this.diseaseKey}" (ID: ${this.diseaseId})`);
+
     try {
-      // Fetch all recommendations
-      const recommendations = await firstValueFrom(
-        this.recommendationService.getRecommendations()
+      // 2. Fetch ONLY the recommendations for this specific disease ID
+      const response: any = await firstValueFrom(
+        this.recommendationService.getRecommendations(this.diseaseId)
       );
 
-      // Create a reverse map to easily find which SeverityType (mild/moderate/severe)
+      // 3. Since the backend filtered it, all returned data belongs to this disease
+      const diseaseRecommendations = response?.data ?? response ?? [];
+      console.log(`🔹 Fetched strictly filtered recommendations from API:`, diseaseRecommendations);
+
+      // 4. Create a reverse map to easily find which SeverityType (mild/moderate/severe)
       // corresponds to a given database severity ID.
       const severityIdToLevelMap: Record<number, SeverityType> = {};
-      this.diseaseSeverities.forEach(sev => {
+      this.diseaseSeverities.forEach((sev: any) => {
         const level = (sev.severity_level || sev.severity || sev.level || sev.name || '')
           .toLowerCase()
           .trim();
@@ -394,44 +411,83 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           severityIdToLevelMap[sev.id] = level as SeverityType;
         }
       });
+      console.log(`🔹 Valid Severity IDs mapping for this disease:`, severityIdToLevelMap);
 
-      // Loop through fetched recommendations and populate the UI state
-      recommendations.forEach((rec: any) => {
-        const level = severityIdToLevelMap[rec.disease_severity_id];
-
-        // Only process recommendations that belong to the current disease's severities
-        if (level && this.sevData[level]) {
-
-          // 1. Save the ID to our tracking map so future saves trigger a PUT request
-          const mapKey = `${rec.disease_severity_id}_${rec.category_key}`;
-          this.savedRecommendationIds[mapKey] = rec.id;
-
-          // 2. Map the DB content back into the Angular component's UI state
-          switch (rec.category_key) {
-            case 'action_items':
-              this.sevData[level].actions = Array.isArray(rec.content) ? rec.content : [];
-              break;
-            case 'prevention_items':
-              this.sevData[level].prevention = Array.isArray(rec.content) ? rec.content : [];
-              break;
-            case 'escalate_text':
-              this.sevData[level].escalateEn = rec.content?.en || '';
-              this.sevData[level].escalateTl = rec.content?.tl || '';
-              break;
-            case 'seek_help_text':
-              this.sevData[level].seekHelpEn = rec.content?.en || '';
-              this.sevData[level].seekHelpTl = rec.content?.tl || '';
-              break;
-          }
+      // 5. Reset previous tracking IDs and UI state so switching diseases doesn't mix data
+      this.savedRecommendationIds = {};
+      this.displaySeverities.forEach(level => {
+        if (this.sevData[level]) {
+          this.sevData[level].actions = [];
+          this.sevData[level].prevention = [];
+          this.sevData[level].escalateEn = '';
+          this.sevData[level].escalateTl = '';
+          this.sevData[level].seekHelpEn = '';
+          this.sevData[level].seekHelpTl = '';
         }
       });
 
-      // Trigger change detection to update the view with the fetched data
+      console.log(`🔹 Mapping matched recommendations to UI State:`);
+
+      // 6. Loop through the backend-filtered recommendations and populate the UI state
+      diseaseRecommendations.forEach((rec: any) => {
+        if (!rec.disease_severity_id) return;
+
+        const level = severityIdToLevelMap[rec.disease_severity_id];
+
+        if (level && this.sevData[level]) {
+          console.log(`   ✅ Matched [${rec.category_key}] -> Severity [${level}] (ID: ${rec.disease_severity_id})`);
+
+          console.log(`      ↳ Raw Content Type:`, typeof rec.content);
+          console.log(`      ↳ Is Array?:`, Array.isArray(rec.content));
+          console.log(`      ↳ Raw Content Value:`, rec.content);
+
+          const mapKey = `${rec.disease_severity_id}_${rec.category_key}`;
+          this.savedRecommendationIds[mapKey] = rec.id;
+
+          let parsedContent = rec.content;
+          if (typeof parsedContent === 'string') {
+            try {
+              parsedContent = JSON.parse(parsedContent);
+              console.log(`      ↳ ⚠️ Content was a string. Successfully parsed into JSON:`, parsedContent);
+            } catch (e) {
+              console.warn(`      ↳ ❌ Content is a string but NOT valid JSON. Cannot parse.`);
+            }
+          }
+
+          switch (rec.category_key) {
+            case 'action_items':
+              this.sevData[level].actions = Array.isArray(parsedContent) ? parsedContent : [];
+              console.log(`      ↳ Set actions to:`, this.sevData[level].actions);
+              break;
+            case 'prevention_items':
+              this.sevData[level].prevention = Array.isArray(parsedContent) ? parsedContent : [];
+              console.log(`      ↳ Set prevention to:`, this.sevData[level].prevention);
+              break;
+            case 'escalate_text':
+              this.sevData[level].escalateEn = parsedContent?.en || '';
+              this.sevData[level].escalateTl = parsedContent?.tl || '';
+              console.log(`      ↳ Set escalateEn: "${this.sevData[level].escalateEn}"`);
+              break;
+            case 'seek_help_text':
+              this.sevData[level].seekHelpEn = parsedContent?.en || '';
+              this.sevData[level].seekHelpTl = parsedContent?.tl || '';
+              console.log(`      ↳ Set seekHelpEn: "${this.sevData[level].seekHelpEn}"`);
+              break;
+          }
+        } else {
+          console.warn(`   ❌ Ignored [${rec.category_key}] (Severity ID: ${rec.disease_severity_id}) - Not mapped to active disease.`);
+        }
+      });
+
+      console.log(`🚀 FINAL STATE OF THIS.SEVDATA BEFORE UI RENDER:`, JSON.parse(JSON.stringify(this.sevData)));
+
       this.cdr.markForCheck();
-      console.log('[RecommendationsSetup] Successfully loaded existing recommendations.');
+      console.log('✅ [RecommendationsSetup] Successfully finished applying recommendations.');
 
     } catch (error) {
-      console.error('[RecommendationsSetup] Failed to load existing recommendations', error);
+      console.error('❌ [RecommendationsSetup Error] Failed to load existing recommendations:', error);
+    } finally {
+      console.groupEnd();
     }
   }
 }
