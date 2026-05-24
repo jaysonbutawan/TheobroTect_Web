@@ -1,15 +1,15 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { NgZone, Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { DiseaseSidebarComponent } from './disease-sidebar.component';
 import { MonitoringSetupComponent } from './monitoring-setup.component';
 import { RecommendationsSetupComponent, SeverityData } from './recommendations-setup.component';
 import { TranslationService } from './translation.service';
 import { DiseaseGuideService } from './disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
+import { DiseaseViewModalComponent } from './disease-view-modal.component';
 
 export interface ChecklistItem {
   en: string;
@@ -24,10 +24,19 @@ export interface ChecklistItem {
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    DiseaseSidebarComponent,
+    DiseaseViewModalComponent,
     MonitoringSetupComponent,
     RecommendationsSetupComponent
   ],
+  styles: [`
+  @keyframes deleteProgress {
+    from { width: 100%; }
+    to   { width: 0%; }
+  }
+  .delete-progress-bar {
+    animation: deleteProgress 5s linear forwards;
+  }
+`],
   templateUrl: './disease-guidance.component.html',
 })
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
@@ -45,9 +54,25 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   selectedDisease: any = null;
   currentStep: number = 1;
 
+  // ─── TABLE VIEW TOGGLE ───
+  showAddedDiseases: boolean = false;
+  searchQuery: string = '';
+  filterLocale: string = '';
+
+  pendingDeleteDisease: DiseaseDto | null = null;
+  deleteToastVisible = false;
+  deleteCountdown = 5;
+  private deleteTimer: any = null;
+  private deleteCountTimer: any = null;
+
+  // ─── VIEW MODAL ───
+  isViewModalOpen: boolean = false;
+  viewingDisease: DiseaseDto | null = null;
+
   private destroy$ = new Subject<void>();
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
+  private ngZone = inject(NgZone);
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private diseaseService = inject(DiseaseGuideService);
@@ -84,17 +109,73 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     Object.values(this.debounceTimers).forEach(clearTimeout);
   }
 
-  /**
-   * Helper getter to verify if a valid disease configuration context
-   * has been saved or chosen out of the structural list.
-   */
+  // ─── COMPUTED: filtered records for the table view ───
+  get filteredRecords(): DiseaseDto[] {
+    return this.existingRecords.filter(disease => {
+      const query = this.searchQuery.trim().toLowerCase();
+
+      const matchesSearch = !query ||
+        (disease.display_name?.en ?? '').toLowerCase().includes(query) ||
+        (disease.display_name?.tl ?? '').toLowerCase().includes(query) ||
+        (disease.disease_key ?? '').toLowerCase().includes(query);
+
+      const matchesLocale = !this.filterLocale ||
+        disease.disease_key === this.filterLocale;
+
+      return matchesSearch && matchesLocale;
+    });
+  }
+
+  // ─── TABLE ACTIONS ───
+  onTableViewDisease(disease: DiseaseDto): void {
+    this.viewingDisease = disease;
+    this.isViewModalOpen = true;
+  }
+
+  editOpenedFromTable = false;
+
+  onTableEditDisease(disease: DiseaseDto): void {
+    // Track that edit was triggered from the table
+    this.editOpenedFromTable = this.showAddedDiseases;
+
+    // Switch back to form view and select this disease for editing
+    this.showAddedDiseases = false;
+    this.onSidebarDiseaseSelected(disease);
+  }
+
+  onTableDeleteDisease(disease: DiseaseDto): void {
+  if (this.pendingDeleteDisease) {
+    this.confirmDelete();
+  }
+
+  this.pendingDeleteDisease = disease;
+  this.deleteToastVisible = true;
+  this.deleteCountdown = 5;
+
+  this.ngZone.runOutsideAngular(() => {
+    this.deleteCountTimer = setInterval(() => {
+      this.ngZone.run(() => {
+        this.deleteCountdown--;
+        this.cdr.markForCheck();
+        if (this.deleteCountdown <= 0) clearInterval(this.deleteCountTimer);
+      });
+    }, 1000);
+
+    this.deleteTimer = setTimeout(() => {
+      this.ngZone.run(() => {
+        this.confirmDelete();
+        this.cdr.markForCheck();
+      });
+    }, 5000);
+  });
+}
+
+  // ─── STEP NAVIGATION ───
   get isDiseaseContextActive(): boolean {
     return !!this.currentEditId && !!this.selectedDiseaseKey;
   }
 
-  // ─── STEP NAVIGATION ───
   setStep(step: number): void {
-    // If attempting to access step 2 or 3 without an active disease context, block action
     if (step > 1 && !this.isDiseaseContextActive) {
       console.warn('[NAVIGATION BLOCKED] Select or Save a disease profile row first before arranging rules.');
       return;
@@ -185,7 +266,13 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.selectedDisease = null;
 
     this.form.reset();
-    this.currentStep = 1; // Always route back to safety layout baseline step 1
+    this.currentStep = 1;
+
+    // If edit was triggered from the table, go back to it
+    if (this.editOpenedFromTable) {
+      this.showAddedDiseases = true;
+      this.editOpenedFromTable = false;
+    }
   }
 
   onSave(): void {
@@ -232,7 +319,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
             : `Created: ${saved.display_name?.en}`
         );
 
-        // Lock in context properties immediately so they can now proceed onto Steps 2 & 3 without losing state
         this.currentEditId = saved.id;
         this.isEditMode = true;
 
@@ -244,4 +330,32 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  undoDelete(): void {
+  clearTimeout(this.deleteTimer);
+  clearInterval(this.deleteCountTimer);
+  this.pendingDeleteDisease = null;
+  this.deleteToastVisible = false;
+  this.deleteCountdown = 5;
+}
+
+confirmDelete(): void {
+  clearTimeout(this.deleteTimer);
+  clearInterval(this.deleteCountTimer);
+
+  if (!this.pendingDeleteDisease) return;
+
+  const id = this.pendingDeleteDisease.id;
+
+  // 🔁 Replace with your actual service call
+  // this.diseaseService.deleteDisease(id).subscribe(() => { ... });
+  console.warn('[DELETE] Disease:', id, this.pendingDeleteDisease.display_name?.en);
+
+  // Remove from local list immediately
+  this.existingRecords = this.existingRecords.filter(d => d.id !== id);
+
+  this.pendingDeleteDisease = null;
+  this.deleteToastVisible = false;
+  this.deleteCountdown = 5;
+}
 }

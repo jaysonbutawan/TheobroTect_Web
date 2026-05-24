@@ -9,6 +9,8 @@ export interface DiseaseDto {
   display_name: LocalizedText;
   description: LocalizedText;
   locale: string;
+  created_at?: string;   //
+  updated_at?: string;   // 
 }
 
 export interface CreateDiseaseDto {
