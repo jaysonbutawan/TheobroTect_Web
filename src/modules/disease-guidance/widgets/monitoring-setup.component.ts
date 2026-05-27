@@ -4,10 +4,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
-import { ChecklistItem } from './diease-guidance.component';
-import { DiseaseSeverityService } from './disease-severity.service';
-import { CreateDiseaseSeverityDto, CreateMonitoringPlanDto, MonitoringPlanDto } from './disease-guidance.dto';
-import { MonitoringSetupService } from './monitoring-setup.service';
+import { ChecklistItem } from '../diease-guidance.component';
+import { DiseaseSeverityService } from '../services/disease-severity.service';
+import { CreateDiseaseSeverityDto, CreateMonitoringPlanDto, MonitoringPlanDto } from '../disease-guidance.dto';
+import { MonitoringSetupService } from '../services/monitoring-setup.service';
 
 @Component({
   selector: 'app-monitoring-setup',
@@ -37,7 +37,6 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
   }
 
   ngOnInit(): void {
-    // Forcefully verify and inject the missing control paths into the parent FormGroup reference
     if (this.form) {
       if (!this.form.contains('rescanDays')) {
         this.form.addControl('rescanDays', new FormControl(''));

@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient,HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../../environments/environment.prod';
 
 import {
   RecommendationDto,
   CreateRecommendationDto,
   UpdateRecommendationDto
-} from './recommendation.dto';
+} from '../recommendation.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,7 @@ export class RecommendationSetupService {
     );
   }
 
- getRecommendations(diseaseId?: number): Observable<RecommendationDto[]> {
+  getRecommendations(diseaseId?: number): Observable<RecommendationDto[]> {
     let params = new HttpParams();
 
     // If a disease ID is passed in, attach it to the request url: ?disease_id=5

@@ -1,16 +1,16 @@
-import { NgZone, Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { MonitoringSetupComponent } from './monitoring-setup.component';
-import { RecommendationsSetupComponent, SeverityData } from './recommendations-setup.component';
-import { TranslationService } from './translation.service';
-import { DiseaseGuideService } from './disease-guidance.service';
+import { MonitoringSetupComponent } from './widgets/monitoring-setup.component';
+import { RecommendationsSetupComponent, SeverityData } from './widgets/recommendations-setup.component';
+import { TranslationService } from './services/translation.service';
+import { DiseaseGuideService } from './services/disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
-import { DiseaseViewModalComponent } from './disease-view-modal.component';
-
+import { DiseaseViewModalComponent } from './widgets/disease-view-modal.component';
+import { DiseaseTableComponent } from './widgets/disease-table.component';
 export interface ChecklistItem {
   en: string;
   tl: string;
@@ -26,44 +26,26 @@ export interface ChecklistItem {
     FormsModule,
     DiseaseViewModalComponent,
     MonitoringSetupComponent,
-    RecommendationsSetupComponent
+    RecommendationsSetupComponent,
+    DiseaseTableComponent,
+
   ],
-  styles: [`
-  @keyframes deleteProgress {
-    from { width: 100%; }
-    to   { width: 0%; }
-  }
-  .delete-progress-bar {
-    animation: deleteProgress 5s linear forwards;
-  }
-`],
   templateUrl: './disease-guidance.component.html',
 })
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   form!: FormGroup;
-
   translating: Record<string, boolean> = {};
 
   selectedLabel: string = '';
   selectedDiseaseKey: string | null = null;
-
   existingRecords: DiseaseDto[] = [];
 
   isEditMode: boolean = false;
   currentEditId: number | null = null;
   selectedDisease: any = null;
   currentStep: number = 1;
-
-  // ─── TABLE VIEW TOGGLE ───
   showAddedDiseases: boolean = false;
-  searchQuery: string = '';
-  filterLocale: string = '';
-
-  pendingDeleteDisease: DiseaseDto | null = null;
-  deleteToastVisible = false;
-  deleteCountdown = 5;
-  private deleteTimer: any = null;
-  private deleteCountTimer: any = null;
+  editOpenedFromTable = false;
 
   // ─── VIEW MODAL ───
   isViewModalOpen: boolean = false;
@@ -72,11 +54,24 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
-  private ngZone = inject(NgZone);
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private diseaseService = inject(DiseaseGuideService);
   private translationService = inject(TranslationService);
+
+  diseaseKeys: string[] = [
+    'black_pod_disease',
+    'cacao_pod_borer',
+    'mealybug',
+    'healthy',
+    'non_cacao'
+  ];
+
+  sevData: SeverityData = {
+    mild: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
+    moderate: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
+    severe: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' }
+  };
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -89,103 +84,53 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.fetchExistingDiseases();
   }
 
-  sevData: SeverityData = {
-    mild: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
-    moderate: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
-    severe: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' }
-  };
-
-  diseaseKeys: string[] = [
-    'black_pod_disease',
-    'cacao_pod_borer',
-    'mealybug',
-    'healthy',
-    'non_cacao'
-  ];
-
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     Object.values(this.debounceTimers).forEach(clearTimeout);
   }
 
-  // ─── COMPUTED: filtered records for the table view ───
-  get filteredRecords(): DiseaseDto[] {
-    return this.existingRecords.filter(disease => {
-      const query = this.searchQuery.trim().toLowerCase();
-
-      const matchesSearch = !query ||
-        (disease.display_name?.en ?? '').toLowerCase().includes(query) ||
-        (disease.display_name?.tl ?? '').toLowerCase().includes(query) ||
-        (disease.disease_key ?? '').toLowerCase().includes(query);
-
-      const matchesLocale = !this.filterLocale ||
-        disease.disease_key === this.filterLocale;
-
-      return matchesSearch && matchesLocale;
-    });
+  // ─── UTILITIES ───
+  formatLabel(key: string): string {
+    if (!key) return '';
+    return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   }
 
-  // ─── TABLE ACTIONS ───
+  // ─── TABLE EVENT HANDLERS ───
+
   onTableViewDisease(disease: DiseaseDto): void {
     this.viewingDisease = disease;
     this.isViewModalOpen = true;
   }
 
-  editOpenedFromTable = false;
-
   onTableEditDisease(disease: DiseaseDto): void {
-    // Track that edit was triggered from the table
     this.editOpenedFromTable = this.showAddedDiseases;
-
-    // Switch back to form view and select this disease for editing
     this.showAddedDiseases = false;
     this.onSidebarDiseaseSelected(disease);
   }
 
-  onTableDeleteDisease(disease: DiseaseDto): void {
-  if (this.pendingDeleteDisease) {
-    this.confirmDelete();
+  onTableDeleteConfirmed(id: number): void {
+    // 🔁 actual service call back-end deletion execution
+    // this.diseaseService.deleteDisease(id).subscribe();
+    console.warn('[DELETE CONFIRMED BY TABLE] ID:', id);
+
+    // Remove from local array to instantly update the child UI
+    this.existingRecords = this.existingRecords.filter(d => d.id !== id);
+    this.cdr.markForCheck();
   }
 
-  this.pendingDeleteDisease = disease;
-  this.deleteToastVisible = true;
-  this.deleteCountdown = 5;
+  // ─── CORE FORM / NAVIGATION LOGIC ───
 
-  this.ngZone.runOutsideAngular(() => {
-    this.deleteCountTimer = setInterval(() => {
-      this.ngZone.run(() => {
-        this.deleteCountdown--;
-        this.cdr.markForCheck();
-        if (this.deleteCountdown <= 0) clearInterval(this.deleteCountTimer);
-      });
-    }, 1000);
-
-    this.deleteTimer = setTimeout(() => {
-      this.ngZone.run(() => {
-        this.confirmDelete();
-        this.cdr.markForCheck();
-      });
-    }, 5000);
-  });
-}
-
-  // ─── STEP NAVIGATION ───
   get isDiseaseContextActive(): boolean {
     return !!this.currentEditId && !!this.selectedDiseaseKey;
   }
 
   setStep(step: number): void {
     if (step > 1 && !this.isDiseaseContextActive) {
-      console.warn('[NAVIGATION BLOCKED] Select or Save a disease profile row first before arranging rules.');
+      console.warn('[NAVIGATION BLOCKED] Select or Save a disease profile row first.');
       return;
     }
     this.currentStep = step;
-  }
-
-  formatLabel(key: string): string {
-    if (!key) return '';
-    return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   }
 
   onEnInput(sourceControlName: string, targetControlName: string): void {
@@ -198,7 +143,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     }
 
     this.translating[targetControlName] = true;
-
     this.debounceTimers[targetControlName] = setTimeout(async () => {
       try {
         const translated = await this.translationService.translate(text);
@@ -214,16 +158,11 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
 
   onSidebarDiseaseSelected(disease: any): void {
     this.selectedDisease = disease;
-
     if (disease?.disease_key) {
       this.selectedLabel = disease.disease_key;
       this.selectedDiseaseKey = disease.disease_key;
-
       this.isEditMode = true;
       this.currentEditId = disease.id;
-
-      console.log('Selected Disease ID:', disease.id);
-      console.log('currentEditId:', this.currentEditId);
 
       this.form.patchValue({
         nameEn: disease.display_name?.en || '',
@@ -264,7 +203,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.selectedLabel = '';
     this.selectedDiseaseKey = null;
     this.selectedDisease = null;
-
     this.form.reset();
     this.currentStep = 1;
 
@@ -295,11 +233,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       }
     };
 
-    console.group('[DISEASE SAVE]');
-    console.log('Mode:', this.isEditMode ? 'UPDATE' : 'CREATE');
-    console.log('Payload:', payload);
-    console.groupEnd();
-
     const request$ =
       this.isEditMode && this.currentEditId
         ? this.diseaseService.updateDisease(this.currentEditId, payload)
@@ -308,10 +241,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     request$.subscribe({
       next: (res: any) => {
         const saved = res?.data ?? res;
-
-        console.group('[SAVE SUCCESS]');
-        console.log(saved);
-        console.groupEnd();
 
         alert(
           this.isEditMode
@@ -330,32 +259,4 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  undoDelete(): void {
-  clearTimeout(this.deleteTimer);
-  clearInterval(this.deleteCountTimer);
-  this.pendingDeleteDisease = null;
-  this.deleteToastVisible = false;
-  this.deleteCountdown = 5;
-}
-
-confirmDelete(): void {
-  clearTimeout(this.deleteTimer);
-  clearInterval(this.deleteCountTimer);
-
-  if (!this.pendingDeleteDisease) return;
-
-  const id = this.pendingDeleteDisease.id;
-
-  // 🔁 Replace with your actual service call
-  // this.diseaseService.deleteDisease(id).subscribe(() => { ... });
-  console.warn('[DELETE] Disease:', id, this.pendingDeleteDisease.display_name?.en);
-
-  // Remove from local list immediately
-  this.existingRecords = this.existingRecords.filter(d => d.id !== id);
-
-  this.pendingDeleteDisease = null;
-  this.deleteToastVisible = false;
-  this.deleteCountdown = 5;
-}
 }

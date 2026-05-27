@@ -1,6 +1,6 @@
 import { Injectable, inject} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../../environments/environment.prod';
 import { Observable } from 'rxjs';
 
 import {
@@ -8,7 +8,7 @@ import {
   DiseaseDto,
   CreateDiseaseDto,
   UpdateDiseaseDto
-} from './disease-guidance.dto';
+} from '../disease-guidance.dto';
 
 @Injectable({
   providedIn: 'root'

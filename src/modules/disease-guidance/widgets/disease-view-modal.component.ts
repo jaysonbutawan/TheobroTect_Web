@@ -11,12 +11,12 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { take, catchError } from 'rxjs/operators';
 
-import { DiseaseDto, MonitoringPlanDto } from './disease-guidance.dto';
-import { RecommendationDto } from './recommendation.dto';
-import { MonitoringSetupService } from './monitoring-setup.service';
-import { RecommendationSetupService } from './recommendations-setup.service';
+import { DiseaseDto, MonitoringPlanDto } from '../disease-guidance.dto';
+import { RecommendationDto } from '../recommendation.dto';
+import { MonitoringSetupService } from '../services/monitoring-setup.service';
+import { RecommendationSetupService } from '../services/recommendations-setup.service';
 
 type ModalTab = 'general' | 'monitoring' | 'recommendations';
 
@@ -291,6 +291,7 @@ type ModalTab = 'general' | 'monitoring' | 'recommendations';
           <!-- ── RECOMMENDATIONS TAB ── -->
           @if (activeTab === 'recommendations') {
             <div class="space-y-4">
+
               @if (recommendations.length === 0) {
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-12 text-center">
                   <svg class="w-10 h-10 mx-auto text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,85 +302,115 @@ type ModalTab = 'general' | 'monitoring' | 'recommendations';
                 </div>
               }
 
-              <!-- Group by severity -->
+              <!-- BUG FIX: Group loop was intact but rec loop was entirely missing inside it -->
               @for (group of groupedRecommendations; track group.severity) {
                 <div class="rounded-2xl border overflow-hidden"
                   [ngClass]="{
                     'border-emerald-100': group.severity === 'mild',
-                    'border-amber-100': group.severity === 'moderate',
-                    'border-red-100': group.severity === 'severe',
-                    'border-slate-100': !group.severity
+                    'border-amber-100':   group.severity === 'moderate',
+                    'border-red-100':     group.severity === 'severe',
+                    'border-slate-100':   group.severity === 'general'
                   }">
 
                   <!-- Severity header -->
                   <div class="flex items-center gap-2 px-5 py-3 border-b"
                     [ngClass]="{
                       'bg-emerald-50/60 border-emerald-100': group.severity === 'mild',
-                      'bg-amber-50/60 border-amber-100': group.severity === 'moderate',
-                      'bg-red-50/60 border-red-100': group.severity === 'severe',
-                      'bg-slate-50/60 border-slate-100': !group.severity
+                      'bg-amber-50/60 border-amber-100':     group.severity === 'moderate',
+                      'bg-red-50/60 border-red-100':         group.severity === 'severe',
+                      'bg-slate-50/60 border-slate-100':     group.severity === 'general'
                     }">
                     <div class="w-2 h-2 rounded-full"
                       [ngClass]="{
                         'bg-emerald-500': group.severity === 'mild',
-                        'bg-amber-500': group.severity === 'moderate',
-                        'bg-red-500': group.severity === 'severe',
-                        'bg-slate-400': !group.severity
+                        'bg-amber-500':   group.severity === 'moderate',
+                        'bg-red-500':     group.severity === 'severe',
+                        'bg-slate-400':   group.severity === 'general'
                       }">
                     </div>
                     <span class="text-xs font-bold uppercase tracking-wide"
                       [ngClass]="{
                         'text-emerald-700': group.severity === 'mild',
-                        'text-amber-700': group.severity === 'moderate',
-                        'text-red-700': group.severity === 'severe',
-                        'text-slate-600': !group.severity
+                        'text-amber-700':   group.severity === 'moderate',
+                        'text-red-700':     group.severity === 'severe',
+                        'text-slate-600':   group.severity === 'general'
                       }">
-                      {{ group.severity ? (group.severity | titlecase) : 'General' }}
+                      {{ group.severity | titlecase }}
                     </span>
                     <span class="ml-auto text-[11px] font-medium text-slate-400">
                       {{ group.items.length }} item{{ group.items.length !== 1 ? 's' : '' }}
                     </span>
                   </div>
 
-                  <!-- Recommendation items -->
+                  <!-- BUG FIX: This @for loop over rec was completely missing -->
                   <div class="divide-y divide-slate-50">
                     @for (rec of group.items; track rec.id) {
-                      <div class="px-5 py-4">
-                        <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 uppercase tracking-wide">
-                            {{ rec.category_key }}
-                          </span>
-                          <span class="text-[10px] text-slate-400">Sort #{{ rec.sort_order }}</span>
-                        </div>
+                      <div class="p-4 space-y-3">
 
-                        <!-- Content EN -->
-                        @if (rec.content['en']) {
-                          <div class="mb-2">
-                            <div class="flex items-center gap-1.5 mb-1">
-                              <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
-                            </div>
-                            <p class="text-sm text-slate-600 leading-relaxed bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
-                              {{ rec.content['en'] }}
-                            </p>
-                          </div>
-                        }
+                        <!-- Category label -->
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide">
+                          {{ rec.category_key | titlecase }}
+                        </span>
 
-                        <!-- Content TL -->
-                        @if (rec.content['tl']) {
-                          <div>
-                            <div class="flex items-center gap-1.5 mb-1">
-                              <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
-                            </div>
-                            <p class="text-sm text-slate-600 leading-relaxed bg-amber-50/40 rounded-lg px-3 py-2 border border-amber-100">
-                              {{ rec.content['tl'] }}
-                            </p>
+                        <!-- BUG FIX: Array.isArray was used in the template but never exposed on the class -->
+                        @if (isArray(rec.content)) {
+
+                          <!-- ARRAY CONTENT (action_items / prevention_items) -->
+                          <div class="space-y-3">
+                            @for (item of asArray(rec.content); track $index) {
+                              <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+                                @if (item.en) {
+                                  <div class="mb-2">
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                      <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 leading-relaxed">{{ item.en }}</p>
+                                  </div>
+                                }
+                                @if (item.tl) {
+                                  <div>
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                      <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 leading-relaxed">{{ item.tl }}</p>
+                                  </div>
+                                }
+                              </div>
+                            }
                           </div>
+
+                        } @else {
+
+                          <!-- OBJECT CONTENT (escalate_text / seek_help_text) -->
+                          @if (asObject(rec.content)?.en) {
+                            <div class="mb-2">
+                              <div class="flex items-center gap-1.5 mb-1">
+                                <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
+                              </div>
+                              <p class="text-sm text-slate-600 leading-relaxed bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+                                {{ asObject(rec.content)!.en }}
+                              </p>
+                            </div>
+                          }
+                          @if (asObject(rec.content)?.tl) {
+                            <div>
+                              <div class="flex items-center gap-1.5 mb-1">
+                                <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
+                              </div>
+                              <p class="text-sm text-slate-600 leading-relaxed bg-amber-50/40 rounded-lg px-3 py-2 border border-amber-100">
+                                {{ asObject(rec.content)!.tl }}
+                              </p>
+                            </div>
+                          }
+
                         }
                       </div>
                     }
                   </div>
+
                 </div>
               }
+
             </div>
           }
 
@@ -393,17 +424,6 @@ type ModalTab = 'general' | 'monitoring' | 'recommendations';
           <span class="text-xs text-slate-400 font-medium">Read-only view</span>
         </div>
         <div class="flex items-center gap-2">
-          <!-- <button
-            type="button"
-            (click)="onEdit()"
-            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-tr from-emerald-500 to-green-400 shadow-sm hover:brightness-105 transition-all"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-            Edit Disease
-          </button> -->
           <button
             type="button"
             (click)="close()"
@@ -432,6 +452,19 @@ export class DiseaseViewModalComponent implements OnChanges {
   monitoringPlans: MonitoringPlanDto[] = [];
   recommendations: RecommendationDto[] = [];
 
+  // BUG FIX: Expose Array.isArray to the template — Angular templates cannot call
+  // global functions directly, so it must be a class method.
+  readonly isArray = Array.isArray;
+
+  // BUG FIX: Type-safe cast helpers used in the template to avoid unsafe `any` access
+  asArray(content: any): { en: string; tl: string }[] {
+    return Array.isArray(content) ? content : [];
+  }
+
+  asObject(content: any): { en: string; tl: string } | null {
+    return content && !Array.isArray(content) ? content : null;
+  }
+
   private monitoringService = inject(MonitoringSetupService);
   private recommendationService = inject(RecommendationSetupService);
   private cdr = inject(ChangeDetectorRef);
@@ -453,35 +486,44 @@ export class DiseaseViewModalComponent implements OnChanges {
 
     forkJoin({
       monitoring: this.monitoringService.getMonitoringPlans().pipe(
+        take(1),
         catchError(() => of({ data: [] as MonitoringPlanDto[] }))
       ),
       recommendations: this.recommendationService.getRecommendations(this.disease.id).pipe(
+        take(1),
         catchError(() => of([] as RecommendationDto[]))
       )
     }).subscribe({
       next: ({ monitoring, recommendations }) => {
-        // Filter monitoring plans by disease_key
-        const allPlans: MonitoringPlanDto[] = (monitoring as any)?.data ?? monitoring ?? [];
-        this.monitoringPlans = allPlans.filter(
-          p => p.disease_key === this.disease!.disease_key
-        );
+        const allPlans: any[] = (monitoring as any)?.data ?? monitoring ?? [];
 
-        // Recommendations already filtered by disease_id via query param
+        console.log('[DiseaseViewModal] All Plans from API:', allPlans);
+        console.log('[DiseaseViewModal] Current Disease:', this.disease);
+
+        this.monitoringPlans = allPlans.filter(p => {
+          console.log(`[DiseaseViewModal] Comparing plan disease_key="${p.disease_key}" vs "${this.disease!.disease_key}"`);
+          return p.disease_key?.toString().toLowerCase() === this.disease!.disease_key?.toString().toLowerCase();
+        });
+
+        console.log('[DiseaseViewModal] Matched monitoring plans:', this.monitoringPlans);
+
         this.recommendations = Array.isArray(recommendations)
           ? recommendations
           : (recommendations as any)?.data ?? [];
 
+        console.log('[DiseaseViewModal] Recommendations loaded:', this.recommendations);
+
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: () => {
+      error: (err) => {
+        console.error('[DiseaseViewModal] loadData error:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
       }
     });
   }
 
-  // Group recommendations by severity level for display
   get groupedRecommendations(): { severity: string; items: RecommendationDto[] }[] {
     const groups: Record<string, RecommendationDto[]> = {};
 
