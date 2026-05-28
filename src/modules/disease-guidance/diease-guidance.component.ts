@@ -27,7 +27,7 @@ export interface ChecklistItem {
     DiseaseViewModalComponent,
     MonitoringSetupComponent,
     RecommendationsSetupComponent,
-    DiseaseTableComponent,
+    // DiseaseTableComponent,
 
   ],
   templateUrl: './disease-guidance.component.html',
@@ -35,6 +35,8 @@ export interface ChecklistItem {
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   translating: Record<string, boolean> = {};
+  searchQuery: string = '';
+  filterLocale: string = '';
 
   selectedLabel: string = '';
   selectedDiseaseKey: string | null = null;
@@ -257,6 +259,15 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         console.error('[SAVE ERROR]', err);
         alert('Save failed. Check console.');
       }
+    });
+  }
+
+  get filteredRecords(): DiseaseDto[] {
+    return this.existingRecords.filter(d => {
+      const matchesSearch = !this.searchQuery ||
+        d.display_name?.en?.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const matchesLocale = !this.filterLocale || d.locale === this.filterLocale;
+      return matchesSearch && matchesLocale;
     });
   }
 }
