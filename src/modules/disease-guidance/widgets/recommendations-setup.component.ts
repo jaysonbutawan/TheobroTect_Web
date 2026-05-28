@@ -16,8 +16,6 @@ import { TranslationService } from '../services/translation.service';
 import { ChecklistItem } from '../diease-guidance.component';
 import { DiseaseSeverityService } from '../services/disease-severity.service';
 import { RecommendationSetupService } from '../services/recommendations-setup.service';
-import { CreateRecommendationDto, UpdateRecommendationDto } from '../recommendation.dto';
-
 export interface SeverityLevelData {
   actions: ChecklistItem[];
   prevention: ChecklistItem[];
@@ -54,20 +52,18 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   diseaseSeverities: any[] = [];
   isSaving: boolean = false;
 
-  private savedRecommendationIds: Record<string, number> = {};
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
   private translationService = inject(TranslationService);
   private severityService = inject(DiseaseSeverityService);
   private recommendationService = inject(RecommendationSetupService);
   private cdr = inject(ChangeDetectorRef);
 
-  // ─── Track whether initial load already ran ───────────────────────────────
   private initialLoadDone = false;
 
   themeMap = {
-    mild:     { bg: 'bg-emerald-50/30', border: 'border-emerald-100', text: 'text-emerald-700', dashBorder: 'border-emerald-300', btnHover: 'hover:bg-emerald-50', badgeBg: 'bg-blue-100',   badgeText: 'text-blue-700'   },
-    moderate: { bg: 'bg-amber-50/30',   border: 'border-amber-100',   text: 'text-amber-700',   dashBorder: 'border-amber-300',   btnHover: 'hover:bg-amber-50',   badgeBg: 'bg-amber-100',  badgeText: 'text-amber-700'  },
-    severe:   { bg: 'bg-red-50/30',     border: 'border-red-100',     text: 'text-red-700',     dashBorder: 'border-red-300',     btnHover: 'hover:bg-red-50',     badgeBg: 'bg-purple-100', badgeText: 'text-purple-700' }
+    mild: { bg: 'bg-emerald-50/30', border: 'border-emerald-100', text: 'text-emerald-700', dashBorder: 'border-emerald-300', btnHover: 'hover:bg-emerald-50', badgeBg: 'bg-blue-100', badgeText: 'text-blue-700' },
+    moderate: { bg: 'bg-amber-50/30', border: 'border-amber-100', text: 'text-amber-700', dashBorder: 'border-amber-300', btnHover: 'hover:bg-amber-50', badgeBg: 'bg-amber-100', badgeText: 'text-amber-700' },
+    severe: { bg: 'bg-red-50/30', border: 'border-red-100', text: 'text-red-700', dashBorder: 'border-red-300', btnHover: 'hover:bg-red-50', badgeBg: 'bg-purple-100', badgeText: 'text-purple-700' }
   };
 
   severityConfig = {
@@ -95,9 +91,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
 
   ngOnInit(): void {
     console.log(`[RecommendationsSetup] ngOnInit -> diseaseId: ${this.diseaseId}, diseaseKey: "${this.diseaseKey}"`);
-
-    // BUG FIX #1: Only trigger the load if BOTH inputs are already available on init.
-    // If one arrives late, ngOnChanges will catch it instead.
     if (this.diseaseId && this.diseaseKey) {
       console.log('[RecommendationsSetup] ngOnInit: Both inputs ready — loading severities.');
       this.initialLoadDone = true;
@@ -115,18 +108,15 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       }
     }
 
-    // BUG FIX #2: Watch ALL changes (including firstChange) so we never miss
-    // the window where BOTH inputs become available simultaneously or staggered.
-    const idReady  = !!this.diseaseId;
+    const idReady = !!this.diseaseId;
     const keyReady = !!this.diseaseKey;
 
-    const idChanged  = !!changes['diseaseId'];
+    const idChanged = !!changes['diseaseId'];
     const keyChanged = !!changes['diseaseKey'];
 
     if ((idChanged || keyChanged) && idReady && keyReady) {
       console.log(`[RecommendationsSetup] ngOnChanges: Both inputs synced -> ID: ${this.diseaseId}, Key: "${this.diseaseKey}"`);
 
-      // Avoid double-loading if ngOnInit already handled it
       if (!this.initialLoadDone) {
         this.initialLoadDone = true;
         this.Severities();
@@ -143,8 +133,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     Object.values(this.debounceTimers).forEach(timer => clearTimeout(timer));
   }
 
-  // ─── Severities ────────────────────────────────────────────────────────────
-
   Severities(): void {
     console.log(`[RecommendationsSetup] Severities(): Fetching for diseaseId=${this.diseaseId}`);
 
@@ -152,7 +140,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       next: (res: any) => {
         this.existingSeverities = res?.data ?? res ?? [];
 
-        // BUG FIX #3: Ensure numeric comparison (backend may return strings)
         this.diseaseSeverities = this.existingSeverities.filter(
           (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
         );
@@ -202,7 +189,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     }
 
     console.log(`[onSaveRecommendations] Starting save for key="${this.diseaseKey}", id=${this.diseaseId}`);
-    console.log('[onSaveRecommendations] Current savedRecommendationIds (upsert map):', { ...this.savedRecommendationIds });
 
     this.isSaving = true;
 
@@ -232,10 +218,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   onBulletEnInput(item: ChecklistItem, sourceKey: 'en', targetKey: 'tl'): void {
     const text = item[sourceKey]?.trim();
 
-    // BUG FIX #5: Use a STABLE key so clearTimeout actually cancels the previous timer.
-    // Math.random() as a key means the old timer is never found and never cleared —
-    // every keystroke fires a translation request.
-    const timerKey = `bullet_${item}`;   // object reference as stable identity
+    const timerKey = `bullet_${item}`;
 
     if (!text) {
       item[targetKey] = '';
@@ -288,124 +271,122 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     }, 900);
   }
 
-  // ─── Core upsert logic ─────────────────────────────────────────────────────
+  async saveRecommendationsForDisease(
+    diseaseKey: string
+  ): Promise<void> {
 
-  async saveRecommendationsForDisease(diseaseKey: string): Promise<void> {
     if (!this.diseaseId) {
-      console.error('[saveRecommendations] Aborted: no diseaseId.');
+      console.error('[saveRecommendations] No diseaseId found.');
       return;
     }
 
-    // Build severityId lookup map from already-fetched diseaseSeverities
     const severityIdMap: Record<string, number> = {};
+
     this.diseaseSeverities.forEach(sev => {
-      const level = (sev.severity_level || sev.severity || sev.level || sev.name || '')
-        .toLowerCase().trim();
-      if (['mild', 'moderate', 'severe'].includes(level)) {
-        severityIdMap[level] = sev.id;
-      }
+
+      const level = (
+        sev.severity_level ||
+        sev.severity ||
+        sev.level ||
+        ''
+      ).toLowerCase().trim();
+
+      severityIdMap[level] = sev.id;
     });
 
     console.log('[saveRecommendations] severityIdMap:', severityIdMap);
-    console.log('[saveRecommendations] displaySeverities to process:', this.displaySeverities);
 
+    /**
+     * Process each severity
+     */
     for (const severity of this.displaySeverities) {
+
       const severityId = severityIdMap[severity];
 
       if (!severityId) {
-        console.warn(`[saveRecommendations] ⚠️ No DB id for severity "${severity}" — skipping.`);
+        console.warn(
+          `[saveRecommendations] No severityId for "${severity}"`
+        );
         continue;
       }
 
       const data = this.sevData[severity];
+
       if (!data) {
-        console.warn(`[saveRecommendations] ⚠️ No sevData for "${severity}" — skipping.`);
+        console.warn(
+          `[saveRecommendations] No data for "${severity}"`
+        );
         continue;
       }
 
-      console.log(`[saveRecommendations] Processing severity="${severity}" (id=${severityId})`);
+      const recommendations: any[] = [];
 
       if (data.actions?.length) {
-        await this.upsertRecommendationItem(diseaseKey, severityId, 'action_items',    data.actions,  0);
+
+        recommendations.push({
+          category_key: 'action_items',
+          content: data.actions,
+          sort_order: 0
+        });
       }
       if (data.prevention?.length) {
-        await this.upsertRecommendationItem(diseaseKey, severityId, 'prevention_items', data.prevention, 1);
+
+        recommendations.push({
+          category_key: 'prevention_items',
+          content: data.prevention,
+          sort_order: 1
+        });
       }
       if (data.escalateEn?.trim()) {
-        await this.upsertRecommendationItem(diseaseKey, severityId, 'escalate_text',
-          { en: data.escalateEn, tl: data.escalateTl || '' }, 2);
+
+        recommendations.push({
+          category_key: 'escalate_text',
+          content: {
+            en: data.escalateEn,
+            tl: data.escalateTl || ''
+          },
+          sort_order: 2
+        });
       }
       if (data.seekHelpEn?.trim()) {
-        await this.upsertRecommendationItem(diseaseKey, severityId, 'seek_help_text',
-          { en: data.seekHelpEn, tl: data.seekHelpTl || '' }, 3);
+
+        recommendations.push({
+          category_key: 'seek_help_text',
+          content: {
+            en: data.seekHelpEn,
+            tl: data.seekHelpTl || ''
+          },
+          sort_order: 3
+        });
       }
-    }
+      if (!recommendations.length) {
+        console.warn(
+          `[saveRecommendations] Empty recommendations for "${severity}"`
+        );
+        continue;
+      }
 
-    console.log('[saveRecommendations] ✅ Finished all severities.');
-  }
+      console.log(
+        `[saveRecommendations] Saving severity="${severity}"`,
+        recommendations
+      );
 
- private async upsertRecommendationItem(
-    diseaseKey: string,
-    severityId: number,
-    categoryKey: string,
-    content: any,
-    sortOrder: number
-  ): Promise<void> {
-    const mapKey    = `${severityId}_${categoryKey}`;
-    const existingId = this.savedRecommendationIds[mapKey];
-
-    console.log(`[upsert] mapKey="${mapKey}" | existingId=${existingId ?? 'NONE (will CREATE)'}`);
-
-    try {
-      if (existingId) {
-        // ── UPDATE ────────────────────────────────────────────────────────────
-        const updateDto: UpdateRecommendationDto = {
-          category_key: categoryKey,
-          content,
-          sort_order: sortOrder,
-          locale: null
-        };
-
-        console.log(`[upsert] PUT -> id=${existingId}`, updateDto);
-        await firstValueFrom(this.recommendationService.updateRecommendation(existingId, updateDto));
-        console.log(`[upsert] ✅ Updated "${categoryKey}" for severityId=${severityId}`);
-
-      } else {
-        // ── CREATE ────────────────────────────────────────────────────────────
-
-        // Check if the disease key is 'healthy' or 'non_cacao'. If not, force it to null.
-        const finalDiseaseKey = (diseaseKey === 'healthy' || diseaseKey === 'non_cacao')
-          ? diseaseKey
-          : null;
-
-        const createDto: CreateRecommendationDto = {
-          disease_key: finalDiseaseKey as any, // Cast to 'any' to bypass strict TS rules if DTO expects only string
+      await firstValueFrom(
+        this.recommendationService.saveRecommendations({
           disease_severity_id: severityId,
-          category_key: categoryKey,
-          content,
-          sort_order: sortOrder,
-          locale: null
-        };
+          recommendations
+        })
+      );
 
-        console.log(`[upsert] POST -> new record`, createDto);
-        const response = await firstValueFrom(this.recommendationService.createRecommendation(createDto));
-
-        // BUG FIX #6: Guard against missing id in response — log it clearly
-        if (response?.id) {
-          this.savedRecommendationIds[mapKey] = response.id;
-          console.log(`[upsert] ✅ Created "${categoryKey}" for severityId=${severityId} — stored id=${response.id}`);
-        } else {
-          console.error(`[upsert] ❌ Created "${categoryKey}" but response had no id! Cannot track for future updates.`, response);
-        }
-      }
-    } catch (err) {
-      console.error(`[upsert] ❌ Failed for "${categoryKey}" (severityId=${severityId}):`, err);
-      throw err;
+      console.log(
+        `[saveRecommendations] Saved severity="${severity}"`
+      );
     }
-  }
-  // ─── Load existing ─────────────────────────────────────────────────────────
 
-async loadExistingRecommendations(): Promise<void> {
+    console.log('[saveRecommendations] DONE');
+  }
+
+  async loadExistingRecommendations(): Promise<void> {
     if (!this.diseaseKey || !this.diseaseId) {
       console.warn('[loadExistingRecommendations] Aborted: missing diseaseKey or diseaseId.', {
         diseaseKey: this.diseaseKey,
@@ -424,7 +405,6 @@ async loadExistingRecommendations(): Promise<void> {
       const diseaseRecommendations: any[] = response?.data ?? response ?? [];
       console.log(`[loadExistingRecommendations] Raw records from API (${diseaseRecommendations.length}):`, diseaseRecommendations);
 
-      // Build severityId -> SeverityType map
       const severityIdToLevelMap: Record<number, SeverityType> = {};
       this.diseaseSeverities.forEach((sev: any) => {
         const level = (sev.severity_level || sev.severity || sev.level || sev.name || '')
@@ -434,11 +414,9 @@ async loadExistingRecommendations(): Promise<void> {
         }
       });
 
-      // Reset state before applying fetched data
-      this.savedRecommendationIds = {};
       this.displaySeverities.forEach(level => {
         if (this.sevData[level]) {
-          this.sevData[level].actions    = [];
+          this.sevData[level].actions = [];
           this.sevData[level].prevention = [];
           this.sevData[level].escalateEn = '';
           this.sevData[level].escalateTl = '';
@@ -447,7 +425,6 @@ async loadExistingRecommendations(): Promise<void> {
         }
       });
 
-      // Populate UI state and record IDs for future upsert
       diseaseRecommendations.forEach((rec: any) => {
         if (!rec.disease_severity_id) {
           return;
@@ -460,14 +437,12 @@ async loadExistingRecommendations(): Promise<void> {
         }
 
         const mapKey = `${rec.disease_severity_id}_${rec.category_key}`;
-        this.savedRecommendationIds[mapKey] = rec.id;
 
         let parsedContent = rec.content;
         if (typeof parsedContent === 'string') {
           try {
             parsedContent = JSON.parse(parsedContent);
           } catch {
-            // fail silently for invalid json
           }
         }
 
@@ -489,7 +464,6 @@ async loadExistingRecommendations(): Promise<void> {
         }
       });
 
-      // ─── START OF NEW SUMMARY LOG ───
       const summary: Record<string, any> = {};
       this.displaySeverities.forEach(level => {
         summary[level] = {
@@ -502,9 +476,6 @@ async loadExistingRecommendations(): Promise<void> {
 
       console.log('%c🎯 FETCHED RECOMMENDATIONS SUMMARY', 'color: #10b981; font-weight: bold; font-size: 14px;');
       console.table(summary);
-      console.log('[loadExistingRecommendations] Upsert Tracking IDs:', { ...this.savedRecommendationIds });
-      // ─── END OF NEW SUMMARY LOG ───
-
       this.cdr.markForCheck();
 
     } catch (error) {

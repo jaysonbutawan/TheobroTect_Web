@@ -6,8 +6,8 @@ import { environment } from '../../../environments/environment.prod';
 
 import {
   RecommendationDto,
-  CreateRecommendationDto,
-  UpdateRecommendationDto
+  SaveRecommendationsDto,
+  ApiResponse
 } from '../recommendation.dto';
 
 @Injectable({
@@ -17,26 +17,30 @@ export class RecommendationSetupService {
 
   private http = inject(HttpClient);
 
-  private readonly baseUrl = `${environment.apiUrl}/recommendations`;
+  private readonly baseUrl =
+    `${environment.apiUrl}/recommendations`;
 
-  createRecommendation(
-    data: CreateRecommendationDto
-  ): Observable<RecommendationDto> {
+  saveRecommendations(
+    data: SaveRecommendationsDto
+  ): Observable<ApiResponse<RecommendationDto[]>> {
 
-    return this.http.post<RecommendationDto>(
+    return this.http.post<ApiResponse<RecommendationDto[]>>(
       this.baseUrl,
       data
     );
   }
 
-  getRecommendations(diseaseId?: number): Observable<RecommendationDto[]> {
+  getRecommendations(
+    diseaseId?: number
+  ): Observable<RecommendationDto[]> {
     let params = new HttpParams();
 
-    // If a disease ID is passed in, attach it to the request url: ?disease_id=5
     if (diseaseId) {
-      params = params.set('disease_id', diseaseId.toString());
+      params = params.set(
+        'disease_id',
+        diseaseId.toString()
+      );
     }
-
     return this.http.get<RecommendationDto[]>(
       this.baseUrl,
       { params }
@@ -51,18 +55,6 @@ export class RecommendationSetupService {
       `${this.baseUrl}/${id}`
     );
   }
-
-  updateRecommendation(
-    id: number,
-    data: UpdateRecommendationDto
-  ): Observable<RecommendationDto> {
-
-    return this.http.put<RecommendationDto>(
-      `${this.baseUrl}/${id}`,
-      data
-    );
-  }
-
   deleteRecommendation(
     id: number
   ): Observable<{ message: string }> {
