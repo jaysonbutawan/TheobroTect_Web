@@ -9,3 +9,11 @@
   width: 100%;
   z-index: 1;
 }
+
+* {
+  user-select: none;   /*  only stops text selection */
+}
+
+input, textarea, [data-selectable] {
+  user-select: text;   /* re-enables text selection on inputs */
+}
