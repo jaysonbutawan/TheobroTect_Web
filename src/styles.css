@@ -1,8 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
-
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800&display=swap");
 @import "tailwindcss";
-/* Add this at the very top of your styles.css */
 @import "leaflet/dist/leaflet.css";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
 
 #map {
   height: 600px;
@@ -11,9 +13,9 @@
 }
 
 * {
-  user-select: none;   /*  only stops text selection */
+  user-select: none;
 }
 
 input, textarea, [data-selectable] {
-  user-select: text;   /* re-enables text selection on inputs */
+  user-select: text;
 }
