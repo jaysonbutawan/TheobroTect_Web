@@ -479,15 +479,16 @@
   }
 
   @if (showAddedDiseases) {
-    <app-disease-table
-      class="flex flex-1 flex-col min-h-0"
-      [existingRecords]="existingRecords"
-      [diseaseKeys]="diseaseKeys"
-      (view)="onTableViewDisease($event)"
-      (edit)="onTableEditDisease($event)"
-      (deleteConfirmed)="onTableDeleteConfirmed($event)"
-    >
-    </app-disease-table>
+  <!-- <app-disease-table
+    class="flex flex-1 flex-col min-h-0"
+    [existingRecords]="existingRecords"
+    [diseaseKeys]="diseaseKeys"
+    (view)="onTableViewDisease($event)"
+    (edit)="onTableEditDisease($event)"
+    (deleteConfirmed)="onTableDeleteConfirmed($event)"
+  >
+  </app-disease-table>
+} -->
   <div class="flex-1 overflow-auto px-6 py-6">
 
     <!-- Toolbar -->
@@ -607,7 +608,7 @@
                   Edit
                 </button>
 
-                <button type="button" (click)="onTableDeleteDisease(disease)"
+                <button type="button" (click)="onTableDeleteConfirmed(disease.id)"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all"
                   title="Delete this disease">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
