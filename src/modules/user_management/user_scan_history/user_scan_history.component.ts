@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent  } from '../../../app/shared/skeletons/scan-history-skeleton/scan-history-skeleton';
+
 
 // ─── INTERFACES ───────────────────────────────────────────────────────────────
 
@@ -90,7 +92,7 @@ const PAGE_SIZE = 6;
 @Component({
   selector:    'app-user-scan-history',
   standalone:  true,
-  imports:     [CommonModule, FormsModule],
+  imports:     [CommonModule, FormsModule, ScanHistoryProfileSkeletonComponent,ScanHistorySkeletonComponent,],
   templateUrl: './user_scan_history.component.html',
 })
 export class UserScanHistoryComponent implements OnInit, OnDestroy {

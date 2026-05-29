@@ -9,7 +9,9 @@
     </h1>
 
     <!-- Profile Card -->
-    <!-- Profile Card -->
+     @if (isLoading) {
+  <app-scan-history-profile-skeleton />
+} @else{
     <div
       class="bg-[#2e7d32] border border-[#256427] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-5 mb-6">
 
@@ -126,6 +128,7 @@
 
       </div>
     </div>
+  }
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-2.5 items-center mb-3">
@@ -176,16 +179,8 @@
 
     <!-- Table -->
     @if (isLoading) {
-    <div class="bg-white border border-[#e8ecf0] rounded-2xl overflow-hidden shadow-sm">
-      @for (i of [1,2,3]; track i) {
-      <div class="flex items-center gap-4 px-5 py-4 border-b border-[#f0f4f8] last:border-0 animate-pulse">
-        <div class="h-4 w-36 bg-slate-100 rounded"></div>
-        <div class="h-4 w-24 bg-slate-100 rounded"></div>
-        <div class="h-4 w-28 bg-slate-100 rounded"></div>
-      </div>
-      }
-    </div>
-    } @else if (errorMsg) {
+    <app-scan-history-skeleton />
+    }@else if (errorMsg) {
     <div class="text-center py-16">
       <p class="text-red-500 text-sm mb-2">{{ errorMsg }}</p>
       <button (click)="loadScans()" class="text-[#2e7d32] text-sm font-semibold underline">Try again</button>

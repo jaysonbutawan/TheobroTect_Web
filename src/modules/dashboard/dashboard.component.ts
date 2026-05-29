@@ -5,11 +5,22 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DashboardService } from './dashboard.service';
 import { ScanDto } from './dashboard.dto';
+import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/field-log-skeleton-mobile/field-log-skeleton-mobile';
+import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/field-log-skeleton-desktop/field-log-skeleton-desktop';
+import { StatsSkeletonComponent } from '../../app/shared/skeletons/stats-skeleton/stats-skeleton';
+import { ChartSkeletonComponent } from '../../app/shared/skeletons/chart-skeleton/chart-skeleton'
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
-  templateUrl: './dashboard.component.html',
+  imports: [
+    CommonModule,
+    BaseChartDirective,
+    FieldLogSkeletonMobileComponent,
+    FieldLogSkeletonDesktopComponent,
+    StatsSkeletonComponent,      
+    ChartSkeletonComponent,     
+  ],
+    templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
@@ -70,74 +81,44 @@ export class DashboardComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadScans();
-    this.recentUserScans();
-
+    this.loadDashboardData(); // replaces this.loadScans() and this.recentUserScans()
   }
-
-
-
-  /**
-   * Load scans from API and process data for both table and charts
-   */
-  loadScans(): void {
+  loadDashboardData(): void {
     this.isLoading = true;
     this.errorMessage = '';
     this.cdr.markForCheck();
 
     this.dashboardService.getUsersScan().subscribe({
       next: (res) => {
-        // Map API response to table data
-
-        // Process and aggregate data for charts
+        // charts (was in loadScans)
         this.processBarChartData(res.data);
         this.processLineChartData(res.data);
 
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Failed to load scans:', err);
-        this.errorMessage = 'Failed to load scans data';
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
-  recentUserScans(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.cdr.markForCheck();
-
-    this.dashboardService.getUsersScan().subscribe({
-      next: (res) => {
-
+        // table (was in recentUserScans)
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // start of today
+        today.setHours(0, 0, 0, 0);
 
-        const filteredScans = res.data.filter(scan => {
-          const createdAt = new Date(scan.scanned_at);
-          createdAt.setHours(0, 0, 0, 0);
-          return createdAt.getTime() === today.getTime();
-        });
-
-        // Map filtered data
-        this.recentScans = filteredScans.map(scan => ({
-          farmer: scan.user_name || 'Unknown',
-          locationName: scan.location_label || 'Unknown Location',
-          type: scan.disease_key || 'Unknown Disease',
-          severity_key: scan.severity_key || 'Unknown Severity',
-          confidence: scan.confidence || 0,
-          coordinates: `${scan.location_lat},${scan.location_lng}`
-        }));
+        this.recentScans = res.data
+          .filter(scan => {
+            const createdAt = new Date(scan.scanned_at);
+            createdAt.setHours(0, 0, 0, 0);
+            return createdAt.getTime() === today.getTime();
+          })
+          .map(scan => ({
+            farmer: scan.user_name || 'Unknown',
+            locationName: scan.location_label || 'Unknown Location',
+            type: scan.disease_key || 'Unknown Disease',
+            severity_key: scan.severity_key || 'Unknown Severity',
+            confidence: scan.confidence || 0,
+            coordinates: `${scan.location_lat},${scan.location_lng}`
+          }));
 
         this.isLoading = false;
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Failed to load scans:', err);
-        this.errorMessage = 'Failed to load scans data';
+        console.error('Failed to load dashboard data:', err);
+        this.errorMessage = 'Failed to load data';
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -266,34 +247,34 @@ export class DashboardComponent implements OnInit {
     const podBorerMildCounts: number[] = [];
 
     // Process each month group
-sortedMonths.forEach(month => {
-  const scansForMonth = monthGroups[month];
+    sortedMonths.forEach(month => {
+      const scansForMonth = monthGroups[month];
 
-  // Count by disease type and severity
-  const healthyCount = scansForMonth.filter(s =>
-    !s.disease_key || this.normalizeDisease(s.disease_key).includes('healthy')
-  ).length;
+      // Count by disease type and severity
+      const healthyCount = scansForMonth.filter(s =>
+        !s.disease_key || this.normalizeDisease(s.disease_key).includes('healthy')
+      ).length;
 
-  const blackPodCount = scansForMonth.filter(s =>
-    this.normalizeDisease(s.disease_key).includes('black pod') &&
-    s.severity_key?.toLowerCase().includes('severe')
-  ).length;
+      const blackPodCount = scansForMonth.filter(s =>
+        this.normalizeDisease(s.disease_key).includes('black pod') &&
+        s.severity_key?.toLowerCase().includes('severe')
+      ).length;
 
-  const mealybugCount = scansForMonth.filter(s =>
-    this.normalizeDisease(s.disease_key).includes('mealy bug') &&
-    s.severity_key?.toLowerCase().includes('mild')
-  ).length;
+      const mealybugCount = scansForMonth.filter(s =>
+        this.normalizeDisease(s.disease_key).includes('mealy bug') &&
+        s.severity_key?.toLowerCase().includes('mild')
+      ).length;
 
-  const podBorerCount = scansForMonth.filter(s =>
-    this.normalizeDisease(s.disease_key).includes('pod borer') &&
-    s.severity_key?.toLowerCase().includes('mild')
-  ).length;
+      const podBorerCount = scansForMonth.filter(s =>
+        this.normalizeDisease(s.disease_key).includes('pod borer') &&
+        s.severity_key?.toLowerCase().includes('mild')
+      ).length;
 
-  healthyCounts.push(healthyCount);
-  blackPodSevereCounts.push(blackPodCount);
-  mealybugMildCounts.push(mealybugCount);
-  podBorerMildCounts.push(podBorerCount);
-});
+      healthyCounts.push(healthyCount);
+      blackPodSevereCounts.push(blackPodCount);
+      mealybugMildCounts.push(mealybugCount);
+      podBorerMildCounts.push(podBorerCount);
+    });
 
     console.log('[LINE CHART] Computed counts before assignment:', {
       labels: sortedMonths.map(m => this.formatMonth(m)),
@@ -412,5 +393,5 @@ sortedMonths.forEach(month => {
     this.router.navigate(['/dashboard/heatmap'], { queryParams: { loc: coords } });
   }
 
-  
+
 }
