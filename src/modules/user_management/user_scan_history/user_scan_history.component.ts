@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent  } from '../../../app/shared/skeletons/scan-history-skeleton/scan-history-skeleton';
+import { ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent } from '../../../app/shared/skeletons/disease-guidance/scan-history-skeleton/scan-history-skeleton';
 
 
 // ─── INTERFACES ───────────────────────────────────────────────────────────────
@@ -15,31 +15,31 @@ export interface DiseaseScore {
 }
 
 export interface ScanHistoryEntry {
-  date:     string;
-  disease:  string;
+  date: string;
+  disease: string;
   severity: Severity;
 }
 
 export interface CacaoScan {
-  id:          string;
-  pod_id:      string;
-  disease:     DiseaseType | string;
-  severity:    Severity;
-  confidence:  number;
-  scanned_at:  string;           // ISO date string e.g. '2024-11-28T10:30:00'
-  region:      string;
-  image_url?:  string;
-  scores:      DiseaseScore;
+  id: string;
+  pod_id: string;
+  disease: DiseaseType | string;
+  severity: Severity;
+  confidence: number;
+  scanned_at: string;           // ISO date string e.g. '2024-11-28T10:30:00'
+  region: string;
+  image_url?: string;
+  scores: DiseaseScore;
   description: string;
-  actions:     string[];
-  history:     ScanHistoryEntry[];
+  actions: string[];
+  history: ScanHistoryEntry[];
 }
 
 export interface ScanFilters {
-  search:   string;
-  disease:  string;
+  search: string;
+  disease: string;
   severity: string;
-  sort:     'date-desc' | 'date-asc' | 'conf-desc' | 'sev-desc';
+  sort: 'date-desc' | 'date-asc' | 'conf-desc' | 'sev-desc';
 }
 
 // ─── DUMMY DATA ───────────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ const DUMMY_SCANS: CacaoScan[] = [
     ],
     history: [
       { date: '2024-11-10', disease: 'Black pod rot', severity: 'Moderate' },
-      { date: '2024-10-22', disease: 'Healthy',       severity: 'Mild' },
+      { date: '2024-10-22', disease: 'Healthy', severity: 'Mild' },
     ],
   },
   {
@@ -90,38 +90,38 @@ const DUMMY_SCANS: CacaoScan[] = [
 const PAGE_SIZE = 6;
 
 @Component({
-  selector:    'app-user-scan-history',
-  standalone:  true,
-  imports:     [CommonModule, FormsModule, ScanHistoryProfileSkeletonComponent,ScanHistorySkeletonComponent,],
+  selector: 'app-user-scan-history',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ScanHistoryProfileSkeletonComponent, ScanHistorySkeletonComponent,],
   templateUrl: './user_scan_history.component.html',
 })
 export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
   // ── State ──────────────────────────────────────────────────────────────────
-  allScans:      CacaoScan[] = [];
+  allScans: CacaoScan[] = [];
   filteredScans: CacaoScan[] = [];
-  pagedScans:    CacaoScan[] = [];
-  selectedScan:  CacaoScan | null = null;
+  pagedScans: CacaoScan[] = [];
+  selectedScan: CacaoScan | null = null;
 
   isLoading = false;
-  errorMsg  = '';
+  errorMsg = '';
   view: 'list' | 'detail' = 'list';
 
   filters: ScanFilters = {
-    search:   '',
-    disease:  '',
+    search: '',
+    disease: '',
     severity: '',
-    sort:     'date-desc',
+    sort: 'date-desc',
   };
 
   currentPage = 1;
-  totalPages  = 1;
-  totalScans  = 0;
+  totalPages = 1;
+  totalScans = 0;
 
   // ── Stats (original 4) ─────────────────────────────────────────────────────
-  statTotal   = 0;
+  statTotal = 0;
   statAvgConf = 0;
-  statHigh    = 0;
+  statHigh = 0;
   statHealthy = 0;
 
   // ── Stats (new profile card) ───────────────────────────────────────────────
@@ -133,12 +133,12 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
   latestScanTime = '—';
 
   // ── Filter options ─────────────────────────────────────────────────────────
-  diseaseOptions  = ['Black pod rot', 'Frosty pod rot', "Witches' broom", 'Healthy'];
+  diseaseOptions = ['Black pod rot', 'Frosty pod rot', "Witches' broom", 'Healthy'];
   severityOptions: Severity[] = ['Mild', 'Moderate', 'Severe'];
 
-  private search$  = new Subject<string>();
+  private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
-  private cdr      = inject(ChangeDetectorRef);
+  private cdr = inject(ChangeDetectorRef);
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   ngOnInit(): void {
@@ -157,10 +157,10 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
   // ── Data loading ───────────────────────────────────────────────────────────
   loadScans(): void {
     this.isLoading = true;
-    this.errorMsg  = '';
+    this.errorMsg = '';
     this.cdr.markForCheck();
     setTimeout(() => {
-      this.allScans  = DUMMY_SCANS;
+      this.allScans = DUMMY_SCANS;
       this.isLoading = false;
       this.cdr.markForCheck();
       this.updateStats();
@@ -170,12 +170,12 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
   // ── Stats ──────────────────────────────────────────────────────────────────
   updateStats(): void {
-    this.statTotal   = this.allScans.length;
+    this.statTotal = this.allScans.length;
     this.statAvgConf = this.statTotal
       ? Math.round(this.allScans.reduce((s, x) => s + x.confidence, 0) / this.statTotal)
       : 0;
-    this.statHigh    = this.allScans.filter(s => s.severity === 'Severe').length;
-    this.statHealthy = this.allScans.filter(s => s.disease  === 'Healthy').length;
+    this.statHigh = this.allScans.filter(s => s.severity === 'Severe').length;
+    this.statHealthy = this.allScans.filter(s => s.disease === 'Healthy').length;
 
     // Distinct regions
     this.statLocations = new Set(this.allScans.map(s => s.region)).size;
@@ -202,18 +202,18 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
     this.filteredScans = this.allScans.filter(s => {
       const mq = !q || s.disease.toLowerCase().includes(q)
-                    || s.pod_id.toLowerCase().includes(q)
-                    || s.region.toLowerCase().includes(q);
-      const md = !this.filters.disease  || s.disease  === this.filters.disease;
+        || s.pod_id.toLowerCase().includes(q)
+        || s.region.toLowerCase().includes(q);
+      const md = !this.filters.disease || s.disease === this.filters.disease;
       const ms = !this.filters.severity || s.severity === this.filters.severity;
       return mq && md && ms;
     });
 
     switch (this.filters.sort) {
-      case 'date-asc':  this.filteredScans.sort((a, b) => a.scanned_at.localeCompare(b.scanned_at)); break;
+      case 'date-asc': this.filteredScans.sort((a, b) => a.scanned_at.localeCompare(b.scanned_at)); break;
       case 'date-desc': this.filteredScans.sort((a, b) => b.scanned_at.localeCompare(a.scanned_at)); break;
       case 'conf-desc': this.filteredScans.sort((a, b) => b.confidence - a.confidence); break;
-      case 'sev-desc':  this.filteredScans.sort((a, b) => sevOrder[b.severity] - sevOrder[a.severity]); break;
+      case 'sev-desc': this.filteredScans.sort((a, b) => sevOrder[b.severity] - sevOrder[a.severity]); break;
     }
 
     this.totalScans = this.filteredScans.length;
@@ -224,7 +224,7 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
   // ── Pagination ─────────────────────────────────────────────────────────────
   updatePage(): void {
-    const start     = (this.currentPage - 1) * PAGE_SIZE;
+    const start = (this.currentPage - 1) * PAGE_SIZE;
     this.pagedScans = this.filteredScans.slice(start, start + PAGE_SIZE);
   }
 
@@ -286,10 +286,10 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
 
   diseaseBarColor(disease: string): string {
     const map: Record<string, string> = {
-      'Black pod rot':  '#E24B4A',
+      'Black pod rot': '#E24B4A',
       'Frosty pod rot': '#BA7517',
       "Witches' broom": '#7F77DD',
-      'Healthy':        '#639922',
+      'Healthy': '#639922',
     };
     return map[disease] ?? '#888780';
   }
@@ -302,9 +302,9 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
     // Ensure we always have a valid datetime by appending time if missing
     const normalized = iso.includes('T') ? iso : iso + 'T00:00:00';
     return new Date(normalized).toLocaleDateString('en-GB', {
-      day:   '2-digit',
+      day: '2-digit',
       month: 'short',
-      year:  'numeric',
+      year: 'numeric',
     });
   }
 
@@ -315,7 +315,7 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
   formatTime(iso: string): string {
     if (!iso.includes('T')) return '—';
     return new Date(iso).toLocaleTimeString('en-US', {
-      hour:   '2-digit',
+      hour: '2-digit',
       minute: '2-digit',
       hour12: true,
     });
@@ -326,14 +326,14 @@ export class UserScanHistoryComponent implements OnInit, OnDestroy {
   }
 
   get rangeStart(): number { return (this.currentPage - 1) * PAGE_SIZE + 1; }
-  get rangeEnd():   number { return Math.min(this.currentPage * PAGE_SIZE, this.totalScans); }
+  get rangeEnd(): number { return Math.min(this.currentPage * PAGE_SIZE, this.totalScans); }
 
   getDefaultImage(disease: string): string {
     if (!disease) return 'assets/images/mb.png';
     const d = disease.toLowerCase();
-    if (d.includes('monilia') || d.includes('mb'))        return 'assets/images/mb.png';
-    if (d.includes('phytophthora') || d.includes('pb'))   return 'assets/images/pb.png';
-    if (d.includes('black pod') || d.includes('bp'))      return 'assets/images/bp.png';
+    if (d.includes('monilia') || d.includes('mb')) return 'assets/images/mb.png';
+    if (d.includes('phytophthora') || d.includes('pb')) return 'assets/images/pb.png';
+    if (d.includes('black pod') || d.includes('bp')) return 'assets/images/bp.png';
     return 'assets/images/mb.png';
   }
 }

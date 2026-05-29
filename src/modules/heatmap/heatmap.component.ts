@@ -6,6 +6,8 @@ import * as L from 'leaflet';
 import 'leaflet.heat';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { ScanDto } from '../dashboard/dashboard.dto';
+import { HeatmapSkeletonComponent } from '../../app/shared/skeletons/heatmap-skeleton/heatmap-skeleton';
+
 
 interface Observation {
   text: string;
@@ -15,7 +17,7 @@ interface Observation {
 @Component({
   selector: 'app-heatmap',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule, DatePipe, HeatmapSkeletonComponent],
   templateUrl: './heatmap.component.html',
   styleUrl: './heatmap.component.css'
 })

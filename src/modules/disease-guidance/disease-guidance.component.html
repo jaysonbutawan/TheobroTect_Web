@@ -1,15 +1,9 @@
-<app-disease-view-modal
-  [isOpen]="isViewModalOpen"
-  [disease]="viewingDisease"
-  (modalClose)="isViewModalOpen = false"
-  (editRequested)="onTableEditDisease($event)"
->
+<app-disease-view-modal [isOpen]="isViewModalOpen" [disease]="viewingDisease" (modalClose)="isViewModalOpen = false"
+  (editRequested)="onTableEditDisease($event)">
 </app-disease-view-modal>
 
 <div class="flex flex-col h-screen w-full m-0 p-0 overflow-hidden bg-slate-50/50">
-  <div
-    class="flex items-start gap-4 px-5 md:px-8 py-5 border-b border-white/60 bg-white/40 flex-shrink-0"
-  >
+  <div class="flex items-start gap-4 px-5 md:px-8 py-5 border-b border-white/60 bg-white/40 flex-shrink-0">
     <div class="flex-1 min-w-0">
       <p class="text-sm text-slate-500 mt-0.5 font-medium">
         Configure detection labels, monitoring logic, and severity-based guidance. Filipino fields
@@ -18,16 +12,8 @@
     </div>
     <div class="flex items-center gap-3 flex-shrink-0">
       <span
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-700 text-xs font-semibold border border-violet-500/20 shadow-sm"
-      >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-        >
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-700 text-xs font-semibold border border-violet-500/20 shadow-sm">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="m5 8 6 6" />
           <path d="m4 14 6-6 2-3" />
           <path d="M2 5h12" />
@@ -38,444 +24,313 @@
         <span class="hidden sm:inline">Auto-translate</span> EN → TL
       </span>
 
-      <button
-        type="button"
-        (click)="showAddedDiseases = !showAddedDiseases"
+      <button type="button" (click)="onToggleView()"
+
         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm transition-all duration-300"
         [ngClass]="
           showAddedDiseases
             ? 'bg-green-500 text-white border-green-500 shadow-green-500/20'
             : 'bg-white/60 text-slate-600 border-slate-200 hover:border-green-400 hover:text-green-600'
-        "
-      >
+        ">
         @if (showAddedDiseases) {
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Add Disease
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Add Disease
         } @else {
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-            <rect x="9" y="3" width="6" height="4" rx="1" />
-            <path d="M9 12h6M9 16h4" />
-          </svg>
-          View Added Diseases
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+          <rect x="9" y="3" width="6" height="4" rx="1" />
+          <path d="M9 12h6M9 16h4" />
+        </svg>
+        View Added Diseases
         }
       </button>
     </div>
   </div>
 
   @if (!showAddedDiseases) {
-    <div class="flex flex-1 overflow-hidden">
-      <div class="flex-1 w-full h-full bg-white/70 backdrop-blur-xl overflow-y-auto flex flex-col">
-        <div
-          class="px-4 md:px-10 py-5 bg-white/30 backdrop-blur-md border-b border-slate-200/40 shadow-[0_4px_20px_rgba(0,0,0,0.01)] sticky top-0 z-20"
-        >
-          <div class="max-w-4xl mx-auto flex items-center justify-between relative">
-            <button
-              type="button"
-              (click)="setStep(1)"
-              class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 group focus:outline-none z-10 transition-all duration-300"
-            >
-              <div
-                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
-                [ngClass]="{
+  <div class="flex flex-1 overflow-hidden">
+    <div class="flex-1 w-full h-full bg-white/70 backdrop-blur-xl overflow-y-auto flex flex-col">
+      <div
+        class="px-4 md:px-10 py-5 bg-white/30 backdrop-blur-md border-b border-slate-200/40 shadow-[0_4px_20px_rgba(0,0,0,0.01)] sticky top-0 z-20">
+        <div class="max-w-4xl mx-auto flex items-center justify-between relative">
+          <button type="button" (click)="setStep(1)"
+            class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 group focus:outline-none z-10 transition-all duration-300">
+            <div
+              class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
+              [ngClass]="{
                   'bg-gradient-to-tr from-green-500 to-emerald-400 text-white border-transparent shadow-[0_4px_12px_rgba(16,185,129,0.3)] scale-110':
                     currentStep === 1,
                   'bg-white/80 text-green-600 border-green-200 shadow-sm': currentStep > 1,
-                }"
-              >
-                @if (currentStep > 1) {
-                  <i class="pi pi-check text-[10px] stroke-[3px]"></i>
-                } @else {
-                  1
-                }
-              </div>
-              <span
-                class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
-                [ngClass]="{
+                }">
+              @if (currentStep > 1) {
+              <i class="pi pi-check text-[10px] stroke-[3px]"></i>
+              } @else {
+              1
+              }
+            </div>
+            <span
+              class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
+              [ngClass]="{
                   'text-slate-800 font-bold': currentStep === 1,
                   'text-green-600': currentStep > 1,
-                }"
-              >
-                General Info
-              </span>
-            </button>
+                }">
+              General Info
+            </span>
+          </button>
 
+          <div class="flex-1 h-[3px] bg-slate-200/50 rounded-full mx-2 md:mx-4 overflow-hidden relative">
             <div
-              class="flex-1 h-[3px] bg-slate-200/50 rounded-full mx-2 md:mx-4 overflow-hidden relative"
-            >
-              <div
-                class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500 ease-out rounded-full"
-                [style.width.%]="currentStep > 1 ? 100 : 0"
-              ></div>
-            </div>
+              class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500 ease-out rounded-full"
+              [style.width.%]="currentStep > 1 ? 100 : 0"></div>
+          </div>
 
-            <button
-              type="button"
-              (click)="setStep(2)"
-              [disabled]="!isDiseaseContextActive"
-              class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 group focus:outline-none z-10 transition-all duration-300"
-              [ngClass]="{ 'pointer-events-none opacity-50': !isDiseaseContextActive }"
-              [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
-            >
-              <div
-                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
-                [ngClass]="{
+          <button type="button" (click)="setStep(2)" [disabled]="!isDiseaseContextActive"
+            class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 group focus:outline-none z-10 transition-all duration-300"
+            [ngClass]="{ 'pointer-events-none opacity-50': !isDiseaseContextActive }"
+            [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''">
+            <div
+              class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
+              [ngClass]="{
                   'bg-gradient-to-tr from-green-500 to-emerald-400 text-white border-transparent shadow-[0_4px_12px_rgba(16,185,129,0.3)] scale-110':
                     currentStep === 2,
                   'bg-white/80 text-green-600 border-green-200 shadow-sm': currentStep > 2,
                   'bg-white/60 text-slate-400 border-slate-200': currentStep < 2,
-                }"
-              >
-                @if (currentStep > 2) {
-                  <i class="pi pi-check text-[10px] stroke-[3px]"></i>
-                } @else if (!isDiseaseContextActive) {
-                  <span class="text-[10px]">🔒</span>
-                } @else {
-                  2
-                }
-              </div>
-              <span
-                class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
-                [ngClass]="{
+                }">
+              @if (currentStep > 2) {
+              <i class="pi pi-check text-[10px] stroke-[3px]"></i>
+              } @else if (!isDiseaseContextActive) {
+              <span class="text-[10px]">🔒</span>
+              } @else {
+              2
+              }
+            </div>
+            <span
+              class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
+              [ngClass]="{
                   'text-slate-800 font-bold': currentStep === 2,
                   'text-green-600': currentStep > 2,
                   'text-slate-400 group-hover:text-slate-600': currentStep < 2,
-                }"
-              >
-                Monitoring
-              </span>
-            </button>
+                }">
+              Monitoring
+            </span>
+          </button>
 
+          <div class="flex-1 h-[3px] bg-slate-200/50 rounded-full mx-2 md:mx-4 overflow-hidden relative">
             <div
-              class="flex-1 h-[3px] bg-slate-200/50 rounded-full mx-2 md:mx-4 overflow-hidden relative"
-            >
-              <div
-                class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500 ease-out rounded-full"
-                [style.width.%]="currentStep > 2 ? 100 : 0"
-              ></div>
-            </div>
+              class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500 ease-out rounded-full"
+              [style.width.%]="currentStep > 2 ? 100 : 0"></div>
+          </div>
 
-            <button
-              type="button"
-              (click)="setStep(3)"
-              [disabled]="!isDiseaseContextActive"
-              class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 group focus:outline-none z-10 transition-all duration-300"
-              [ngClass]="{ 'pointer-events-none opacity-50': !isDiseaseContextActive }"
-              [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
-            >
-              <div
-                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
-                [ngClass]="{
+          <button type="button" (click)="setStep(3)" [disabled]="!isDiseaseContextActive"
+            class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 group focus:outline-none z-10 transition-all duration-300"
+            [ngClass]="{ 'pointer-events-none opacity-50': !isDiseaseContextActive }"
+            [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''">
+            <div
+              class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
+              [ngClass]="{
                   'bg-gradient-to-tr from-green-500 to-emerald-400 text-white border-transparent shadow-[0_4px_12px_rgba(16,185,129,0.3)] scale-110':
                     currentStep === 3,
                   'bg-white/60 text-slate-400 border-slate-200': currentStep < 3,
-                }"
-              >
-                @if (!isDiseaseContextActive) {
-                  <span class="text-[10px]">🔒</span>
-                } @else {
-                  3
-                }
-              </div>
-              <span
-                class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
-                [ngClass]="{
+                }">
+              @if (!isDiseaseContextActive) {
+              <span class="text-[10px]">🔒</span>
+              } @else {
+              3
+              }
+            </div>
+            <span
+              class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
+              [ngClass]="{
                   'text-slate-800 font-bold': currentStep === 3,
                   'text-slate-400 group-hover:text-slate-600': currentStep < 3,
-                }"
-              >
-                Recommendations
-              </span>
-            </button>
-          </div>
+                }">
+              Recommendations
+            </span>
+          </button>
+        </div>
 
-          @if (!isDiseaseContextActive) {
-            <p
-              class="text-center text-xs text-amber-600 mt-4 font-medium bg-amber-50/80 backdrop-blur-sm rounded-xl py-2 border border-amber-200/50 shadow-sm mx-auto max-w-2xl"
-            >
-              ⚠️ Please select an entry from the sidebar or fill in general information and click
-              "Save Configuration" to unlock subsequent setup modules.
-            </p>
+        @if (!isDiseaseContextActive) {
+        <p
+          class="text-center text-xs text-amber-600 mt-4 font-medium bg-amber-50/80 backdrop-blur-sm rounded-xl py-2 border border-amber-200/50 shadow-sm mx-auto max-w-2xl">
+          ⚠️ Please select an entry from the sidebar or fill in general information and click
+          "Save Configuration" to unlock subsequent setup modules.
+        </p>
+        }
+      </div>
+
+      <form class="flex-1 flex flex-col" [formGroup]="form" (ngSubmit)="onSave()">
+        <div class="flex-1 overflow-y-auto">
+          @if (currentStep === 1) {
+          <section class="px-5 md:px-8 py-6 md:py-8">
+            <div class="flex items-start gap-3 mb-6">
+              <span
+                class="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 text-xs font-bold border border-blue-500/20">01</span>
+              <div>
+                <h2 class="text-lg font-bold text-slate-800">General Information</h2>
+                <p class="text-sm text-slate-500 mt-0.5">
+                  Basic identity of the disease for the app.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+              <div class="flex flex-col gap-2">
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide">
+                  <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px]">EN</span>
+                  Disease Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" formControlName="nameEn" placeholder="e.g. Black Pod Disease"
+                  class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-300" />
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide">
+                  <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px]">TL</span>
+                  Pangalan sa Filipino <span class="text-red-500">*</span>
+                  @if (translating['nameTl']) {
+                  <span
+                    class="ml-auto flex items-center gap-1.5 text-[10px] font-medium text-violet-600 normal-case bg-violet-50 px-2 py-0.5 rounded-full">
+                    <span
+                      class="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin"></span>
+                    Nagsasalin...
+                  </span>
+                  } @else if (form.get('nameTl')?.value) {
+                  <span
+                    class="ml-auto text-[10px] font-medium text-emerald-600 normal-case bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    Auto-translated
+                  </span>
+                  }
+                </label>
+                <input type="text" formControlName="nameTl" placeholder="Awtomatikong isasalin..."
+                  [class.opacity-70]="translating['nameTl']"
+                  class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-amber-50/40 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-amber-50/80 transition-all duration-300" />
+              </div>
+
+              <div class="col-span-1 md:col-span-2 flex flex-col gap-2">
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide">
+                  <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px]">EN</span>
+                  Description <span class="text-red-500">*</span>
+                </label>
+                <textarea formControlName="descEn" rows="3"
+                  placeholder="Brief overview of the disease, how it spreads, what conditions worsen it..."
+                  (input)="onEnInput('descEn', 'descTl')"
+                  class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-300 resize-none"></textarea>
+              </div>
+
+              <div class="col-span-1 md:col-span-2 flex flex-col gap-2">
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide">
+                  <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px]">TL</span>
+                  Paglalarawan sa Filipino <span class="text-red-500">*</span>
+                  @if (translating['descTl']) {
+                  <span
+                    class="ml-auto flex items-center gap-1.5 text-[10px] font-medium text-violet-600 normal-case bg-violet-50 px-2 py-0.5 rounded-full">
+                    <span
+                      class="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin"></span>
+                    Nagsasalin...
+                  </span>
+                  } @else if (form.get('descTl')?.value) {
+                  <span
+                    class="ml-auto text-[10px] font-medium text-emerald-600 normal-case bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    Auto-translated
+                  </span>
+                  }
+                </label>
+                <textarea formControlName="descTl" rows="3" placeholder="Awtomatikong isasalin..."
+                  [class.opacity-70]="translating['descTl']"
+                  class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-amber-50/40 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-amber-50/80 transition-all duration-300 resize-none"></textarea>
+              </div>
+            </div>
+
+            <div
+              class="flex flex-col gap-3 mt-8 bg-white/40 backdrop-blur-xl p-5 md:p-6 rounded-2xl border border-white/80 shadow-sm">
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wide">
+                Detection Label <span class="text-red-500">*</span>
+              </label>
+              <div class="flex flex-col md:flex-row md:items-center gap-4">
+                <div class="relative flex-1">
+                  <select aria-label="Select a detection label" id="detection-label-select" [(ngModel)]="selectedLabel"
+                    (ngModelChange)="onDiseaseKeyChange($event)" [ngModelOptions]="{ standalone: true }" required
+                    class="w-full appearance-none px-4 py-3 text-sm font-semibold rounded-xl border border-white/80 bg-white/80 backdrop-blur-sm text-slate-700 focus:outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-400 transition-all duration-300 cursor-pointer pr-10 shadow-sm">
+                    <option value="" disabled selected>Select a label...</option>
+                    @for (key of diseaseKeys; track key) {
+                    <option [value]="key">{{ formatLabel(key) }}</option>
+                    }
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.5">
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
+                <button type="button" (click)="onSave()" [disabled]="isSaveDisabled"
+                  class="md:w-auto w-full flex-shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-tr from-emerald-500 to-green-400 text-white text-sm font-bold shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:brightness-105 hover:-translate-y-0.5 focus:ring-4 focus:ring-green-500/20 focus:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                  </svg>
+                  Save Configuration
+                </button>
+              </div>
+            </div>
+          </section>
+          }
+
+          @if (currentStep === 2) {
+          <div class="px-5 md:px-8 py-6">
+            <app-monitoring-setup [form]="form" [diseaseId]="currentEditId"
+              [diseaseKey]="selectedDiseaseKey"></app-monitoring-setup>
+          </div>
+          }
+
+          @if (currentStep === 3) {
+          <div class="animate-fade-in px-5 md:px-8 py-6">
+            <app-recommendations-setup [diseaseKey]="selectedDiseaseKey ?? ''" [sevData]="sevData"
+              [diseaseId]="currentEditId"></app-recommendations-setup>
+          </div>
           }
         </div>
 
-        <form class="flex-1 flex flex-col" [formGroup]="form" (ngSubmit)="onSave()">
-          <div class="flex-1 overflow-y-auto">
-            @if (currentStep === 1) {
-              <section class="px-5 md:px-8 py-6 md:py-8">
-                <div class="flex items-start gap-3 mb-6">
-                  <span
-                    class="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 text-xs font-bold border border-blue-500/20"
-                    >01</span
-                  >
-                  <div>
-                    <h2 class="text-lg font-bold text-slate-800">General Information</h2>
-                    <p class="text-sm text-slate-500 mt-0.5">
-                      Basic identity of the disease for the app.
-                    </p>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                  <div class="flex flex-col gap-2">
-                    <label
-                      class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide"
-                    >
-                      <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px]"
-                        >EN</span
-                      >
-                      Disease Name <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      formControlName="nameEn"
-                      placeholder="e.g. Black Pod Disease"
-                      class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-300"
-                    />
-                  </div>
-
-                  <div class="flex flex-col gap-2">
-                    <label
-                      class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide"
-                    >
-                      <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px]"
-                        >TL</span
-                      >
-                      Pangalan sa Filipino <span class="text-red-500">*</span>
-                      @if (translating['nameTl']) {
-                        <span
-                          class="ml-auto flex items-center gap-1.5 text-[10px] font-medium text-violet-600 normal-case bg-violet-50 px-2 py-0.5 rounded-full"
-                        >
-                          <span
-                            class="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin"
-                          ></span>
-                          Nagsasalin...
-                        </span>
-                      } @else if (form.get('nameTl')?.value) {
-                        <span
-                          class="ml-auto text-[10px] font-medium text-emerald-600 normal-case bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100"
-                        >
-                          Auto-translated
-                        </span>
-                      }
-                    </label>
-                    <input
-                      type="text"
-                      formControlName="nameTl"
-                      placeholder="Awtomatikong isasalin..."
-                      [class.opacity-70]="translating['nameTl']"
-                      class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-amber-50/40 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-amber-50/80 transition-all duration-300"
-                    />
-                  </div>
-
-                  <div class="col-span-1 md:col-span-2 flex flex-col gap-2">
-                    <label
-                      class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide"
-                    >
-                      <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px]"
-                        >EN</span
-                      >
-                      Description <span class="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      formControlName="descEn"
-                      rows="3"
-                      placeholder="Brief overview of the disease, how it spreads, what conditions worsen it..."
-                      (input)="onEnInput('descEn', 'descTl')"
-                      class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-300 resize-none"
-                    ></textarea>
-                  </div>
-
-                  <div class="col-span-1 md:col-span-2 flex flex-col gap-2">
-                    <label
-                      class="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wide"
-                    >
-                      <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px]"
-                        >TL</span
-                      >
-                      Paglalarawan sa Filipino <span class="text-red-500">*</span>
-                      @if (translating['descTl']) {
-                        <span
-                          class="ml-auto flex items-center gap-1.5 text-[10px] font-medium text-violet-600 normal-case bg-violet-50 px-2 py-0.5 rounded-full"
-                        >
-                          <span
-                            class="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin"
-                          ></span>
-                          Nagsasalin...
-                        </span>
-                      } @else if (form.get('descTl')?.value) {
-                        <span
-                          class="ml-auto text-[10px] font-medium text-emerald-600 normal-case bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100"
-                        >
-                          Auto-translated
-                        </span>
-                      }
-                    </label>
-                    <textarea
-                      formControlName="descTl"
-                      rows="3"
-                      placeholder="Awtomatikong isasalin..."
-                      [class.opacity-70]="translating['descTl']"
-                      class="w-full px-4 py-3 text-sm rounded-xl border border-white/60 bg-amber-50/40 backdrop-blur-sm text-slate-800 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-amber-50/80 transition-all duration-300 resize-none"
-                    ></textarea>
-                  </div>
-                </div>
-
-                <div
-                  class="flex flex-col gap-3 mt-8 bg-white/40 backdrop-blur-xl p-5 md:p-6 rounded-2xl border border-white/80 shadow-sm"
-                >
-                  <label class="text-xs font-bold text-slate-600 uppercase tracking-wide">
-                    Detection Label <span class="text-red-500">*</span>
-                  </label>
-                  <div class="flex flex-col md:flex-row md:items-center gap-4">
-                    <div class="relative flex-1">
-                      <select
-                        aria-label="Select a detection label"
-                        id="detection-label-select"
-                        [(ngModel)]="selectedLabel"
-                        (ngModelChange)="onDiseaseKeyChange($event)"
-                        [ngModelOptions]="{ standalone: true }"
-                        required
-                        class="w-full appearance-none px-4 py-3 text-sm font-semibold rounded-xl border border-white/80 bg-white/80 backdrop-blur-sm text-slate-700 focus:outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-400 transition-all duration-300 cursor-pointer pr-10 shadow-sm"
-                      >
-                        <option value="" disabled selected>Select a label...</option>
-                        @for (key of diseaseKeys; track key) {
-                          <option [value]="key">{{ formatLabel(key) }}</option>
-                        }
-                      </select>
-                      <div
-                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                        >
-                          <path d="M6 9l6 6 6-6" />
-                        </svg>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      (click)="onSave()"
-                      [disabled]="isSaveDisabled"
-                      class="md:w-auto w-full flex-shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-tr from-emerald-500 to-green-400 text-white text-sm font-bold shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:brightness-105 hover:-translate-y-0.5 focus:ring-4 focus:ring-green-500/20 focus:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                      >
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                        <polyline points="17 21 17 13 7 13 7 21" />
-                        <polyline points="7 3 7 8 15 8" />
-                      </svg>
-                      Save Configuration
-                    </button>
-                  </div>
-                </div>
-              </section>
-            }
-
-            @if (currentStep === 2) {
-              <div class="px-5 md:px-8 py-6">
-                <app-monitoring-setup
-                  [form]="form"
-                  [diseaseId]="currentEditId"
-                  [diseaseKey]="selectedDiseaseKey"
-                ></app-monitoring-setup>
-              </div>
-            }
-
-            @if (currentStep === 3) {
-              <div class="animate-fade-in px-5 md:px-8 py-6">
-                <app-recommendations-setup
-                  [diseaseKey]="selectedDiseaseKey ?? ''"
-                  [sevData]="sevData"
-                  [diseaseId]="currentEditId"
-                ></app-recommendations-setup>
-              </div>
+        <div
+          class="px-5 md:px-8 py-4 bg-white/50 backdrop-blur-lg border-t border-white/60 flex items-center justify-between gap-3 mt-auto">
+          <div>
+            @if (currentStep > 1) {
+            <button type="button" (click)="setStep(currentStep - 1)"
+              class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-all">
+              Back
+            </button>
             }
           </div>
-
-          <div
-            class="px-5 md:px-8 py-4 bg-white/50 backdrop-blur-lg border-t border-white/60 flex items-center justify-between gap-3 mt-auto"
-          >
-            <div>
-              @if (currentStep > 1) {
-                <button
-                  type="button"
-                  (click)="setStep(currentStep - 1)"
-                  class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-all"
-                >
-                  Back
-                </button>
+          <div class="flex items-center gap-2 md:gap-3">
+            <button type="button" (click)="cancelEdit()"
+              class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-all inline-flex items-center gap-1.5">
+              @if (editOpenedFromTable) {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back to Table
+              } @else {
+              Cancel
               }
-            </div>
-            <div class="flex items-center gap-2 md:gap-3">
-              <button
-                type="button"
-                (click)="cancelEdit()"
-                class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-all inline-flex items-center gap-1.5"
-              >
-                @if (editOpenedFromTable) {
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                  >
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                  </svg>
-                  Back to Table
-                } @else {
-                  Cancel
-                }
-              </button>
-              @if (currentStep < 3) {
-                <button
-                  type="button"
-                  (click)="setStep(currentStep + 1)"
-                  [disabled]="currentStep === 1 && !isDiseaseContextActive"
-                  [title]="
+            </button>
+            @if (currentStep < 3) { <button type="button" (click)="setStep(currentStep + 1)"
+              [disabled]="currentStep === 1 && !isDiseaseContextActive" [title]="
                     currentStep === 1 && !isDiseaseContextActive
                       ? 'Save disease before proceeding'
                       : ''
                   "
-                  class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-bold hover:bg-slate-700 hover:shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:bg-slate-800"
-                >
-                  Next Step
-                </button>
+              class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-bold hover:bg-slate-700 hover:shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:bg-slate-800">
+              Next Step
+              </button>
               }
-            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
+  </div>
   }
 
   @if (showAddedDiseases) {
@@ -524,6 +379,9 @@
     </div>
 
     <!-- Table -->
+    @if (isLoading) {
+    <app-disease-table-skeleton />
+    } @else{
     <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
       <table class="w-full text-sm">
         <thead>
@@ -535,7 +393,8 @@
               Key</th>
             <th class="text-left px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider w-[20%]">Created
               At</th>
-            <th class="text-right px-25 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider w-[21%]">Actions
+            <th class="text-right px-25 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider w-[21%]">
+              Actions
             </th>
           </tr>
         </thead>
@@ -656,7 +515,7 @@
         </div>
       </div>
     </div>
-
+    }
   </div>
   }
 </div>

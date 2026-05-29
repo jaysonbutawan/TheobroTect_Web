@@ -10,7 +10,8 @@ import { TranslationService } from './services/translation.service';
 import { DiseaseGuideService } from './services/disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
 import { DiseaseViewModalComponent } from './widgets/disease-view-modal.component';
-import { DiseaseTableComponent } from './widgets/disease-table.component';
+import { DiseaseTableSkeletonComponent } from '../../app/shared/skeletons/disease-guidance/disease-table-skeleton/disease-table-skeleton';
+
 export interface ChecklistItem {
   en: string;
   tl: string;
@@ -27,8 +28,7 @@ export interface ChecklistItem {
     DiseaseViewModalComponent,
     MonitoringSetupComponent,
     RecommendationsSetupComponent,
-    // DiseaseTableComponent,
-
+    DiseaseTableSkeletonComponent,
   ],
   templateUrl: './disease-guidance.component.html',
 })
@@ -48,6 +48,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   currentStep: number = 1;
   showAddedDiseases: boolean = false;
   editOpenedFromTable = false;
+  isLoading: boolean = false;
 
   // ─── VIEW MODAL ───
   isViewModalOpen: boolean = false;
@@ -83,7 +84,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       descTl: ['', Validators.required],
     });
 
-    this.fetchExistingDiseases();
+    this.fetchExistingDiseases(); // ← call it here, don't define it here
   }
 
   ngOnDestroy(): void {
@@ -99,7 +100,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   }
 
   // ─── TABLE EVENT HANDLERS ───
-
   onTableViewDisease(disease: DiseaseDto): void {
     this.viewingDisease = disease;
     this.isViewModalOpen = true;
@@ -112,17 +112,12 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   }
 
   onTableDeleteConfirmed(id: number): void {
-    // 🔁 actual service call back-end deletion execution
-    // this.diseaseService.deleteDisease(id).subscribe();
     console.warn('[DELETE CONFIRMED BY TABLE] ID:', id);
-
-    // Remove from local array to instantly update the child UI
     this.existingRecords = this.existingRecords.filter(d => d.id !== id);
     this.cdr.markForCheck();
   }
 
   // ─── CORE FORM / NAVIGATION LOGIC ───
-
   get isDiseaseContextActive(): boolean {
     return !!this.currentEditId && !!this.selectedDiseaseKey;
   }
@@ -184,16 +179,22 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     return this.form.invalid || !this.selectedLabel;
   }
 
+  // ─── SINGLE CORRECT VERSION ───
   fetchExistingDiseases(): void {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
     this.diseaseService.getDisease()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: any) => {
           this.existingRecords = res.data || res || [];
+          this.isLoading = false;
           this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Fetch error:', err);
+          this.isLoading = false;
           this.cdr.markForCheck();
         }
       });
@@ -208,7 +209,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.form.reset();
     this.currentStep = 1;
 
-    // If edit was triggered from the table, go back to it
     if (this.editOpenedFromTable) {
       this.showAddedDiseases = true;
       this.editOpenedFromTable = false;
@@ -243,16 +243,13 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     request$.subscribe({
       next: (res: any) => {
         const saved = res?.data ?? res;
-
         alert(
           this.isEditMode
             ? `Updated: ${saved.display_name?.en}`
             : `Created: ${saved.display_name?.en}`
         );
-
         this.currentEditId = saved.id;
         this.isEditMode = true;
-
         this.fetchExistingDiseases();
       },
       error: (err) => {
@@ -270,4 +267,11 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       return matchesSearch && matchesLocale;
     });
   }
+
+  onToggleView(): void {
+  this.showAddedDiseases = !this.showAddedDiseases;
+  if (this.showAddedDiseases) {
+    this.fetchExistingDiseases();
+  }
+}
 }

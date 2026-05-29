@@ -5,10 +5,10 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DashboardService } from './dashboard.service';
 import { ScanDto } from './dashboard.dto';
-import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/field-log-skeleton-mobile/field-log-skeleton-mobile';
-import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/field-log-skeleton-desktop/field-log-skeleton-desktop';
-import { StatsSkeletonComponent } from '../../app/shared/skeletons/stats-skeleton/stats-skeleton';
-import { ChartSkeletonComponent } from '../../app/shared/skeletons/chart-skeleton/chart-skeleton'
+import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-mobile/field-log-skeleton-mobile';
+import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-desktop/field-log-skeleton-desktop';
+import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
+import { ChartSkeletonComponent } from '../../app/shared/skeletons/dashboard/chart-skeleton/chart-skeleton'
 @Component({
   selector: 'app-dashboard',
   standalone: true,

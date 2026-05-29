@@ -1,9 +1,13 @@
-import { Component, Input, AfterViewInit } from '@angular/core';
+import { Component, Input, AfterViewInit, inject, ChangeDetectorRef, NgZone  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MapService } from '../../app/core/services/map.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { FieldReportsSkeletonComponent } from '../../app/shared/skeletons/field-reports/field-reports-skeleton/field-reports-skeleton';
+import { BarangayCardsSkeletonComponent } from '../../app/shared/skeletons/field-reports/barangay-cards-skeleton/barangay-cards-skeleton';
+import { ChangeDetectionStrategy } from '@angular/core';
+
 
 export interface ScanRecord {
   id: string;
@@ -17,7 +21,7 @@ export interface ScanRecord {
 @Component({
   selector: 'app-field-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FieldReportsSkeletonComponent, BarangayCardsSkeletonComponent],
   templateUrl: './field-reports-list.component.html',
   styleUrls: ['./shared-reports.css']
 })
@@ -34,6 +38,13 @@ export class FieldReportsComponent implements AfterViewInit {
   selectedBarangay: string | null = null;
   selectedDisease: string = 'All';
   filterDate: string = '';
+  isLoading: boolean = false;
+  isCardsLoading: boolean = true;
+  private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
+
+
+
 
   diseaseCategories = ['All', 'Black Pod Rot', 'Pod Borer', 'Mealy Bug', 'Healthy'];
 
@@ -81,14 +92,21 @@ export class FieldReportsComponent implements AfterViewInit {
   constructor(private mapService: MapService) { }
 
   ngAfterViewInit(): void {
+  try {
     this.mapService.initMap('map');
+  } catch (e) {
+    console.warn('Map init skipped:', e);
   }
 
-  selectBarangay(name: string) {
-    this.selectedBarangay = name;
-    this.selectedDisease = 'All';
-    this.filterDate
-  }
+  this.ngZone.run(() => {
+    setTimeout(() => {
+      this.isCardsLoading = false;
+      this.isLoading = false;
+      this.cdr.detectChanges();
+      console.log('isCardsLoading:', this.isCardsLoading);
+    }, 3000);
+  });
+}
 
   setDiseaseFilter(disease: string) {
     this.selectedDisease = disease;
@@ -114,97 +132,111 @@ export class FieldReportsComponent implements AfterViewInit {
     return map[status] ?? 'bg-slate-400';
   }
 
-generatePDF() {
-  const doc = new jsPDF();
-  const data = this.filteredScans;
-  const timestamp = new Date().toLocaleString();
-  const logoPath = 'assets/images/theobrotect_logo.png';
+  generatePDF() {
+    const doc = new jsPDF();
+    const data = this.filteredScans;
+    const timestamp = new Date().toLocaleString();
+    const logoPath = 'assets/images/theobrotect_logo.png';
 
-  // 1. HEADER & BRANDING
-  doc.setFillColor(5, 150, 105); // Emerald-600
-  doc.rect(0, 0, 210, 40, 'F');
-  
-  // Add Logo to the top right
-  // Parameters: image, type, x, y, width, height
-  doc.addImage(logoPath, 'PNG', 165, 5, 30, 30);
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.text('THEOBROTECT', 14, 22);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('AGRICULTURAL INTELLIGENCE & DISEASE SURVEILLANCE', 14, 30);
-  
-  // 2. REPORT METADATA
-  doc.setTextColor(15, 23, 42);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Field Intelligence Summary', 14, 52);
-  
-  doc.setDrawColor(5, 150, 105); 
-  doc.setLineWidth(1);
-  doc.line(14, 54, 35, 54);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Barangay: ${this.selectedBarangay}`, 14, 62);
-  doc.text(`Total Scans: ${data.length}`, 14, 68);
-  doc.text(`Report Date: ${timestamp}`, 14, 74);
+    // 1. HEADER & BRANDING
+    doc.setFillColor(5, 150, 105); // Emerald-600
+    doc.rect(0, 0, 210, 40, 'F');
 
-  // 3. DATA TABLE
-  autoTable(doc, {
-    startY: 85,
-    head: [['SCAN ID', 'DIAGNOSIS', 'SEVERITY STATUS', 'TIMESTAMP']],
-    body: data.map(s => [s.id, s.disease, s.status.toUpperCase(), s.timestamp]),
-    theme: 'striped',
-    headStyles: { 
-      fillColor: [5, 150, 105],
-      textColor: [255, 255, 255],
-      fontStyle: 'bold'
-    },
-    didParseCell: (cellData) => {
-      if (cellData.section === 'body' && cellData.column.index === 2) {
-        const status = cellData.cell.raw as string;
-        if (status === 'SEVERE') cellData.cell.styles.textColor = [185, 28, 28];
-        if (status === 'HEALTHY') cellData.cell.styles.textColor = [5, 150, 105];
-      }
-    },
-    styles: { fontSize: 9 },
-    margin: { bottom: 60 } // Leave space at the bottom for the signature
-  });
+    // Add Logo to the top right
+    // Parameters: image, type, x, y, width, height
+    doc.addImage(logoPath, 'PNG', 165, 5, 30, 30);
 
-  // 4. SIGNATURE SECTION (Fixed at the bottom of the last page)
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const sigY = pageHeight - 40; // 40mm from the bottom
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('THEOBROTECT', 14, 22);
 
-  doc.setFontSize(10);
-  doc.setTextColor(15, 23, 42);
-  
-  // Left Side: Field Officer
-  doc.setDrawColor(15, 23, 42);
-  doc.setLineWidth(0.5);
-  doc.line(14, sigY, 90, sigY); 
-  doc.setFont('helvetica', 'bold');
-  doc.text('SIGNATURE OVER PRINTED NAME', 14, sigY + 5);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Field Intelligence Officer', 14, sigY + 10);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('AGRICULTURAL INTELLIGENCE & DISEASE SURVEILLANCE', 14, 30);
 
-  // Right Side: Date Signed
-  doc.line(120, sigY, 196, sigY);
-  doc.setFont('helvetica', 'bold');
-  doc.text('DATE SIGNED', 120, sigY + 5);
+    // 2. REPORT METADATA
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Field Intelligence Summary', 14, 52);
 
-  // 5. SYSTEM FOOTER
-  const pageCount = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.setTextColor(160);
-    doc.text(`System Generated by TheobroTect Admin Suite`, 105, pageHeight - 10, { align: 'center' });
+    doc.setDrawColor(5, 150, 105);
+    doc.setLineWidth(1);
+    doc.line(14, 54, 35, 54);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Barangay: ${this.selectedBarangay}`, 14, 62);
+    doc.text(`Total Scans: ${data.length}`, 14, 68);
+    doc.text(`Report Date: ${timestamp}`, 14, 74);
+
+    // 3. DATA TABLE
+    autoTable(doc, {
+      startY: 85,
+      head: [['SCAN ID', 'DIAGNOSIS', 'SEVERITY STATUS', 'TIMESTAMP']],
+      body: data.map(s => [s.id, s.disease, s.status.toUpperCase(), s.timestamp]),
+      theme: 'striped',
+      headStyles: {
+        fillColor: [5, 150, 105],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      didParseCell: (cellData) => {
+        if (cellData.section === 'body' && cellData.column.index === 2) {
+          const status = cellData.cell.raw as string;
+          if (status === 'SEVERE') cellData.cell.styles.textColor = [185, 28, 28];
+          if (status === 'HEALTHY') cellData.cell.styles.textColor = [5, 150, 105];
+        }
+      },
+      styles: { fontSize: 9 },
+      margin: { bottom: 60 } // Leave space at the bottom for the signature
+    });
+
+    // 4. SIGNATURE SECTION (Fixed at the bottom of the last page)
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const sigY = pageHeight - 40; // 40mm from the bottom
+
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+
+    // Left Side: Field Officer
+    doc.setDrawColor(15, 23, 42);
+    doc.setLineWidth(0.5);
+    doc.line(14, sigY, 90, sigY);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SIGNATURE OVER PRINTED NAME', 14, sigY + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Field Intelligence Officer', 14, sigY + 10);
+
+    // Right Side: Date Signed
+    doc.line(120, sigY, 196, sigY);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DATE SIGNED', 120, sigY + 5);
+
+    // 5. SYSTEM FOOTER
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(160);
+      doc.text(`System Generated by TheobroTect Admin Suite`, 105, pageHeight - 10, { align: 'center' });
+    }
+
+    doc.save(`TheobroTect_Report_${this.selectedBarangay}.pdf`);
   }
+ selectBarangay(name: string) {
+  this.isLoading = true;
+  this.selectedBarangay = name;
+  this.selectedDisease = 'All';
+  this.filterDate = '';
+  this.cdr.detectChanges();
 
-  doc.save(`TheobroTect_Report_${this.selectedBarangay}.pdf`);
+  this.ngZone.run(() => {
+    setTimeout(() => {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }, 3000);
+  });
 }
 }
