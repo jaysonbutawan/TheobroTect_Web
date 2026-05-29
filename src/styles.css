@@ -1,6 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800&display=swap");
 @import "tailwindcss";
+<<<<<<< Updated upstream
 @import "leaflet/dist/leaflet.css";
+=======
+@import 'mapbox-gl/dist/mapbox-gl.css';
+@import 'maplibre-gl/dist/maplibre-gl.css';
+>>>>>>> Stashed changes
 
 @theme {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
@@ -12,6 +17,7 @@
   z-index: 1;
 }
 
+<<<<<<< Updated upstream
 * {
   user-select: none;
 }
@@ -19,3 +25,5 @@
 input, textarea, [data-selectable] {
   user-select: text;
 }
+=======
+>>>>>>> Stashed changes
