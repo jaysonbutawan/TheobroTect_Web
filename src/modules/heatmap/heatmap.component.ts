@@ -144,42 +144,166 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.applyFilters();
   }
 
-  private plotMarkers(scans: ScanDto[]): void {
-    const heatPoints: any[] = [];
+private plotMarkers(scans: ScanDto[]): void {
+  const heatPoints: any[] = [];
 
-    scans.forEach(scan => {
-      if (!scan.location_lat || !scan.location_lng) return;
+  scans.forEach(scan => {
+    if (!scan.location_lat || !scan.location_lng) return;
 
-      const lat = Number(scan.location_lat);
-      const lng = Number(scan.location_lng);
+    const lat = Number(scan.location_lat);
+    const lng = Number(scan.location_lng);
 
-      let intensity = 0.4;
-      const severity = (scan.severity_key || 'mild').toLowerCase();
+    const diseaseKey = (scan.disease_key || '').toLowerCase();
+    const severity = (scan.severity_key || 'mild').toLowerCase();
 
+    let intensity = 0.4;
+
+    if (diseaseKey.includes('healthy')) {
+      // Healthy: always low intensity, green gradient
+      intensity = 0.3;
+    } else if (diseaseKey.includes('mealybug')) {
+      // Mealybug: dark blue (severe/moderate) → fade blue (mild)
       if (severity === 'severe') intensity = 1.0;
-      else if (severity === 'moderate') intensity = 0.7;
-      else intensity = 0.4;
+      else if (severity === 'moderate') intensity = 0.65;
+      else intensity = 0.3; // mild = faded
+    } else if (diseaseKey.includes('black pod') || diseaseKey.includes('blackpod')) {
+      // Black pod: dark red (severe) → medium red (moderate) → light red (mild)
+      if (severity === 'severe') intensity = 1.0;
+      else if (severity === 'moderate') intensity = 0.65;
+      else intensity = 0.3;
+    } else if (diseaseKey.includes('pod borer') || diseaseKey.includes('podborer')) {
+      // Pod borer: yellow
+      if (severity === 'severe') intensity = 1.0;
+      else if (severity === 'moderate') intensity = 0.65;
+      else intensity = 0.3;
+    } else {
+      // Other diseases: same mealybug-style blue logic
+      if (severity === 'severe') intensity = 1.0;
+      else if (severity === 'moderate') intensity = 0.65;
+      else intensity = 0.3;
+    }
 
-      heatPoints.push([lat, lng, intensity]);
+    heatPoints.push([lat, lng, intensity, diseaseKey]); // carry diseaseKey for per-layer logic
+  });
 
-      // UPDATED: use clickable marker instead of hover popup
-      this.addClickableMarker(lat, lng, scan);
-    });
+  // --- Healthy layer (green) ---
+  const healthyPoints = heatPoints
+    .filter(p => p[2] !== undefined && (p[3] as string).includes('healthy'))
+    .map(p => [p[0], p[1], p[2]]);
 
-    (L as any).heatLayer(heatPoints, {
+  if (healthyPoints.length) {
+    (L as any).heatLayer(healthyPoints, {
       radius: 50,
       blur: 25,
       max: 1.0,
-      minOpacity: 0.5,
+      minOpacity: 0.45,
       gradient: {
-        0.2: '#3b82f6',
-        0.4: '#10b981',
-        0.6: '#facc15',
-        0.8: '#f97316',
-        1.0: '#ef4444'
+        0.2: '#bbf7d0',
+        0.5: '#4ade80',
+        0.8: '#16a34a',
+        1.0: '#14532d'
       }
     }).addTo(this.map);
   }
+
+  // --- Mealybug layer (dark blue → faded blue) ---
+  const mealybugPoints = heatPoints
+    .filter(p => (p[3] as string).includes('mealybug'))
+    .map(p => [p[0], p[1], p[2]]);
+
+  if (mealybugPoints.length) {
+    (L as any).heatLayer(mealybugPoints, {
+      radius: 50,
+      blur: 25,
+      max: 1.0,
+      minOpacity: 0.45,
+      gradient: {
+        0.2: '#bfdbfe', // light blue (mild)
+        0.5: '#3b82f6', // mid blue (moderate)
+        0.8: '#1d4ed8', // dark blue
+        1.0: '#1e3a8a'  // very dark blue (severe)
+      }
+    }).addTo(this.map);
+  }
+
+  // --- Black Pod layer (dark red → light red) ---
+  const blackPodPoints = heatPoints
+    .filter(p => (p[3] as string).includes('black pod') || (p[3] as string).includes('blackpod'))
+    .map(p => [p[0], p[1], p[2]]);
+
+  if (blackPodPoints.length) {
+    (L as any).heatLayer(blackPodPoints, {
+      radius: 50,
+      blur: 25,
+      max: 1.0,
+      minOpacity: 0.45,
+      gradient: {
+        0.2: '#fecaca', // light red (mild)
+        0.5: '#f87171', // medium red (moderate)
+        0.8: '#dc2626', // red
+        1.0: '#7f1d1d'  // very dark red (severe)
+      }
+    }).addTo(this.map);
+  }
+
+  // --- Pod Borer layer (yellow) ---
+  const podBorerPoints = heatPoints
+    .filter(p => (p[3] as string).includes('pod borer') || (p[3] as string).includes('podborer'))
+    .map(p => [p[0], p[1], p[2]]);
+
+  if (podBorerPoints.length) {
+    (L as any).heatLayer(podBorerPoints, {
+      radius: 50,
+      blur: 25,
+      max: 1.0,
+      minOpacity: 0.45,
+      gradient: {
+        0.2: '#FFFBA7', // pale yellow (mild)
+        0.5: '#FFEA6C', // yellow (moderate)
+        0.8: '#eab308', // amber-yellow
+        1.0: '#FFCC00'  // dark amber (severe)
+      }
+    }).addTo(this.map);
+  }
+
+  // --- Other / fallback diseases (blue, same as mealybug) ---
+  const otherPoints = heatPoints
+    .filter(p => {
+      const d = p[3] as string;
+      return !d.includes('healthy')
+        && !d.includes('mealybug')
+        && !d.includes('black pod')
+        && !d.includes('blackpod')
+        && !d.includes('pod borer')
+        && !d.includes('podborer');
+    })
+    .map(p => [p[0], p[1], p[2]]);
+
+  if (otherPoints.length) {
+    (L as any).heatLayer(otherPoints, {
+      radius: 50,
+      blur: 25,
+      max: 1.0,
+      minOpacity: 0.45,
+      gradient: {
+        0.2: '#bfdbfe',
+        0.5: '#3b82f6',
+        0.8: '#1d4ed8',
+        1.0: '#1e3a8a'
+      }
+    }).addTo(this.map);
+  }
+
+  // --- Plot clickable ghost markers on top of all heat layers ---
+  scans.forEach(scan => {
+    if (!scan.location_lat || !scan.location_lng) return;
+    this.addClickableMarker(
+      Number(scan.location_lat),
+      Number(scan.location_lng),
+      scan
+    );
+  });
+}
 
   // UPDATED: replaced addInvisibleInteractionLayer — now clickable, drives right panel
   private addClickableMarker(lat: number, lng: number, scan: ScanDto): void {
