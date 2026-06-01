@@ -78,15 +78,35 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initMap(): void {
+    // 1. Define your base styles
+    const cleanView = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; CartoDB'
+    });
+
+    const detailedTerrain = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps',
+      maxZoom: 20
+    });
+
+    // 2. Initialize map with the detailed terrain view by default
     this.map = L.map('map', {
       center: [7.7512, 125.7231],
       zoom: 12,
-      zoomControl: false
+      zoomControl: false,
+      layers: [detailedTerrain] // Default layer
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; CartoDB'
-    }).addTo(this.map);
+    // 3. Create a toggle control menu
+    const baseMaps = {
+      "Detailed Terrain": detailedTerrain,
+      "Clean View": cleanView
+    };
+
+    // Adds a tiny control button to the map interface
+    L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
+
+    // Render your Sawata boundary lines
+    this.drawBoundary();
   }
 
   loadScans(): void {
@@ -117,6 +137,54 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.activeFilter = filter;
     this.applyFilters();
   }
+  private drawBoundary(): void {
+    const boundaryCoords: L.LatLngTuple[] = [
+      [7.806560861082189, 125.63986102045375],
+      [7.7956762095560865, 125.63196459707926],
+      [7.794995909431882, 125.66320696782175],
+      [7.741929100320352, 125.64020434320918],
+      [7.743630063488939, 125.68655291518975],
+      [7.722537635330425, 125.67693987803823],
+      [7.68608165649672, 125.68385925522492],
+      [7.671187109483628, 125.70077199774289],
+      [7.680133924592561, 125.7221384442543],
+      [7.66464738677233, 125.72361706165712],
+      [7.6526771983407205, 125.74031302153712],
+      [7.652043473116281, 125.7484123382937],
+      [7.683939805531676, 125.76134282642398],
+      [7.682813265212966, 125.77782564636436],
+      [7.691332653669563, 125.78493031018593],
+      [7.7033721590568724, 125.77945971904207],
+      [7.70808359287765, 125.77164314928795],
+      [7.727444436605209, 125.76759349090968],
+      [7.741435502048624, 125.75246835983998],
+      [7.752139988193796, 125.73589958976596],
+      [7.763325284000295, 125.72782762483625],
+      [7.811671196718009, 125.72624964672997],
+      [7.827604881331258, 125.70919534486183],
+      [7.823215663004752, 125.70694976062417],
+      [7.830551043241702, 125.69462939311539],
+      [7.842360795049566, 125.66801254185408],
+      [7.823328174293252, 125.63906132053842],
+      [7.808920959985727, 125.64199646739989]
+    ];
+
+    // 1. Bottom Layer: Solid Red Line
+    L.polygon(boundaryCoords, {
+      color: '#dc2626',   // Deep red color
+      weight: 5,          // Thickness of the line
+      fillColor: '#000',  // Optional: darken the inside slightly
+      fillOpacity: 0.05,  // Very subtle inner fill
+      interactive: false  // Prevent it from blocking clicks on your markers
+    }).addTo(this.map);
+    L.polygon(boundaryCoords, {
+      color: '#ffffff',   // White color
+      weight: 5,          // Same thickness
+      dashArray: '10, 15', // 10px line, 15px gap
+      fill: false,        // No fill on the top layer
+      interactive: false
+    }).addTo(this.map);
+  }
 
   applyFilters(): void {
     if (!this.map) {
@@ -136,7 +204,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // 2. Prepare target string matching strings
     const monthString = String(this.activeFilter.month + 1).padStart(2, '0');
     const targetYearMonth = `${this.activeFilter.year}-${monthString}`;
 
