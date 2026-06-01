@@ -2,15 +2,13 @@ import { Component, OnInit, AfterViewInit, OnDestroy, inject, ChangeDetectorRef 
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import * as L from 'leaflet';
+import 'leaflet.heat';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { ScanDto } from '../dashboard/dashboard.dto';
 import { HeatmapSkeletonComponent } from '../../app/shared/skeletons/heatmap-skeleton/heatmap-skeleton';
-
-
-import * as maplibregl from 'maplibre-gl';
-import { MapboxOverlay } from '@deck.gl/mapbox';
-import { HeatmapLayer } from '@deck.gl/aggregation-layers';
-import { ScatterplotLayer } from '@deck.gl/layers';
+// Import the component and its exported interface
+import { FilterBarComponent, FilterState } from './widgets/filter-bar.component';
 
 interface Observation {
   text: string;
@@ -20,29 +18,25 @@ interface Observation {
 @Component({
   selector: 'app-heatmap',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, HeatmapSkeletonComponent],
+  imports: [CommonModule, FormsModule, DatePipe, FilterBarComponent],
   templateUrl: './heatmap.component.html',
   styleUrl: './heatmap.component.css'
 })
 export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
-  private map!: maplibregl.Map;
-  private deckOverlay!: MapboxOverlay;
-
-  // FIX: Two flags to track readiness independently
-  private mapReady = false;
-  private scansReady = false;
-
+  private map!: L.Map;
   isLoading = false;
   errorMessage = '';
-
   allScans: ScanDto[] = [];
-  filters = {
-    date: '',
-    disease: 'all',
-    zone: 'all'
-  };
 
+  private readonly now = new Date();
+
+  activeFilter: FilterState = {
+    year: this.now.getFullYear(),
+    month: this.now.getMonth(),
+    disease: 'all'
+  };
   selectedScan: ScanDto | null = null;
+
   lastSyncTime: Date = new Date();
   scanCoverage: number = 83;
   isSyncing: boolean = false;
@@ -69,7 +63,11 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.initMap();
-    this.loadScans();
+
+    // Push the state changes to the next macro-task cycle
+    setTimeout(() => {
+      this.loadScans();
+    }, 0);
 
     this.route.queryParams.subscribe(params => {
       if (params['loc'] && this.map) {
@@ -80,59 +78,35 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initMap(): void {
-    this.map = new maplibregl.Map({
-      container: 'map',
-      style: {
-        version: 8,
-        sources: {
-          'osm-tiles': {
-            type: 'raster',
-            tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '© OpenStreetMap contributors'
-          }
-        },
-        layers: [
-          {
-            id: 'osm-layer',
-            type: 'raster',
-            source: 'osm-tiles',
-            minzoom: 0,
-            maxzoom: 19
-          }
-        ]
-      },
-      center: [125.7231, 7.7512],
+    // 1. Define your base styles
+    const cleanView = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; CartoDB'
+    });
+
+    const detailedTerrain = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps',
+      maxZoom: 20
+    });
+
+    // 2. Initialize map with the detailed terrain view by default
+    this.map = L.map('map', {
+      center: [7.7512, 125.7231],
       zoom: 12,
-      pitch: 65,
-      bearing: 45
+      zoomControl: false,
+      layers: [detailedTerrain] // Default layer
     });
 
-    this.map.on('load', () => {
-      this.map.addSource('open-terrain', {
-        type: 'raster-dem',
-        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-        encoding: 'terrarium',
-        tileSize: 256,
-        maxzoom: 14
-      });
+    // 3. Create a toggle control menu
+    const baseMaps = {
+      "Detailed Terrain": detailedTerrain,
+      "Clean View": cleanView
+    };
 
-      this.map.setTerrain({ source: 'open-terrain', exaggeration: 1.5 });
+    // Adds a tiny control button to the map interface
+    L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
 
-      // FIX: Initialize the DeckGL overlay HERE inside the load event,
-      // so it is always registered before any layer data is pushed.
-      // interleaved: false ensures the deck.gl canvas renders ON TOP of
-      // the MapLibre raster tiles and is never occluded.
-      this.deckOverlay = new MapboxOverlay({
-        interleaved: false,
-        layers: []
-      });
-      this.map.addControl(this.deckOverlay as any);
-
-      // FIX: Mark map as ready, then attempt to render if scans already loaded
-      this.mapReady = true;
-      this.tryRender();
-    });
+    // Render your Sawata boundary lines
+    this.drawBoundary();
   }
 
   loadScans(): void {
@@ -144,9 +118,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (res) => {
         if (res.data) {
           this.allScans = res.data;
-          // FIX: Mark scans as ready, then attempt to render if map already loaded
-          this.scansReady = true;
-          this.tryRender();
+          this.applyFilters();
         }
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -160,84 +132,310 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // FIX: Central gate — only renders when BOTH map and scans are ready
-  private tryRender(): void {
-    if (this.mapReady && this.scansReady) {
-      this.applyFilters();
-    }
+
+  onFilterChange(filter: FilterState): void {
+    this.activeFilter = filter;
+    this.applyFilters();
+  }
+  private drawBoundary(): void {
+    const boundaryCoords: L.LatLngTuple[] = [
+      [7.806560861082189, 125.63986102045375],
+      [7.7956762095560865, 125.63196459707926],
+      [7.794995909431882, 125.66320696782175],
+      [7.741929100320352, 125.64020434320918],
+      [7.743630063488939, 125.68655291518975],
+      [7.722537635330425, 125.67693987803823],
+      [7.68608165649672, 125.68385925522492],
+      [7.671187109483628, 125.70077199774289],
+      [7.680133924592561, 125.7221384442543],
+      [7.66464738677233, 125.72361706165712],
+      [7.6526771983407205, 125.74031302153712],
+      [7.652043473116281, 125.7484123382937],
+      [7.683939805531676, 125.76134282642398],
+      [7.682813265212966, 125.77782564636436],
+      [7.691332653669563, 125.78493031018593],
+      [7.7033721590568724, 125.77945971904207],
+      [7.70808359287765, 125.77164314928795],
+      [7.727444436605209, 125.76759349090968],
+      [7.741435502048624, 125.75246835983998],
+      [7.752139988193796, 125.73589958976596],
+      [7.763325284000295, 125.72782762483625],
+      [7.811671196718009, 125.72624964672997],
+      [7.827604881331258, 125.70919534486183],
+      [7.823215663004752, 125.70694976062417],
+      [7.830551043241702, 125.69462939311539],
+      [7.842360795049566, 125.66801254185408],
+      [7.823328174293252, 125.63906132053842],
+      [7.808920959985727, 125.64199646739989]
+    ];
+
+    // 1. Bottom Layer: Solid Red Line
+    L.polygon(boundaryCoords, {
+      color: '#dc2626',   // Deep red color
+      weight: 5,          // Thickness of the line
+      fillColor: '#000',  // Optional: darken the inside slightly
+      fillOpacity: 0.05,  // Very subtle inner fill
+      interactive: false  // Prevent it from blocking clicks on your markers
+    }).addTo(this.map);
+    L.polygon(boundaryCoords, {
+      color: '#ffffff',   // White color
+      weight: 5,          // Same thickness
+      dashArray: '10, 15', // 10px line, 15px gap
+      fill: false,        // No fill on the top layer
+      interactive: false
+    }).addTo(this.map);
   }
 
   applyFilters(): void {
-    const filteredData = this.allScans.filter(scan => {
-      const matchesDate = !this.filters.date || scan.created_at?.includes(this.filters.date);
-      const matchesDisease = this.filters.disease === 'all' ||
-        scan.disease_key?.toLowerCase().includes(this.filters.disease.toLowerCase());
-      return matchesDate && matchesDisease;
-    });
+    if (!this.map) {
+      console.warn('⚠️ [HeatmapFilter] Map is not initialized yet. Skipping filter application.');
+      return;
+    }
 
-    this.plotMarkers(filteredData);
-  }
-
-  resetFilters(): void {
-    this.filters = { date: '', disease: 'all', zone: 'all' };
-    this.selectedScan = null;
-    this.applyFilters();
-  }
-
-  private plotMarkers(scans: ScanDto[]): void {
-    const data = scans
-      .filter(s => s.location_lat && s.location_lng)
-      .map(scan => {
-        const severity = (scan.severity_key || 'mild').toLowerCase();
-        let weight = 1;
-        if (severity === 'moderate') weight = 5;
-        if (severity === 'severe') weight = 10;
-
-        return {
-          position: [Number(scan.location_lng), Number(scan.location_lat)],
-          weight: weight,
-          scan: scan
-        };
-      });
-
-    const heatmapLayer = new HeatmapLayer({
-      id: 'disease-heatmap-visuals',
-      data,
-      getPosition: (d: any) => d.position,
-      getWeight: (d: any) => d.weight,
-      radiusPixels: 45,
-      intensity: 1,
-      threshold: 0.05,
-      colorRange: [
-        [144, 238, 144, 50],
-        [50, 205, 50, 150],
-        [173, 255, 47, 200],
-        [255, 255, 0, 255],
-        [255, 165, 0, 255],
-        [255, 0, 0, 255]
-      ],
-      aggregation: 'SUM'
-    });
-
-    const interactionLayer = new ScatterplotLayer({
-      id: 'disease-click-targets',
-      data,
-      getPosition: (d: any) => d.position,
-      radiusMinPixels: 15,
-      opacity: 0,
-      pickable: true,
-      onClick: (info: any) => {
-        if (info.object && info.object.scan) {
-          this.selectedScan = info.object.scan;
-          this.cdr.markForCheck();
+    // 1. Clear previous map layers
+    this.map.eachLayer((layer) => {
+      if (
+        layer instanceof (L as any).HeatLayer ||
+        layer instanceof L.CircleMarker
+      ) {
+        if (!layer.getPopup()?.getContent()?.toString().includes('Target Area')) {
+          this.map.removeLayer(layer);
         }
-        return true;
       }
     });
 
-    // FIX: deckOverlay is guaranteed to exist here because tryRender()
-    // only fires after mapReady = true, which is set after overlay is created
-    this.deckOverlay.setProps({ layers: [heatmapLayer, interactionLayer] });
+    const monthString = String(this.activeFilter.month + 1).padStart(2, '0');
+    const targetYearMonth = `${this.activeFilter.year}-${monthString}`;
+
+    console.log(`%c🔍 [HeatmapFilter] Applying Criteria: ${targetYearMonth} | Disease: "${this.activeFilter.disease}"`, 'color: #0f172a; font-weight: bold; background: #f1f5f9; padding: 4px 8px; border-radius: 4px;');
+    console.log(`📊 Total scans available in memory: ${this.allScans.length}`);
+
+    // Counters for logging diagnostics
+    let dateMatchesCount = 0;
+    const uniqueDiseasesInSelectedPeriod: { [key: string]: number } = {};
+
+    // 3. Execute filtering loop
+    const filteredData = this.allScans.filter(scan => {
+      // Check if scan string exists and matches YYYY-MM prefix
+      const matchesDate = !!scan.created_at?.startsWith(targetYearMonth);
+
+      if (matchesDate) {
+        dateMatchesCount++;
+        // Keep track of what diseases actually exist inside this month/year window
+        const dKey = (scan.disease_key || 'unknown').toLowerCase();
+        uniqueDiseasesInSelectedPeriod[dKey] = (uniqueDiseasesInSelectedPeriod[dKey] || 0) + 1;
+      }
+
+      const matchesDisease =
+        this.activeFilter.disease === 'all' ||
+        scan.disease_key?.toLowerCase() === this.activeFilter.disease.toLowerCase();
+
+      return matchesDate && matchesDisease;
+    });
+
+    // 4. Print Summary to the Console
+    console.group(`📈 Filter Results for ${targetYearMonth}`);
+    console.log(`📅 Scans matching the date [${targetYearMonth}]: ${dateMatchesCount}`);
+    console.log(`🎯 Scans matching BOTH Date and Disease ["${this.activeFilter.disease}"]: ${filteredData.length}`);
+
+    if (dateMatchesCount > 0) {
+      console.log('🦠 Distribution of all diseases found in this specific period:', uniqueDiseasesInSelectedPeriod);
+    } else if (this.allScans.length > 0) {
+      console.warn(`⚠️ Zero scans matched "${targetYearMonth}". Here is a sample "created_at" value from your API data to check formatting:`, this.allScans[0]?.created_at);
+    }
+    console.groupEnd();
+
+    // 5. Render to map
+    this.plotMarkers(filteredData);
+  }
+
+  private plotMarkers(scans: ScanDto[]): void {
+    const heatPoints: any[] = [];
+
+    scans.forEach(scan => {
+      if (!scan.location_lat || !scan.location_lng) return;
+
+      const lat = Number(scan.location_lat);
+      const lng = Number(scan.location_lng);
+
+      const diseaseKey = (scan.disease_key || '').toLowerCase();
+      const severity = (scan.severity_key || 'mild').toLowerCase();
+
+      let intensity = 0.4;
+
+      if (diseaseKey.includes('healthy')) {
+        intensity = 0.3;
+      } else if (diseaseKey.includes('mealybug')) {
+        if (severity === 'severe') intensity = 1.0;
+        else if (severity === 'moderate') intensity = 0.65;
+        else intensity = 0.3;
+      } else if (diseaseKey.includes('black pod') || diseaseKey.includes('blackpod')) {
+        if (severity === 'severe') intensity = 1.0;
+        else if (severity === 'moderate') intensity = 0.65;
+        else intensity = 0.3;
+      } else if (diseaseKey.includes('pod borer') || diseaseKey.includes('podborer')) {
+        if (severity === 'severe') intensity = 1.0;
+        else if (severity === 'moderate') intensity = 0.65;
+        else intensity = 0.3;
+      } else {
+        if (severity === 'severe') intensity = 1.0;
+        else if (severity === 'moderate') intensity = 0.65;
+        else intensity = 0.3;
+      }
+
+      heatPoints.push([lat, lng, intensity, diseaseKey]);
+    });
+
+    // --- Healthy layer (green) ---
+    const healthyPoints = heatPoints
+      .filter(p => p[2] !== undefined && (p[3] as string).includes('healthy'))
+      .map(p => [p[0], p[1], p[2]]);
+
+    if (healthyPoints.length) {
+      (L as any).heatLayer(healthyPoints, {
+        radius: 50,
+        blur: 25,
+        max: 1.0,
+        minOpacity: 0.45,
+        gradient: {
+          0.2: '#bbf7d0',
+          0.5: '#4ade80',
+          0.8: '#16a34a',
+          1.0: '#14532d'
+        }
+      }).addTo(this.map);
+    }
+
+    // --- Mealybug layer (dark blue → faded blue) ---
+    const mealybugPoints = heatPoints
+      .filter(p => (p[3] as string).includes('mealybug'))
+      .map(p => [p[0], p[1], p[2]]);
+
+    if (mealybugPoints.length) {
+      (L as any).heatLayer(mealybugPoints, {
+        radius: 50,
+        blur: 25,
+        max: 1.0,
+        minOpacity: 0.45,
+        gradient: {
+          0.2: '#bfdbfe',
+          0.5: '#3b82f6',
+          0.8: '#1d4ed8',
+          1.0: '#1e3a8a'
+        }
+      }).addTo(this.map);
+    }
+
+    // --- Black Pod layer (dark red → light red) ---
+    const blackPodPoints = heatPoints
+      .filter(p => (p[3] as string).includes('black pod') || (p[3] as string).includes('blackpod'))
+      .map(p => [p[0], p[1], p[2]]);
+
+    if (blackPodPoints.length) {
+      (L as any).heatLayer(blackPodPoints, {
+        radius: 50,
+        blur: 25,
+        max: 1.0,
+        minOpacity: 0.45,
+        gradient: {
+          0.2: '#fecaca',
+          0.5: '#f87171',
+          0.8: '#dc2626',
+          1.0: '#7f1d1d'
+        }
+      }).addTo(this.map);
+    }
+
+    // --- Pod Borer layer (yellow) ---
+    const podBorerPoints = heatPoints
+      .filter(p => (p[3] as string).includes('pod borer') || (p[3] as string).includes('podborer'))
+      .map(p => [p[0], p[1], p[2]]);
+
+    if (podBorerPoints.length) {
+      (L as any).heatLayer(podBorerPoints, {
+        radius: 50,
+        blur: 25,
+        max: 1.0,
+        minOpacity: 0.45,
+        gradient: {
+          0.2: '#FFFBA7',
+          0.5: '#FFEA6C',
+          0.8: '#eab308',
+          1.0: '#FFCC00'
+        }
+      }).addTo(this.map);
+    }
+
+    // --- Other / fallback diseases (blue, same as mealybug) ---
+    const otherPoints = heatPoints
+      .filter(p => {
+        const d = p[3] as string;
+        return !d.includes('healthy')
+          && !d.includes('mealybug')
+          && !d.includes('black pod')
+          && !d.includes('blackpod')
+          && !d.includes('pod borer')
+          && !d.includes('podborer');
+      })
+      .map(p => [p[0], p[1], p[2]]);
+
+    if (otherPoints.length) {
+      (L as any).heatLayer(otherPoints, {
+        radius: 50,
+        blur: 25,
+        max: 1.0,
+        minOpacity: 0.45,
+        gradient: {
+          0.2: '#bfdbfe',
+          0.5: '#3b82f6',
+          0.8: '#1d4ed8',
+          1.0: '#1e3a8a'
+        }
+      }).addTo(this.map);
+    }
+
+    // --- Plot clickable ghost markers on top of all heat layers ---
+    scans.forEach(scan => {
+      if (!scan.location_lat || !scan.location_lng) return;
+      this.addClickableMarker(
+        Number(scan.location_lat),
+        Number(scan.location_lng),
+        scan
+      );
+    });
+  }
+
+  private addClickableMarker(lat: number, lng: number, scan: ScanDto): void {
+    const ghostMarker = L.circleMarker([lat, lng], {
+      radius: 20,
+      stroke: false,
+      fillColor: '#000',
+      fillOpacity: 0,
+    });
+
+    ghostMarker.addTo(this.map);
+
+    ghostMarker.bindTooltip(`
+      <div style="font-size:11px;font-weight:700;padding:2px 4px;white-space:nowrap;">
+        ${scan.user_name || 'Unknown'} &nbsp;·&nbsp; ${scan.disease_key || '—'}
+      </div>
+    `, {
+      sticky: true,
+      direction: 'top',
+      className: 'custom-heatmap-tooltip'
+    });
+
+    ghostMarker.on('click', () => {
+      this.selectedScan = scan;
+      this.cdr.markForCheck();
+    });
+
+    ghostMarker.on('mouseover', (e) => {
+      (e.target as L.CircleMarker).setStyle({ fillOpacity: 0.08, fillColor: '#1e293b' });
+    });
+    ghostMarker.on('mouseout', (e) => {
+      (e.target as L.CircleMarker).setStyle({ fillOpacity: 0 });
+    });
   }
 
   clearSelectedScan(): void {
@@ -262,38 +460,25 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public focusOnLocation(lat: number, lng: number): void {
     if (!this.map) return;
-
-    this.map.flyTo({
-      center: [lng, lat],
-      zoom: 16,
-      pitch: 60,
-      bearing: 0,
-      duration: 2000
-    });
-
     setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'custom-div-icon relative flex items-center justify-center';
-      el.innerHTML = `
-        <div class="absolute w-12 h-12 bg-green-500 rounded-full animate-ping opacity-20"></div>
-        <div class="w-8 h-8 bg-white border-4 border-green-600 rounded-full shadow-2xl relative z-10"></div>
-      `;
-
-      const popup = new maplibregl.Popup({ offset: 25 })
-        .setHTML(`<b class="text-slate-800">Target Area</b>`);
-
-      new maplibregl.Marker(el)
-        .setLngLat([lng, lat])
-        .setPopup(popup)
-        .addTo(this.map)
-        .togglePopup();
-    }, 2000);
+      this.map.flyTo([lat, lng], 16, { animate: true, duration: 2.0 });
+      const highlightIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="relative flex items-center justify-center">
+                 <div class="absolute w-12 h-12 bg-green-500 rounded-full animate-ping opacity-20"></div>
+                 <div class="w-8 h-8 bg-white border-4 border-green-600 rounded-full shadow-2xl relative z-10"></div>
+               </div>`,
+        iconSize: [48, 48],
+        iconAnchor: [24, 24]
+      });
+      L.marker([lat, lng], { icon: highlightIcon }).addTo(this.map)
+        .bindPopup(`<b class="text-slate-800">Target Area</b>`).openPopup();
+    }, 300);
   }
 
   refreshSync(): void {
     if (this.isSyncing) return;
     this.isSyncing = true;
-    this.scansReady = false; // FIX: Reset so tryRender re-gates properly on refresh
     this.loadScans();
     setTimeout(() => {
       this.lastSyncTime = new Date();
@@ -309,24 +494,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newObservation = '';
   }
 
-  recenterMap() {
-    this.map.flyTo({
-      center: [125.7231, 7.7512],
-      zoom: 12,
-      pitch: 65,
-      bearing: 45,
-      duration: 1500
-    });
-  }
-
+  recenterMap() { this.map.setView([7.7512, 125.7231], 12); }
   goBack() { this.router.navigate(['/dashboard']); }
-
-  ngOnDestroy() {
-    if (this.deckOverlay) {
-      this.deckOverlay.finalize();
-    }
-    if (this.map) {
-      this.map.remove();
-    }
-  }
+  ngOnDestroy() { if (this.map) this.map.remove(); }
 }
