@@ -395,11 +395,14 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       return;
     }
 
+
     console.group(`[loadExistingRecommendations] Disease="${this.diseaseKey}" (ID: ${this.diseaseId})`);
 
     try {
       const response: any = await firstValueFrom(
-        this.recommendationService.getRecommendations(this.diseaseId)
+        this.diseaseKey === 'healthy'
+          ? this.recommendationService.getRecommendationsByDiseaseKey('healthy')
+          : this.recommendationService.getRecommendations(this.diseaseId!)
       );
 
       const diseaseRecommendations: any[] = response?.data ?? response ?? [];
