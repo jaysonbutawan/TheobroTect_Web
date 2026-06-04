@@ -1,19 +1,25 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { SidebarComponent } from '../../modules/sidebar/sidebar.component';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HostListener } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+// Adjust your paths as necessary
+import { SidebarComponent } from '../../modules/sidebar/sidebar.component';
+import { ToastService } from '../../app/shared/components/toast/toast.service';
+import { ToastNotificationComponent } from '../../app/shared/components/toast/toast-notification.component'; // 🌟 ADD THIS
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, SidebarComponent],
+  // 🌟 ADD ToastNotificationComponent to the imports array
+  imports: [CommonModule, RouterOutlet, SidebarComponent, ToastNotificationComponent],
   templateUrl: './layout.components.html',
 })
 export class LayoutComponent {
   isMobileMenuOpen = false;
   sideCollapsed = false;
   private touchStartX = 0;
+
+  constructor(public toastService: ToastService) {}
 
   toggleMobileMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;

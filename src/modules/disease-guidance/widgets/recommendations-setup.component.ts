@@ -16,6 +16,7 @@ import { TranslationService } from '../services/translation.service';
 import { ChecklistItem } from '../diease-guidance.component';
 import { DiseaseSeverityService } from '../services/disease-severity.service';
 import { RecommendationSetupService } from '../services/recommendations-setup.service';
+import { ToastService } from '../../../app/shared/components/toast/toast.service';
 export interface SeverityLevelData {
   actions: ChecklistItem[];
   prevention: ChecklistItem[];
@@ -56,9 +57,12 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   private translationService = inject(TranslationService);
   private severityService = inject(DiseaseSeverityService);
   private recommendationService = inject(RecommendationSetupService);
+  private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   private initialLoadDone = false;
+
+
 
   themeMap = {
     mild: { bg: 'bg-emerald-50/30', border: 'border-emerald-100', text: 'text-emerald-700', dashBorder: 'border-emerald-300', btnHover: 'hover:bg-emerald-50', badgeBg: 'bg-blue-100', badgeText: 'text-blue-700' },
@@ -134,6 +138,25 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   }
 
   Severities(): void {
+    if (this.diseaseKey === 'healthy') {
+      console.log('🌿 [Severities] "healthy" key detected. Adapting UI.');
+
+      this.displaySeverities = ['mild'];
+      this.activeSev = 'mild';
+
+      // 🎨 OVERRIDE THE UI TEXT FOR HEALTHY STATE
+      this.severityConfig.mild.label = 'Healthy / Normal';
+      this.severityConfig.mild.description = 'Standard preventive care and maintenance';
+
+      this.loadExistingRecommendations();
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // 🌟 2. Reset the label back to "Mild" for actual diseases (in case the component is reused)
+    this.severityConfig.mild.label = 'Mild';
+    this.severityConfig.mild.description = 'Early or low-impact signs';
+
     console.log(`[RecommendationsSetup] Severities(): Fetching for diseaseId=${this.diseaseId}`);
 
     this.severityService.getSeverities().subscribe({
@@ -144,8 +167,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
         );
 
-        console.log(`[RecommendationsSetup] Severities(): diseaseSeverities found:`, this.diseaseSeverities);
-
         const fetchedLevels = this.diseaseSeverities
           .map((sev: any) =>
             (sev.severity_level || sev.severity || sev.level || sev.name || '').toLowerCase()
@@ -153,13 +174,11 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           .filter((val: string) => ['mild', 'moderate', 'severe'].includes(val)) as SeverityType[];
 
         this.displaySeverities = fetchedLevels;
-        console.log(`[RecommendationsSetup] Severities(): displaySeverities resolved to:`, this.displaySeverities);
 
         if (this.displaySeverities.length > 0 && !this.displaySeverities.includes(this.activeSev)) {
           this.activeSev = this.displaySeverities[0];
         }
 
-        // BUG FIX #4: diseaseSeverities is now populated — safe to load recommendations
         this.loadExistingRecommendations();
         this.cdr.markForCheck();
       },
@@ -177,27 +196,17 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     }
   }
 
-  // ─── Save ──────────────────────────────────────────────────────────────────
 
   onSaveRecommendations(): void {
     if (!this.diseaseKey || !this.diseaseId) {
-      console.error('[onSaveRecommendations] Aborted: diseaseKey or diseaseId is missing.', {
-        diseaseKey: this.diseaseKey,
-        diseaseId: this.diseaseId
-      });
       return;
     }
-
-    console.log(`[onSaveRecommendations] Starting save for key="${this.diseaseKey}", id=${this.diseaseId}`);
 
     this.isSaving = true;
 
     this.saveRecommendationsForDisease(this.diseaseKey)
-      .then(() => {
-        console.log('[onSaveRecommendations] ✅ All recommendations saved successfully.');
-      })
-      .catch(err => {
-        console.error('[onSaveRecommendations] ❌ Error saving recommendations:', err);
+      .catch(() => {
+        // Optional: show a user-friendly notification here
       })
       .finally(() => {
         this.isSaving = false;
@@ -205,7 +214,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       });
   }
 
-  // ─── Bullets ───────────────────────────────────────────────────────────────
 
   addBullet(list: ChecklistItem[]): void {
     list.push({ en: '', tl: '', translating: false });
@@ -271,74 +279,28 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     }, 900);
   }
 
-  async saveRecommendationsForDisease(
-    diseaseKey: string
-  ): Promise<void> {
-
-    if (!this.diseaseId) {
-      console.error('[saveRecommendations] No diseaseId found.');
-      return;
-    }
-
-    const severityIdMap: Record<string, number> = {};
-
-    this.diseaseSeverities.forEach(sev => {
-
-      const level = (
-        sev.severity_level ||
-        sev.severity ||
-        sev.level ||
-        ''
-      ).toLowerCase().trim();
-
-      severityIdMap[level] = sev.id;
-    });
-
-    console.log('[saveRecommendations] severityIdMap:', severityIdMap);
-
-    /**
-     * Process each severity
-     */
-    for (const severity of this.displaySeverities) {
-
-      const severityId = severityIdMap[severity];
-
-      if (!severityId) {
-        console.warn(
-          `[saveRecommendations] No severityId for "${severity}"`
-        );
-        continue;
-      }
-
-      const data = this.sevData[severity];
-
-      if (!data) {
-        console.warn(
-          `[saveRecommendations] No data for "${severity}"`
-        );
-        continue;
-      }
-
+  async saveRecommendationsForDisease(diseaseKey: string): Promise<void> {
+    if (diseaseKey === 'healthy') {
+      const data = this.sevData['mild'];
       const recommendations: any[] = [];
 
-      if (data.actions?.length) {
-
+      if (data?.actions?.length) {
         recommendations.push({
           category_key: 'action_items',
           content: data.actions,
           sort_order: 0
         });
       }
-      if (data.prevention?.length) {
 
+      if (data?.prevention?.length) {
         recommendations.push({
           category_key: 'prevention_items',
           content: data.prevention,
           sort_order: 1
         });
       }
-      if (data.escalateEn?.trim()) {
 
+      if (data?.escalateEn?.trim()) {
         recommendations.push({
           category_key: 'escalate_text',
           content: {
@@ -348,8 +310,8 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           sort_order: 2
         });
       }
-      if (data.seekHelpEn?.trim()) {
 
+      if (data?.seekHelpEn?.trim()) {
         recommendations.push({
           category_key: 'seek_help_text',
           content: {
@@ -359,44 +321,106 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           sort_order: 3
         });
       }
-      if (!recommendations.length) {
-        console.warn(
-          `[saveRecommendations] Empty recommendations for "${severity}"`
+
+      try {
+        await firstValueFrom(
+          this.recommendationService.saveRecommendations({
+            disease_key: 'healthy',
+            recommendations
+          })
         );
-        continue;
+        this.toastService.show('success', 'Saved Successfully', 'Healthy recommendations have been saved.');
+      } catch {
+        this.toastService.show('error', 'Error Occurred', 'Unable to save healthy recommendations.');
       }
-
-      console.log(
-        `[saveRecommendations] Saving severity="${severity}"`,
-        recommendations
-      );
-
-      await firstValueFrom(
-        this.recommendationService.saveRecommendations({
-          disease_severity_id: severityId,
-          recommendations
-        })
-      );
-
-      console.log(
-        `[saveRecommendations] Saved severity="${severity}"`
-      );
-    }
-
-    console.log('[saveRecommendations] DONE');
-  }
-
-  async loadExistingRecommendations(): Promise<void> {
-    if (!this.diseaseKey || !this.diseaseId) {
-      console.warn('[loadExistingRecommendations] Aborted: missing diseaseKey or diseaseId.', {
-        diseaseKey: this.diseaseKey,
-        diseaseId: this.diseaseId
-      });
       return;
     }
 
+    if (!this.diseaseId) {
+      return;
+    }
 
-    console.group(`[loadExistingRecommendations] Disease="${this.diseaseKey}" (ID: ${this.diseaseId})`);
+    const severityIdMap: Record<string, number> = {};
+
+    this.diseaseSeverities.forEach(sev => {
+      const level = (
+        sev.severity_level ||
+        sev.severity ||
+        sev.level ||
+        ''
+      ).toLowerCase().trim();
+
+      severityIdMap[level] = sev.id;
+    });
+    try {
+      for (const severity of this.displaySeverities) {
+        const severityId = severityIdMap[severity];
+        if (!severityId) continue;
+
+        const data = this.sevData[severity];
+        if (!data) continue;
+
+        const recommendations: any[] = [];
+
+        if (data.actions?.length) {
+          recommendations.push({
+            category_key: 'action_items',
+            content: data.actions,
+            sort_order: 0
+          });
+        }
+
+        if (data.prevention?.length) {
+          recommendations.push({
+            category_key: 'prevention_items',
+            content: data.prevention,
+            sort_order: 1
+          });
+        }
+
+        if (data.escalateEn?.trim()) {
+          recommendations.push({
+            category_key: 'escalate_text',
+            content: {
+              en: data.escalateEn,
+              tl: data.escalateTl || ''
+            },
+            sort_order: 2
+          });
+        }
+
+        if (data.seekHelpEn?.trim()) {
+          recommendations.push({
+            category_key: 'seek_help_text',
+            content: {
+              en: data.seekHelpEn,
+              tl: data.seekHelpTl || ''
+            },
+            sort_order: 3
+          });
+        }
+
+        if (!recommendations.length) continue;
+
+        await firstValueFrom(
+          this.recommendationService.saveRecommendations({
+            disease_severity_id: severityId,
+            recommendations
+          })
+        );
+      }
+      this.toastService.show('success', 'Saved Successfully', 'Your changes have been saved successfully.');
+
+    } catch {
+      this.toastService.show('error', 'Error Occurred', 'Connection error. Unable to save recommendations.');
+
+    }
+  }
+
+  async loadExistingRecommendations(): Promise<void> {
+    if (!this.diseaseKey || (!this.diseaseId && this.diseaseKey !== 'healthy')) {
+      return;
+    }
 
     try {
       const response: any = await firstValueFrom(
@@ -406,17 +430,19 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       );
 
       const diseaseRecommendations: any[] = response?.data ?? response ?? [];
-      console.log(`[loadExistingRecommendations] Raw records from API (${diseaseRecommendations.length}):`, diseaseRecommendations);
 
       const severityIdToLevelMap: Record<number, SeverityType> = {};
       this.diseaseSeverities.forEach((sev: any) => {
         const level = (sev.severity_level || sev.severity || sev.level || sev.name || '')
-          .toLowerCase().trim();
+          .toLowerCase()
+          .trim();
+
         if (['mild', 'moderate', 'severe'].includes(level)) {
           severityIdToLevelMap[sev.id] = level as SeverityType;
         }
       });
 
+      // Clear existing data in UI
       this.displaySeverities.forEach(level => {
         if (this.sevData[level]) {
           this.sevData[level].actions = [];
@@ -429,37 +455,42 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       });
 
       diseaseRecommendations.forEach((rec: any) => {
-        if (!rec.disease_severity_id) {
-          return;
+        let level: SeverityType | undefined;
+
+        if (this.diseaseKey === 'healthy') {
+          level = 'mild';
+        } else {
+          if (!rec.disease_severity_id) return;
+          level = severityIdToLevelMap[rec.disease_severity_id];
         }
 
-        const level = severityIdToLevelMap[rec.disease_severity_id];
-
-        if (!level || !this.sevData[level]) {
-          return;
-        }
-
-        const mapKey = `${rec.disease_severity_id}_${rec.category_key}`;
+        if (!level || !this.sevData[level]) return;
 
         let parsedContent = rec.content;
         if (typeof parsedContent === 'string') {
           try {
             parsedContent = JSON.parse(parsedContent);
-          } catch {
-          }
+          } catch { }
         }
 
         switch (rec.category_key) {
           case 'action_items':
-            this.sevData[level].actions = Array.isArray(parsedContent) ? parsedContent : [];
+            this.sevData[level].actions = Array.isArray(parsedContent)
+              ? parsedContent
+              : [];
             break;
+
           case 'prevention_items':
-            this.sevData[level].prevention = Array.isArray(parsedContent) ? parsedContent : [];
+            this.sevData[level].prevention = Array.isArray(parsedContent)
+              ? parsedContent
+              : [];
             break;
+
           case 'escalate_text':
             this.sevData[level].escalateEn = parsedContent?.en || '';
             this.sevData[level].escalateTl = parsedContent?.tl || '';
             break;
+
           case 'seek_help_text':
             this.sevData[level].seekHelpEn = parsedContent?.en || '';
             this.sevData[level].seekHelpTl = parsedContent?.tl || '';
@@ -467,24 +498,9 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         }
       });
 
-      const summary: Record<string, any> = {};
-      this.displaySeverities.forEach(level => {
-        summary[level] = {
-          'Actions (Count)': this.sevData[level].actions.length,
-          'Prevention (Count)': this.sevData[level].prevention.length,
-          'Has Escalate Text?': !!this.sevData[level].escalateEn ? '✅ Yes' : '❌ No',
-          'Has Seek Help Text?': !!this.sevData[level].seekHelpEn ? '✅ Yes' : '❌ No',
-        };
-      });
-
-      console.log('%c🎯 FETCHED RECOMMENDATIONS SUMMARY', 'color: #10b981; font-weight: bold; font-size: 14px;');
-      console.table(summary);
       this.cdr.markForCheck();
-
-    } catch (error) {
-      console.error('[loadExistingRecommendations] ❌ Failed:', error);
-    } finally {
-      console.groupEnd();
+    } catch {
+      // Optional: leave empty or handle silently
     }
   }
 }
