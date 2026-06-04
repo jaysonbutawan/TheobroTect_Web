@@ -46,6 +46,16 @@ export class RecommendationSetupService {
       { params }
     );
   }
+  getRecommendationsByDiseaseKey(diseaseKey: string) {
+    return this.http.get(
+      `${environment.apiUrl}/recommendations`,
+      {
+        params: {
+          disease_key: diseaseKey
+        }
+      }
+    );
+  }
 
   getRecommendationById(
     id: number

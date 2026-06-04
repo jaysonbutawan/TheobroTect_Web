@@ -11,6 +11,7 @@ import { DiseaseGuideService } from './services/disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
 import { DiseaseViewModalComponent } from './widgets/disease-view-modal.component';
 import { DiseaseTableSkeletonComponent } from '../../app/shared/skeletons/disease-guidance/disease-table-skeleton/disease-table-skeleton';
+import { DiseaseTableComponent } from './widgets/disease-table.component';
 
 export interface ChecklistItem {
   en: string;
@@ -29,6 +30,7 @@ export interface ChecklistItem {
     MonitoringSetupComponent,
     RecommendationsSetupComponent,
     DiseaseTableSkeletonComponent,
+    DiseaseTableComponent
   ],
   templateUrl: './disease-guidance.component.html',
 })
