@@ -59,16 +59,6 @@ type ModalTab = 'general' | 'monitoring' | 'recommendations';
             </p>
           </div>
         </div>
-
-        <!-- <button
-          type="button"
-          (click)="close()"
-          class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M18 6 6 18M6 6l12 12"/>
-          </svg>
-        </button> -->
       </div>
 
       <!-- Tabs -->
@@ -231,11 +221,11 @@ type ModalTab = 'general' | 'monitoring' | 'recommendations';
                     @if (plan.severity?.severity_level) {
                       <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
                         [ngClass]="{
-                          'bg-emerald-50 text-emerald-700 border border-emerald-100': plan.severity?.severity_level === 'mild',
-                          'bg-amber-50 text-amber-700 border border-amber-100': plan.severity?.severity_level === 'moderate',
-                          'bg-red-50 text-red-700 border border-red-100': plan.severity?.severity_level === 'severe'
+                          'bg-emerald-50 text-emerald-700 border border-emerald-100': plan.severity!.severity_level === 'mild',
+                          'bg-amber-50 text-amber-700 border border-amber-100': plan.severity!.severity_level === 'moderate',
+                          'bg-red-50 text-red-700 border border-red-100': plan.severity!.severity_level === 'severe'
                         }">
-                        {{ plan.severity?.severity_level | titlecase }}
+                        {{ plan.severity!.severity_level | titlecase }}
                       </span>
                     }
                   </div>
