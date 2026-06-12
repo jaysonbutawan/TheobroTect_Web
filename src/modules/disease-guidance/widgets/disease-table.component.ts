@@ -10,39 +10,63 @@ import { DiseaseDto } from '../disease-guidance.dto';
   template: `
 
 <div class="flex items-center justify-between mb-5 gap-3 flex-wrap">
-  <div class="flex items-center gap-3 flex-wrap">
-    <div class="relative">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.35-4.35" />
-      </svg>
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        [ngModelOptions]="{ standalone: true }"
-        placeholder="Search diseases..."
-        class="pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all w-56"
-      />
-    </div>
-
-    <select
-      [(ngModel)]="filterLocale"
-      [ngModelOptions]="{ standalone: true }"
-      aria-label="Filter disease types"
-      class="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all appearance-none pr-8 cursor-pointer"
+<div class="flex items-center gap-3 flex-wrap">
+  <div class="relative w-48 shrink-0">
+    <button
+      type="button"
+      (click)="isFilterDropdownOpen = !isFilterDropdownOpen"
+      class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all shadow-sm"
     >
-      <option value="">All Disease Types</option>
+      <span class="truncate font-medium">{{ filterLocale ? formatLabel(filterLocale) : 'All Disease Types' }}</span>
+      <svg class="transition-transform duration-200 shrink-0 ml-2" [class.rotate-180]="isFilterDropdownOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6" /></svg>
+    </button>
 
-      @for (key of diseaseKeys; track key) {
-        <option [value]="key">{{ formatLabel(key) }}</option>
-      }
-    </select>
+    @if (isFilterDropdownOpen) {
+      <div class="absolute z-50 w-full md:w-56 mt-2 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 overflow-hidden flex flex-col left-0">
+        <ul class="max-h-64 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+
+          <li>
+            <button
+              type="button"
+              (click)="onFilterSelect('')"
+              class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left"
+              [ngClass]="!filterLocale ? 'bg-slate-50 border-slate-800 text-slate-900 shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'"
+              style="border-width: 1px;"
+            >
+              <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors shrink-0"
+                   [ngClass]="!filterLocale ? 'border-slate-800' : 'border-slate-300'">
+                @if (!filterLocale) {
+                  <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+                }
+              </div>
+              <span class="truncate">All Disease Types</span>
+            </button>
+          </li>
+
+          @for (key of diseaseKeys; track key) {
+            <li>
+              <button
+                type="button"
+                (click)="onFilterSelect(key)"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left"
+                [ngClass]="filterLocale === key ? 'bg-slate-50 border-slate-800 text-slate-900 shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'"
+                style="border-width: 1px;"
+              >
+                <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors shrink-0"
+                     [ngClass]="filterLocale === key ? 'border-slate-800' : 'border-slate-300'">
+                  @if (filterLocale === key) {
+                    <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+                  }
+                </div>
+                <span class="truncate">{{ formatLabel(key) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
   </div>
+</div>
 </div>
 
 <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
@@ -241,6 +265,8 @@ export class DiseaseTableComponent implements OnDestroy {
   pendingDeleteDisease: DiseaseDto | null = null;
   deleteToastVisible = false;
   deleteCountdown = 5;
+  isFilterDropdownOpen = false;
+
   private deleteTimer: any = null;
   private deleteCountTimer: any = null;
 
@@ -319,6 +345,12 @@ export class DiseaseTableComponent implements OnDestroy {
     this.pendingDeleteDisease = null;
     this.deleteToastVisible = false;
     this.deleteCountdown = 5;
+  }
+
+
+  public onFilterSelect(key: string): void {
+    this.filterLocale = key;
+    this.isFilterDropdownOpen = false;
   }
 
   private clearTimers(): void {

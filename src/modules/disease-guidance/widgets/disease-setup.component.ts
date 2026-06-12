@@ -30,6 +30,7 @@ export class DiseaseSetupComponent {
   @Output() diseaseKeyChange = new EventEmitter<string>();
 
   currentStep = 1;
+  isDropdownOpen = false;
   translating: Record<string, boolean> = {};
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
@@ -83,12 +84,17 @@ export class DiseaseSetupComponent {
         const translated = await this.translationService.translate(text);
         this.form.get(targetControlName)?.setValue(translated);
       } catch {
-        // Soft fail silently or integrate toast warning if preferred
       } finally {
         this.translating[targetControlName] = false;
         this.cdr.markForCheck();
       }
     }, 900);
+  }
+
+  onCustomSelect(key: string): void {
+    this.selectedLabel = key;
+    this.onDiseaseKeyChange(key);
+    this.isDropdownOpen = false;
   }
 
   onSaveInternal(): void {
