@@ -1,8 +1,9 @@
 import { Component, Input, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MonitoringSetupComponent } from '../widgets/monitoring-setup.component';
-import { RecommendationsSetupComponent, SeverityData } from '../widgets/recommendations-setup.component';
+import { MonitoringSetupComponent } from './monitoring-setup.component';
+import { RecommendationsSetupComponent, SeverityData } from './recommendations-setup.component';
+import { GeneralInfoFormComponent } from './general-info-form.component'; // 1. IMPORT NEW CHILD
 import { TranslationService } from '../services/translation.service';
 
 @Component({
@@ -13,9 +14,10 @@ import { TranslationService } from '../services/translation.service';
     ReactiveFormsModule,
     FormsModule,
     MonitoringSetupComponent,
-    RecommendationsSetupComponent
+    RecommendationsSetupComponent,
+    GeneralInfoFormComponent // 1. ADD TO IMPORTS ARRAY
   ],
-  templateUrl: './disease-setup.component.html'
+  templateUrl: './general-info-setup.component.html'
 })
 export class DiseaseSetupComponent {
   @Input({ required: true }) form!: FormGroup;
@@ -30,8 +32,7 @@ export class DiseaseSetupComponent {
   @Output() diseaseKeyChange = new EventEmitter<string>();
 
   currentStep = 1;
-  isDropdownOpen = false;
-  translating: Record<string, boolean> = {};
+  translating: Record<string, boolean> = {}; // Kept here to feed the child loading states
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
   private translationService = inject(TranslationService);
@@ -53,11 +54,6 @@ export class DiseaseSetupComponent {
     return this.form.invalid || !this.selectedLabel;
   }
 
-  formatLabel(key: string): string {
-    if (!key) return '';
-    return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  }
-
   setStep(step: number): void {
     if (step > 1 && !this.isDiseaseContextActive) {
       return;
@@ -65,7 +61,9 @@ export class DiseaseSetupComponent {
     this.currentStep = step;
   }
 
-  onDiseaseKeyChange(key: string): void {
+  // 2. Modified to handle emissions directly passed from Step 1 child
+  onLabelSelectedFromChild(key: string): void {
+    this.selectedLabel = key;
     this.diseaseKeyChange.emit(key);
   }
 
@@ -84,17 +82,12 @@ export class DiseaseSetupComponent {
         const translated = await this.translationService.translate(text);
         this.form.get(targetControlName)?.setValue(translated);
       } catch {
+        // Fallback catch block
       } finally {
         this.translating[targetControlName] = false;
         this.cdr.markForCheck();
       }
     }, 900);
-  }
-
-  onCustomSelect(key: string): void {
-    this.selectedLabel = key;
-    this.onDiseaseKeyChange(key);
-    this.isDropdownOpen = false;
   }
 
   onSaveInternal(): void {

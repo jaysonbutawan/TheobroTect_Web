@@ -9,7 +9,7 @@ import { DiseaseDto } from './disease-guidance.dto';
 import { DiseaseViewModalComponent } from './widgets/disease-view-modal.component';
 import { DiseaseTableSkeletonComponent } from '../../app/shared/skeletons/disease-guidance/disease-table-skeleton/disease-table-skeleton';
 import { DiseaseTableComponent } from './widgets/disease-table.component';
-import { DiseaseSetupComponent } from './widgets/disease-setup.component'; // Import the new child
+import { DiseaseSetupComponent } from './widgets/general-info-setup.component'; // Import the new child
 import { SeverityData } from './widgets/recommendations-setup.component';
 
 export interface ChecklistItem {
@@ -141,18 +141,18 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       });
   }
 
-cancelEdit(): void {
-  this.isEditMode = false;
-  this.currentEditId = null;
-  this.selectedLabel = '';
-  this.selectedDiseaseKey = null;
-  this.selectedDisease = null;
-  this.form.reset();
+  cancelEdit(): void {
+    this.isEditMode = false;
+    this.currentEditId = null;
+    this.selectedLabel = '';
+    this.selectedDiseaseKey = null;
+    this.selectedDisease = null;
+    this.form.reset();
 
-  // Always return to the table view when resetting/canceling
-  this.showAddedDiseases = true;
-  this.editOpenedFromTable = false;
-}
+    // Always return to the table view when resetting/canceling
+    this.showAddedDiseases = true;
+    this.editOpenedFromTable = false;
+  }
 
   onSave(): void {
     if (this.form.invalid || !this.selectedDiseaseKey) {
