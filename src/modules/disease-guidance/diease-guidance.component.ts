@@ -6,11 +6,15 @@ import { takeUntil } from 'rxjs/operators';
 
 import { DiseaseGuideService } from './services/disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
-import { DiseaseViewModalComponent } from './widgets/disease-view-modal.component';
+import { TranslationService } from './services/translation.service';
+
+import { DiseaseViewModalComponent } from './widgets/disease-view-modal/disease-view-modal.component';
 import { DiseaseTableSkeletonComponent } from '../../app/shared/skeletons/disease-guidance/disease-table-skeleton/disease-table-skeleton';
 import { DiseaseTableComponent } from './widgets/disease-table.component';
-import { DiseaseSetupComponent } from './widgets/general-info-setup.component'; // Import the new child
-import { SeverityData } from './widgets/recommendations-setup.component';
+
+import { GeneralInfoFormComponent } from './widgets/general-info-form/general-info-form.component';
+import { MonitoringSetupComponent } from './widgets/monitoring-setup/monitoring-setup.component';
+import { RecommendationsSetupComponent, SeverityData } from './widgets/recommendations-setup/recommendations-setup.component';
 
 export interface ChecklistItem {
   en: string;
@@ -28,7 +32,9 @@ export interface ChecklistItem {
     DiseaseViewModalComponent,
     DiseaseTableSkeletonComponent,
     DiseaseTableComponent,
-    DiseaseSetupComponent // Add to imports array
+    GeneralInfoFormComponent,
+    MonitoringSetupComponent,
+    RecommendationsSetupComponent
   ],
   templateUrl: './disease-guidance.component.html',
 })
@@ -50,10 +56,16 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   isViewModalOpen = false;
   viewingDisease: DiseaseDto | null = null;
 
+  currentStep = 1;
+  translating: Record<string, boolean> = {};
+  private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+
   private destroy$ = new Subject<void>();
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private diseaseService = inject(DiseaseGuideService);
+  private translationService = inject(TranslationService);
+
   diseaseKeys: string[] = [
     'black_pod_disease',
     'cacao_pod_borer',
@@ -82,6 +94,69 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+
+  get isDiseaseContextActive(): boolean {
+    return !!this.currentEditId && !!this.selectedDiseaseKey;
+  }
+
+  get isSaveDisabled(): boolean {
+    return this.form.invalid || !this.selectedLabel;
+  }
+
+  get filteredRecords(): DiseaseDto[] {
+    return this.existingRecords.filter(d => {
+      const matchesSearch = !this.searchQuery ||
+        d.display_name?.en?.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const matchesLocale = !this.filterLocale || d.locale === this.filterLocale;
+      return matchesSearch && matchesLocale;
+    });
+  }
+
+
+  setStep(step: number): void {
+    if (step > 1 && !this.isDiseaseContextActive) {
+      return;
+    }
+    this.currentStep = step;
+  }
+
+  onLabelSelectedFromChild(key: string): void {
+    this.selectedLabel = key;
+    this.selectedDiseaseKey = key;
+  }
+
+  onEnInput(sourceControlName: string, targetControlName: string): void {
+    const text = this.form.get(sourceControlName)?.value?.trim();
+    clearTimeout(this.debounceTimers[targetControlName]);
+
+    if (!text) {
+      this.form.get(targetControlName)?.setValue('');
+      return;
+    }
+
+    this.translating[targetControlName] = true;
+    this.debounceTimers[targetControlName] = setTimeout(async () => {
+      try {
+        const translated = await this.translationService.translate(text);
+        this.form.get(targetControlName)?.setValue(translated);
+      } catch {
+        // Fallback catch block
+      } finally {
+        this.translating[targetControlName] = false;
+        this.cdr.markForCheck();
+      }
+    }, 900);
+  }
+
+  onSaveInternal(): void {
+    this.onSave();
+  }
+
+  onCancelInternal(): void {
+    this.currentStep = 1;
+    this.cancelEdit();
   }
 
   onTableViewDisease(disease: DiseaseDto): void {
@@ -148,8 +223,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.selectedDiseaseKey = null;
     this.selectedDisease = null;
     this.form.reset();
-
-    // Always return to the table view when resetting/canceling
     this.showAddedDiseases = true;
     this.editOpenedFromTable = false;
   }
@@ -185,17 +258,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         this.fetchExistingDiseases();
       },
       error: () => {
-        // Handle error gracefully via UI notification states
       }
-    });
-  }
-
-  get filteredRecords(): DiseaseDto[] {
-    return this.existingRecords.filter(d => {
-      const matchesSearch = !this.searchQuery ||
-        d.display_name?.en?.toLowerCase().includes(this.searchQuery.toLowerCase());
-      const matchesLocale = !this.filterLocale || d.locale === this.filterLocale;
-      return matchesSearch && matchesLocale;
     });
   }
 

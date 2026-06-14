@@ -13,10 +13,10 @@ import { CommonModule } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { take, catchError } from 'rxjs/operators';
 
-import { DiseaseDto, MonitoringPlanDto } from '../disease-guidance.dto';
-import { RecommendationDto } from '../recommendation.dto';
-import { MonitoringSetupService } from '../services/monitoring-setup.service';
-import { RecommendationSetupService } from '../services/recommendations-setup.service';
+import { DiseaseDto, MonitoringPlanDto } from '../../disease-guidance.dto';
+import { RecommendationDto } from '../../recommendation.dto';
+import { MonitoringSetupService } from '../../services/monitoring-setup.service';
+import { RecommendationSetupService } from '../../services/recommendations-setup.service';
 
 type ModalTab = 'general' | 'monitoring' | 'recommendations';
 

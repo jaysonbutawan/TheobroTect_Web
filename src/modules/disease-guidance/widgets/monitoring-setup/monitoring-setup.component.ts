@@ -4,11 +4,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
-import { ChecklistItem } from '../diease-guidance.component';
-import { DiseaseSeverityService } from '../services/disease-severity.service';
-import { CreateDiseaseSeverityDto, MonitoringPlanDto } from '../disease-guidance.dto';
-import { MonitoringSetupService } from '../services/monitoring-setup.service';
-import { ToastService } from '../../../app/shared/components/toast/toast.service';
+import { ChecklistItem } from '../../diease-guidance.component';
+import { DiseaseSeverityService } from '../../services/disease-severity.service';
+import { CreateDiseaseSeverityDto, MonitoringPlanDto } from '../../disease-guidance.dto';
+import { MonitoringSetupService } from '../../services/monitoring-setup.service';
+import { ToastService } from '../../../../app/shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-monitoring-setup',

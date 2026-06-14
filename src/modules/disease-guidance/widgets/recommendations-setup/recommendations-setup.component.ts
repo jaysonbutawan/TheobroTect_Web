@@ -12,11 +12,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
-import { TranslationService } from '../services/translation.service';
-import { ChecklistItem } from '../diease-guidance.component';
-import { DiseaseSeverityService } from '../services/disease-severity.service';
-import { RecommendationSetupService } from '../services/recommendations-setup.service';
-import { ToastService } from '../../../app/shared/components/toast/toast.service';
+import { TranslationService } from '../../services/translation.service';
+import { ChecklistItem } from '../../diease-guidance.component';
+import { DiseaseSeverityService } from '../../services/disease-severity.service';
+import { RecommendationSetupService } from '../../services/recommendations-setup.service';
+import { ToastService } from '../../../../app/shared/components/toast/toast.service';
 export interface SeverityLevelData {
   actions: ChecklistItem[];
   prevention: ChecklistItem[];
