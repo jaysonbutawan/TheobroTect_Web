@@ -1,0 +1,221 @@
+<div [formGroup]="form" class="space-y-8">
+  @if (showSeverity) {
+    <div class="flex flex-col gap-3">
+      <label class="text-sm font-semibold text-slate-700">
+        Select Target Severity Level
+      </label>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <button
+          type="button"
+          (click)="onSeveritySelect('mild')"
+          class="group relative flex items-center gap-4 rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+          [class]="
+            activeSev === 'mild'
+              ? 'border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600'
+              : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+          "
+        >
+          <div
+            class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition-colors duration-200"
+            [class]="
+              activeSev === 'mild'
+                ? 'border-indigo-600 bg-indigo-600 text-white'
+                : 'border-slate-300 bg-white group-hover:border-slate-400'
+            "
+          >
+            @if (activeSev === 'mild') {
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold" [class]="activeSev === 'mild' ? 'text-indigo-900' : 'text-slate-700'">
+              Mild
+            </span>
+            <span class="mt-0.5 block text-xs text-slate-500">
+              Early or low-impact signs
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          (click)="onSeveritySelect('moderate')"
+          class="group relative flex items-center gap-4 rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+          [class]="
+            activeSev === 'moderate'
+              ? 'border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600'
+              : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+          "
+        >
+          <div
+            class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition-colors duration-200"
+            [class]="
+              activeSev === 'moderate'
+                ? 'border-indigo-600 bg-indigo-600 text-white'
+                : 'border-slate-300 bg-white group-hover:border-slate-400'
+            "
+          >
+            @if (activeSev === 'moderate') {
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold" [class]="activeSev === 'moderate' ? 'text-indigo-900' : 'text-slate-700'">
+              Moderate
+            </span>
+            <span class="mt-0.5 block text-xs text-slate-500">
+              Spreading, structural threat
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          (click)="onSeveritySelect('severe')"
+          class="group relative flex items-center gap-4 rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+          [class]="
+            activeSev === 'severe'
+              ? 'border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600'
+              : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+          "
+        >
+          <div
+            class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition-colors duration-200"
+            [class]="
+              activeSev === 'severe'
+                ? 'border-indigo-600 bg-indigo-600 text-white'
+                : 'border-slate-300 bg-white group-hover:border-slate-400'
+            "
+          >
+            @if (activeSev === 'severe') {
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold" [class]="activeSev === 'severe' ? 'text-indigo-900' : 'text-slate-700'">
+              Severe
+            </span>
+            <span class="mt-0.5 block text-xs text-slate-500">
+              Critical, immediate action needed
+            </span>
+          </div>
+        </button>
+      </div>
+    </div>
+  }
+
+  <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-100 px-6 py-5 flex items-center gap-3">
+      <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700">
+        02
+      </span>
+      <div>
+        <h2 class="text-base font-semibold text-slate-800">Monitoring Setup</h2>
+        <p class="text-sm text-slate-500">Rescan schedule and field worker instructions.</p>
+      </div>
+    </div>
+
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-slate-700">
+          Rescan Interval (Days) <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="number"
+          formControlName="rescanDays"
+          placeholder="7"
+          min="1"
+          max="90"
+          class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-slate-700">
+          Preferred Scan Time <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="time"
+          formControlName="preferredTime"
+          aria-label="Preferred Scan Time"
+          class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+
+      <div class="col-span-1 md:col-span-2 flex flex-col gap-2">
+        <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200">EN</span>
+          Guidance Message <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          formControlName="guidanceEn"
+          rows="2"
+          placeholder="Instruction for the field worker (e.g. 'Rescan after 7 days...')"
+          (input)="onEnInput('guidanceEn', 'guidanceTl')"
+          class="w-full resize-none rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        ></textarea>
+      </div>
+
+      <div class="col-span-1 md:col-span-2 flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200">TL</span>
+            Mensahe sa Filipino <span class="text-red-500">*</span>
+          </label>
+
+          @if (translating['guidanceTl']) {
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+              <span class="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600"></span>
+              Nagsasalin...
+            </span>
+          } @else if (form.get('guidanceTl')?.value) {
+            <span class="text-xs text-slate-500">
+              Auto-translated
+            </span>
+          }
+        </div>
+        <textarea
+          formControlName="guidanceTl"
+          rows="2"
+          placeholder="Awtomatikong isasalin..."
+          [class.opacity-50]="translating['guidanceTl']"
+          class="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-end gap-4 rounded-b-xl">
+      @if (form.invalid && form.touched) {
+        <span class="text-sm text-red-500 flex-1">
+          Mangyaring punan nang tama ang lahat ng kinakailangang impormasyon.
+        </span>
+      }
+
+      <button
+        type="button"
+        (click)="saveMonitoringPlan()"
+        [disabled]="form.invalid"
+        class="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        [class]="
+          form.invalid
+            ? 'cursor-not-allowed bg-slate-300'
+            : 'bg-indigo-600 hover:bg-indigo-700 shadow-sm'
+        "
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
+        </svg>
+        {{ currentMonitoringPlan?.id ? 'I-update ang Plan' : 'I-save ang Plan' }}
+      </button>
+    </div>
+  </section>
+</div>

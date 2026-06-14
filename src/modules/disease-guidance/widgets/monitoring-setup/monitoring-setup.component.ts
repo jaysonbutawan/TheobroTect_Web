@@ -4,10 +4,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
-import { ChecklistItem } from '../diease-guidance.component';
-import { DiseaseSeverityService } from '../services/disease-severity.service';
-import { CreateDiseaseSeverityDto, CreateMonitoringPlanDto, MonitoringPlanDto } from '../disease-guidance.dto';
-import { MonitoringSetupService } from '../services/monitoring-setup.service';
+import { ChecklistItem } from '../../diease-guidance.component';
+import { DiseaseSeverityService } from '../../services/disease-severity.service';
+import { CreateDiseaseSeverityDto, MonitoringPlanDto } from '../../disease-guidance.dto';
+import { MonitoringSetupService } from '../../services/monitoring-setup.service';
+import { ToastService } from '../../../../app/shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-monitoring-setup',
@@ -27,6 +28,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
   translating: Record<string, boolean> = {};
   private severityService = inject(DiseaseSeverityService);
   private monitoringService = inject(MonitoringSetupService);
+  private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
   currentMonitoringPlan: MonitoringPlanDto | null = null;
 
@@ -54,17 +56,12 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('[MonitoringSetup] ngOnChanges triggered:', changes);
-
     if (changes['diseaseId'] && this.diseaseId) {
-      console.log(`[MonitoringSetup] Active Disease ID changed -> ${this.diseaseId}`);
       this.fetchSeverities();
     }
   }
 
   fetchSeverities(): void {
-    console.log(`[MonitoringSetup] Fetching severities for Disease ID: ${this.diseaseId}`);
-
     this.severityService.getSeverities().subscribe({
       next: (res: any) => {
         this.existingSeverities = res?.data ?? res ?? [];
@@ -80,19 +77,17 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
 
         this.cdr.markForCheck();
       },
-      error: (err) => {
-        console.error('❌ [MonitoringSetup Error] Unable to trace reference list records from service endpoints:', err);
+      error: () => {
+         this.toastService.show('error', 'Load Failed', 'Failed to load data.');
       }
     });
   }
 
   loadMonitoringPlan(): void {
     if (!this.diseaseKey) {
-      console.warn('⚠️ [MonitoringSetup] loadMonitoringPlan aborted: missing diseaseKey.');
       return;
     }
 
-    console.log(`[MonitoringSetup] Loading monitoring plans for key: "${this.diseaseKey}"`);
     this.monitoringService.getMonitoringPlans().subscribe({
       next: (res: any) => {
         const plans = res?.data ?? res ?? [];
@@ -118,9 +113,6 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
         }
 
         if (this.currentMonitoringPlan) {
-          console.log('✅ [MonitoringSetup] Matching setup configuration found:', this.currentMonitoringPlan);
-
-          // Convert integer hour from backend (e.g. 14) to "14:00" string format for HTML time input
           const hour = this.currentMonitoringPlan.preferred_time_hour;
           const formattedTime = (hour !== null && hour !== undefined)
             ? `${hour.toString().padStart(2, '0')}:00`
@@ -133,41 +125,26 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
             guidanceTl: this.currentMonitoringPlan.message?.tl ?? ''
           });
         } else {
-          console.log('[MonitoringSetup] No matching layout template rules found. Resetting state configurations.');
           this.form.patchValue({ rescanDays: '', preferredTime: '', guidanceEn: '', guidanceTl: '' });
         }
 
         this.cdr.markForCheck();
       },
-      error: (err) => {
-        console.error('❌ [MonitoringSetup Error] Failed to read component monitoring plans collection:', err);
+      error: () => {
+        this.toastService.show('error', 'Load Failed', 'Failed to load monitoring plans.');
       }
     });
   }
 
   saveMonitoringPlan(): void {
-    // --- DEBUG BLOCK START ---
-    console.group('🔍 [MonitoringSetup Debug] Form Values vs Payload Check');
-    console.log('1. Raw Angular Form Object Value:', this.form.value);
-    console.log('2. Checklist Items State:', this.checklistItems);
-    console.log('3. Active Component Properties:', {
-      diseaseKey: this.diseaseKey,
-      diseaseId: this.diseaseId,
-      activeSev: this.activeSev,
-      showSeverity: this.showSeverity,
-      currentMonitoringPlanId: this.currentMonitoringPlan?.id
-    });
-    // --- DEBUG BLOCK END ---
-
     if (this.form.invalid) {
-      console.error('❌ [MonitoringSetup Error] Upsert process rejected: Form structure fails evaluation values.', this.form.errors);
-      console.groupEnd();
       this.form.markAllAsTouched();
+      this.toastService.show('warning', 'Validation Error', 'Please check the form for errors before saving.');
       return;
     }
+
     if (!this.diseaseKey) {
-      console.error('❌ [MonitoringSetup Error] Upsert process rejected: missing identification parameters for "diseaseKey".');
-      console.groupEnd();
+      this.toastService.show('error', 'Missing Data', 'Disease identification key is missing.');
       return;
     }
 
@@ -180,9 +157,9 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
           Number(sev.disease_id) === Number(this.diseaseId) &&
           sev.severity_level?.toLowerCase() === this.activeSev.toLowerCase()
       );
+
       if (!matchingSeverity) {
-        console.error(`❌ [MonitoringSetup Error] Upsert stopped: target relational severity data row doesn't exist for ID ${this.diseaseId} (${this.activeSev})`);
-        console.groupEnd();
+        this.toastService.show('error', 'Severity Not Found', 'Target severity data does not exist for this disease.');
         return;
       }
       severityId = matchingSeverity.id;
@@ -194,72 +171,44 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       hourInteger = parseInt(parts[0], 10);
     }
 
-    // Structural payload tailored for your Laravel architecture
     const payload: any = {
-
-      disease_key: this.showSeverity
-        ? null
-        : this.diseaseKey,
-
-      disease_severity_id: this.showSeverity
-        ? severityId
-        : null,
-
+      disease_key: this.showSeverity ? null : this.diseaseKey,
+      disease_severity_id: this.showSeverity ? severityId : null,
       rescan_after_days: (() => {
-        const rawValue =
-          formValue.rescanDays !== undefined
-            ? formValue.rescanDays
-            : formValue.rescan_after_days;
+        const rawValue = formValue.rescanDays !== undefined
+          ? formValue.rescanDays
+          : formValue.rescan_after_days;
 
         const parsed = parseInt(rawValue, 10);
-
         return isNaN(parsed) ? 0 : parsed;
       })(),
 
       preferred_time_hour: hourInteger,
 
       message: {
-        en: (
-          formValue.guidanceEn !== undefined
-            ? formValue.guidanceEn
-            : formValue.guidance_en
-        ) || '',
-
-        tl: (
-          formValue.guidanceTl !== undefined
-            ? formValue.guidanceTl
-            : formValue.guidance_tl
-        ) || ''
+        en: (formValue.guidanceEn !== undefined ? formValue.guidanceEn : formValue.guidance_en) || '',
+        tl: (formValue.guidanceTl !== undefined ? formValue.guidanceTl : formValue.guidance_tl) || ''
       },
     };
 
-    // --- CRITICAL INSPECTION POINT ---
-    console.log('🚀 FINAL OUTBOUND PAYLOAD SENT TO BACKEND:');
-    console.dir(payload);
-    console.groupEnd();
-    // ---------------------------------
-
     if (this.currentMonitoringPlan?.id) {
-      console.log(`[MonitoringSetup] Record matches existing tracking context: Updating plan entry data with ID ${this.currentMonitoringPlan.id}`);
       this.monitoringService.updateMonitoringPlan(this.currentMonitoringPlan.id, payload).subscribe({
         next: () => {
-          console.log(`✅ [MonitoringSetup] Plan dataset ID ${this.currentMonitoringPlan?.id} successfully modified.`);
+          this.toastService.show('success', 'Updated Successfully', 'The monitoring plan has been updated.');
           this.loadMonitoringPlan();
         },
-        error: (err) => {
-          console.error(`❌ [MonitoringSetup Error] Failed updating target row data for entry ID ${this.currentMonitoringPlan?.id}:`, err);
+        error: () => {
+          this.toastService.show('error', 'Update Failed', 'An error occurred while updating the monitoring plan.');
         }
       });
     } else {
-      console.log('[MonitoringSetup] No existing context records found: Instantiating standard creation lifecycle flow.');
       this.monitoringService.createMonitoringPlan(payload).subscribe({
         next: () => {
-          console.log('✅ [MonitoringSetup] New configuration dataset created completely.');
+          this.toastService.show('success', 'Created Successfully', 'A new monitoring plan has been created.');
           this.loadMonitoringPlan();
         },
-        error: (err) => {
-          console.error('❌ [MonitoringSetup Error] Creation flow service routine failed. Server validation messages:', err.error);
-          console.log('Failed payload state copy for reference evaluation:', payload);
+        error: () => {
+          this.toastService.show('error', 'Creation Failed', 'An error occurred while creating the monitoring plan.');
         }
       });
     }
@@ -267,20 +216,20 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
 
   deleteMonitoringPlan(): void {
     if (!this.currentMonitoringPlan?.id) {
-      console.warn('⚠️ [MonitoringSetup] Delete operations aborted: context parameters target layout does not provide key variables.');
+      this.toastService.show('error', 'Delete Failed', 'Failed to delete monitoring plan.');
       return;
     }
 
     const planIdToDelete = this.currentMonitoringPlan.id;
     this.monitoringService.deleteMonitoringPlan(planIdToDelete).subscribe({
       next: () => {
-        console.log(`✅ [MonitoringSetup] Plan parameters matching row record ${planIdToDelete} purged.`);
+        this.toastService.show('success', 'Deleted Successfully', 'The monitoring plan has been deleted.');
         this.currentMonitoringPlan = null;
         this.form.patchValue({ rescanDays: '', preferredTime: '', guidanceEn: '', guidanceTl: '' });
         this.cdr.markForCheck();
       },
-      error: (err) => {
-        console.error(`❌ [MonitoringSetup Error] Delete service sequence failed on target item ${planIdToDelete}:`, err);
+      error: () => {
+        this.toastService.show('error', 'Delete Failed', 'Failed to delete monitoring plan.');
       }
     });
   }
@@ -310,9 +259,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
             this.loadMonitoringPlan();
             this.cdr.markForCheck();
           },
-          error: (err) => {
-            console.error(`❌ [MonitoringSetup Error] Missing dynamic asset production loop encountered issues for tier context level "${level}":`, err);
-          }
+          error: () => {}
         });
       } else {
         this.loadMonitoringPlan();
@@ -322,15 +269,12 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
 
   onSeveritySelect(level: 'mild' | 'moderate' | 'severe'): void {
     if (!this.showSeverity) {
-      console.warn('⚠️ [MonitoringSetup] Operation blocked: Selected structure variant does not process multi-tiered severities configuration blocks.');
       return;
     }
 
-    console.log(`[MonitoringSetup] Severity Target Changed -> ${level}`);
     this.activeSev = level;
 
     if (!this.diseaseId) {
-      console.error('❌ [MonitoringSetup Error] Target manipulation abandoned: Identification constraints missing disease tracking info.');
       return;
     }
 
@@ -339,7 +283,6 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
     );
 
     if (!matchExists) {
-      console.log(`[MonitoringSetup] "${level}" layout metadata not found for Context ID ${this.diseaseId}. Dispatching structural dependencies...`);
       const payload = {
         disease_id: this.diseaseId,
         severity_level: level
@@ -349,13 +292,10 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
         next: (res: any) => {
           const newlyCreated = res?.data ?? res;
           this.existingSeverities.push(newlyCreated);
-          console.log(`✅ [MonitoringSetup] "${level}" tier context registered successfully.`, newlyCreated);
           this.loadMonitoringPlan();
           this.cdr.markForCheck();
         },
-        error: (err) => {
-          console.error(`❌ [MonitoringSetup Error] Registration failure for configuration parameters of tier level type "${level}":`, err);
-        }
+        error: () => {}
       });
     } else {
       this.loadMonitoringPlan();

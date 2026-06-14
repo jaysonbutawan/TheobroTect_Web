@@ -8,219 +8,209 @@ import { DiseaseDto } from '../disease-guidance.dto';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-
-<div class="flex items-center justify-between mb-5 gap-3 flex-wrap">
+  <div class="flex items-center justify-between mb-6 gap-3 flex-wrap">
   <div class="flex items-center gap-3 flex-wrap">
-    <div class="relative">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
+    <div class="relative w-56 shrink-0">
+      <button
+        type="button"
+        (click)="isFilterDropdownOpen = !isFilterDropdownOpen"
+        class="w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all shadow-sm font-medium"
       >
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.35-4.35" />
-      </svg>
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        [ngModelOptions]="{ standalone: true }"
-        placeholder="Search diseases..."
-        class="pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all w-56"
-      />
-    </div>
+        <span class="truncate">{{ filterLocale ? formatLabel(filterLocale) : 'All Disease Types' }}</span>
+        <svg
+          class="transition-transform duration-300 shrink-0 ml-2 text-slate-400"
+          [class.-rotate-180]="isFilterDropdownOpen"
+          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        >
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
 
-    <select
-      [(ngModel)]="filterLocale"
-      [ngModelOptions]="{ standalone: true }"
-      aria-label="Filter disease types"
-      class="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all appearance-none pr-8 cursor-pointer"
-    >
-      <option value="">All Disease Types</option>
+      @if (isFilterDropdownOpen) {
+        <div class="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden flex flex-col left-0 origin-top animate-in fade-in slide-in-from-top-2 duration-200">
+          <ul class="max-h-64 overflow-y-auto p-1.5 space-y-0.5 custom-scrollbar">
 
-      @for (key of diseaseKeys; track key) {
-        <option [value]="key">{{ formatLabel(key) }}</option>
+            <li>
+              <button
+                type="button"
+                (click)="onFilterSelect('')"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left"
+                [ngClass]="!filterLocale ? 'bg-slate-50 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+              >
+                <span class="truncate">All Disease Types</span>
+                @if (!filterLocale) {
+                  <svg class="w-4 h-4 text-slate-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6 9 17l-5-5"/>
+                  </svg>
+                }
+              </button>
+            </li>
+
+            @for (key of diseaseKeys; track key) {
+              <li>
+                <button
+                  type="button"
+                  (click)="onFilterSelect(key)"
+                  class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left"
+                  [ngClass]="filterLocale === key ? 'bg-slate-50 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+                >
+                  <span class="truncate">{{ formatLabel(key) }}</span>
+                  @if (filterLocale === key) {
+                    <svg class="w-4 h-4 text-slate-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
       }
-    </select>
+    </div>
   </div>
 </div>
 
-<div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-  <table class="w-full text-sm">
-    <thead>
-      <tr class="bg-slate-50/80 border-b border-slate-100">
-        <th
-          class="text-left px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider w-[32%]"
-        >
-          Disease Name
-        </th>
-        <th
-          class="text-left px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider w-[22%]"
-        >
-          Disease Key
-        </th>
-        <th
-          class="text-left px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider w-[20%]"
-        >
-          Created At
-        </th>
-        <th class="px-5 py-3.5 w-[21%]"></th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-slate-50">
-      @for (disease of filteredRecords; track disease.id) {
-        <tr class="hover:bg-slate-50/60 transition-colors group">
-          <td class="px-5 py-4">
-            <div class="flex items-center gap-3">
-              <div>
-                <div class="font-semibold text-slate-800 text-sm leading-tight">
-                  {{ disease.display_name.en || '—' }}
-                </div>
-                <div class="text-xs text-slate-400 mt-0.5">
-                  {{ disease.display_name.tl || '—' }}
-                </div>
-              </div>
-            </div>
-          </td>
-
-          <td class="px-5 py-4">
-            <span
-              class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wide uppercase bg-slate-100 text-slate-600 border border-slate-200"
-            >
-              {{ disease.disease_key }}
-            </span>
-          </td>
-
-          <td class="px-5 py-4">
-            @if (disease.created_at) {
-              <div class="text-sm text-slate-600">
-                {{ disease.created_at | date: 'MMM dd, yyyy' }}
-              </div>
-              <div class="text-xs text-slate-400 mt-0.5">
-                {{ disease.created_at | date: 'h:mm a' }}
-              </div>
-            } @else {
-              <span class="text-sm text-slate-400">—</span>
-            }
-          </td>
-
-          <td class="px-5 py-4">
-            <div class="flex items-center justify-end gap-1">
-              <button
-                type="button"
-                (click)="onTableViewDisease(disease)"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all"
-                title="View full details"
-              >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-                View
-              </button>
-
-              <button
-                type="button"
-                (click)="onTableEditDisease(disease)"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-green-600 hover:bg-green-50 border border-transparent hover:border-green-100 transition-all"
-                title="Edit this disease"
-              >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                Edit
-              </button>
-
-              <button
-                type="button"
-                (click)="onTableDeleteDisease(disease)"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all"
-                title="Delete this disease"
-              >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                  <path d="M10 11v6M14 11v6" />
-                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                </svg>
-                Delete
-              </button>
-            </div>
-          </td>
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left whitespace-nowrap">
+      <thead>
+        <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+          <th class="px-6 py-4 w-[32%]">Disease Name</th>
+          <th class="px-6 py-4 w-[22%]">Disease Key</th>
+          <th class="px-6 py-4 w-[20%]">Created At</th>
+          <th class="px-6 py-4 w-[21%] text-right">Actions</th>
         </tr>
-      }
+      </thead>
+      <tbody class="divide-y divide-slate-100">
 
-      @if (filteredRecords.length === 0) {
-        <tr>
-          <td colspan="5" class="px-5 py-16 text-center">
-            <svg
-              class="w-10 h-10 mx-auto text-slate-200 mb-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p class="text-sm font-medium text-slate-500">No diseases found</p>
-            <p class="text-xs text-slate-400 mt-1">Try adjusting your search or filter</p>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+        @for (disease of filteredRecords; track disease.id) {
+          <tr class="hover:bg-slate-50/80 transition-colors group">
 
-  <div
-    class="px-5 py-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between"
-  >
-    <span class="text-xs text-slate-500">
-      Showing <span class="font-semibold text-slate-700">{{ filteredRecords.length }}</span> of
-      <span class="font-semibold text-slate-700">{{ existingRecords.length }}</span> diseases
+            <td class="px-6 py-4">
+              <div class="flex flex-col">
+                <span class="font-medium text-slate-900">{{ disease.display_name.en || '—' }}</span>
+                <span class="text-xs text-slate-500 mt-0.5">{{ disease.display_name.tl || '—' }}</span>
+              </div>
+            </td>
+
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase bg-slate-100 text-slate-600">
+                {{ disease.disease_key }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4">
+              @if (disease.created_at) {
+                <div class="flex flex-col">
+                  <span class="text-slate-700">{{ disease.created_at | date: 'MMM dd, yyyy' }}</span>
+                  <span class="text-xs text-slate-400 mt-0.5">{{ disease.created_at | date: 'h:mm a' }}</span>
+                </div>
+              } @else {
+                <span class="text-slate-400">—</span>
+              }
+            </td>
+
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+
+                <button
+                  type="button"
+                  (click)="onTableViewDisease(disease)"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                  title="View details"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  View
+                </button>
+
+                <button
+                  type="button"
+                  (click)="onTableEditDisease(disease)"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                  title="Edit disease"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+                    <path d="m15 5 4 4"/>
+                  </svg>
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  (click)="onTableDeleteDisease(disease)"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                  title="Delete disease"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    <line x1="10" x2="10" y1="11" y2="17"/>
+                    <line x1="14" x2="14" y1="11" y2="17"/>
+                  </svg>
+                  Delete
+                </button>
+
+              </div>
+            </td>
+          </tr>
+        }
+
+        @if (filteredRecords.length === 0) {
+          <tr>
+            <td colspan="4" class="px-6 py-20 text-center">
+              <div class="flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                  <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900">No diseases found</h3>
+                <p class="text-sm text-slate-500 mt-1">Try adjusting your filter to find what you're looking for.</p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="px-6 py-4 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between">
+    <span class="text-sm text-slate-500">
+      Showing <span class="font-medium text-slate-900">{{ filteredRecords.length }}</span> of <span class="font-medium text-slate-900">{{ existingRecords.length }}</span> diseases
     </span>
+
     <div class="flex items-center gap-1">
       <button
         type="button"
-        class="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-500 hover:border-green-400 hover:text-green-600 transition-all flex items-center justify-center text-xs font-bold"
+        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-200/50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
+        aria-label="Previous page"
       >
-        ‹
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
       </button>
+
       <button
         type="button"
-        class="w-7 h-7 rounded-lg bg-green-500 text-white text-xs font-bold shadow-sm"
+        class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-900 text-sm font-medium shadow-sm flex items-center justify-center"
       >
         1
       </button>
+
       <button
         type="button"
-        class="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-500 hover:border-green-400 hover:text-green-600 transition-all flex items-center justify-center text-xs font-bold"
+        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-200/50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
+        aria-label="Next page"
       >
-        ›
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
       </button>
     </div>
   </div>
@@ -241,6 +231,8 @@ export class DiseaseTableComponent implements OnDestroy {
   pendingDeleteDisease: DiseaseDto | null = null;
   deleteToastVisible = false;
   deleteCountdown = 5;
+  isFilterDropdownOpen = false;
+
   private deleteTimer: any = null;
   private deleteCountTimer: any = null;
 
@@ -319,6 +311,12 @@ export class DiseaseTableComponent implements OnDestroy {
     this.pendingDeleteDisease = null;
     this.deleteToastVisible = false;
     this.deleteCountdown = 5;
+  }
+
+
+  public onFilterSelect(key: string): void {
+    this.filterLocale = key;
+    this.isFilterDropdownOpen = false;
   }
 
   private clearTimers(): void {
