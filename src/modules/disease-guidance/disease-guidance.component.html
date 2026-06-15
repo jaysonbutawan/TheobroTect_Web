@@ -299,6 +299,7 @@
             @if (currentStep === 3) {
               <div class="px-5 md:px-8 py-6">
                 <app-recommendations-setup
+                  [form]="form"
                   [diseaseKey]="selectedDiseaseKey ?? ''"
                   [sevData]="sevData"
                   [diseaseId]="currentEditId"
