@@ -9,7 +9,7 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 import { TranslationService } from '../../services/translation.service';
@@ -37,10 +37,11 @@ type SeverityType = 'mild' | 'moderate' | 'severe';
 @Component({
   selector: 'app-recommendations-setup',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './recommendations-setup.component.html'
 })
 export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestroy {
+   @Input({ required: true }) form!: FormGroup;
   @Input({ required: true }) sevData!: SeverityData;
   @Input() diseaseId: number | null = null;
   @Input() diseaseKey: string = '';
