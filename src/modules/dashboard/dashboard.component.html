@@ -1,24 +1,6 @@
-<!-- Top Branding & Navigation Header -->
-<div class="px-6 pt-8 pb-4 animate-in fade-in slide-in-from-top-4 duration-700">
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-      <nav class="flex items-center gap-2 mb-2 font-sans">
-        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Platform</span>
-        <span class="text-slate-300">/</span>
-        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#3D683A]">Dashboard</span>
-      </nav>
-      <h1 class="font-['DM_Sans',sans-serif] text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
-        TheobroTect <span class="text-[#3D683A]">Insights</span>
-      </h1>
-      <p class="text-slate-500 text-sm mt-1 font-medium font-['DM_Sans',sans-serif]">Monitoring cacao health and disease
-        distribution across Sawata Region.</p>
-    </div>
-  </div>
-</div>
-
 <div class="mt-8 px-6 pb-12 antialiased font-['DM_Sans',sans-serif]">
 
-  <!-- Stats Grid -->
+  Stats Grid
   @if (isLoading) {
   <app-stats-skeleton />
   } @else {
@@ -111,19 +93,10 @@
   }
 
   <div class="mt-8 grid grid-cols-1 gap-6">
-
-    <!-- Detection Trends Chart Card -->
-    @if (isLoading) {
-    <app-chart-skeleton />
+@if (isLoading) {
+      <app-chart-skeleton />
     } @else {
-    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 md:p-8 border-b border-gray-50 bg-slate-50/30">
-        <h3 class="text-lg md:text-2xl font-black text-gray-900 tracking-tight">Detection Trends</h3>
-      </div>
-      <div class="p-4 md:p-8 h-64 md:h-96">
-        <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
-      </div>
-    </div>
+      <app-line-chart [chartData]="lineChartData"></app-line-chart>
     }
 
     <!-- Recent Field Logs Card -->
