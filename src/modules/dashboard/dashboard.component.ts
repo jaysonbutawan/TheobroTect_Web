@@ -8,19 +8,22 @@ import { ScanDto } from './dashboard.dto';
 import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-mobile/field-log-skeleton-mobile';
 import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-desktop/field-log-skeleton-desktop';
 import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
-import { ChartSkeletonComponent } from '../../app/shared/skeletons/dashboard/chart-skeleton/chart-skeleton'
+import { ChartSkeletonComponent } from '../../app/shared/skeletons/dashboard/chart-skeleton/chart-skeleton';
+import { LineChartComponent } from './widgets/line-chart.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    BaseChartDirective,
+    // BaseChartDirective,
     FieldLogSkeletonMobileComponent,
     FieldLogSkeletonDesktopComponent,
-    StatsSkeletonComponent,      
-    ChartSkeletonComponent,     
+    StatsSkeletonComponent,
+    ChartSkeletonComponent,
+    LineChartComponent
   ],
-    templateUrl: './dashboard.component.html',
+  templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
@@ -66,23 +69,49 @@ export class DashboardComponent implements OnInit {
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [
-      { data: [], label: 'Healthy Cacao', borderColor: '#a3e635', tension: 0.4, fill: false, pointBackgroundColor: '#a3e635' },
-      { data: [], label: 'Black Pod (Severe)', borderColor: '#166534', tension: 0.4, fill: false, pointBackgroundColor: '#166534' },
-      { data: [], label: 'Mealybug (Mild)', borderColor: '#4ade80', tension: 0.4, fill: false, pointBackgroundColor: '#4ade80' },
-      { data: [], label: 'Pod Borer (Mild)', borderColor: '#15803d', tension: 0.4, fill: false, pointBackgroundColor: '#15803d' }
+      {
+        data: [],
+        label: 'Healthy Cacao',
+        borderColor: '#1976D2', // Blue
+        tension: 0.4,
+        fill: false,
+        pointRadius: 0,
+        borderWidth: 2
+      },
+      {
+        data: [],
+        label: 'Black Pod (Severe)',
+        borderColor: '#D32F2F', // Red
+        tension: 0.4,
+        fill: false,
+        pointRadius: 0,
+        borderWidth: 2
+      },
+      {
+        data: [],
+        label: 'Mealybug (Mild)',
+        borderColor: '#FBC02D', // Yellow
+        tension: 0.4,
+        fill: false,
+        pointRadius: 0,
+        borderWidth: 2
+      },
+      {
+        data: [],
+        label: 'Pod Borer (Mild)',
+        borderColor: '#388E3C', // Green
+        tension: 0.4,
+        fill: false,
+        pointRadius: 0,
+        borderWidth: 2
+      }
     ]
   };
 
-
-  public lineChartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom' } }
-  };
-
   ngOnInit(): void {
-    this.loadDashboardData(); // replaces this.loadScans() and this.recentUserScans()
+    this.loadDashboardData();
   }
+
   loadDashboardData(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -90,11 +119,21 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService.getUsersScan().subscribe({
       next: (res) => {
-        // charts (was in loadScans)
+        console.log('===== RAW API DATA =====');
+        console.log(res.data);
+
+        console.table(
+          res.data.map(s => ({
+            disease: s.disease_key,
+            severity: s.severity_key,
+            scanned_at: s.scanned_at
+          }))
+        );
+        // charts
         this.processBarChartData(res.data);
         this.processLineChartData(res.data);
 
-        // table (was in recentUserScans)
+        // table
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -130,28 +169,21 @@ export class DashboardComponent implements OnInit {
    * Groups data by date and counts by disease type
    */
   private processBarChartData(scans: ScanDto[]): void {
-    // Group scans by date (scanned_at)
     const dateGroups = this.groupScansByDate(scans);
-
-    // Extract labels (dates) and sort them
     const sortedDates = Object.keys(dateGroups).sort(
       (a, b) => new Date(a).getTime() - new Date(b).getTime()
     );
 
-    // Update bar chart labels
     this.barChartData.labels = sortedDates.map(date => this.formatDate(date));
 
-    // Initialize disease count arrays for each date
     const blackPodCounts: number[] = [];
     const mealybugCounts: number[] = [];
     const podBorerCounts: number[] = [];
 
-    // Counter for stats
     let totalBlackPod = 0;
     let totalMealybug = 0;
     let totalPodBorer = 0;
 
-    // Process each date group
     sortedDates.forEach(date => {
       const scansForDate = dateGroups[date];
 
@@ -174,50 +206,24 @@ export class DashboardComponent implements OnInit {
       totalBlackPod += blackPodCount;
       totalMealybug += mealybugCount;
       totalPodBorer += podBorerCount;
-    }); sortedDates.forEach(date => {
-      const scansForDate = dateGroups[date];
-
-      // Count diseases for this date
-      const blackPodCount = scansForDate.filter(
-        s => this.normalizeDisease(s.disease_key) === 'black pod'
-      ).length;
-      const mealybugCount = scansForDate.filter(
-        s => this.normalizeDisease(s.disease_key) === 'mealybug'
-      ).length;
-      const podBorerCount = scansForDate.filter(
-        s => this.normalizeDisease(s.disease_key) === 'pod borer'
-      ).length;
-
-      blackPodCounts.push(blackPodCount);
-      mealybugCounts.push(mealybugCount);
-      podBorerCounts.push(podBorerCount);
-
-      totalBlackPod += blackPodCount;
-      totalMealybug += mealybugCount;
-      totalPodBorer += podBorerCount;
     });
 
-    // Update bar chart datasets
     if (this.barChartData.datasets) {
       this.barChartData.datasets[0].data = blackPodCounts;
       this.barChartData.datasets[1].data = mealybugCounts;
       this.barChartData.datasets[2].data = podBorerCounts;
     }
 
-    // Update stats
     this.stats = {
       blackPod: totalBlackPod,
       mealybug: totalMealybug,
       podBorer: totalPodBorer
     };
-
-    console.log('Bar chart data updated:', {
-      labels: this.barChartData.labels,
-      blackPod: blackPodCounts,
-      mealybug: mealybugCounts,
-      podBorer: podBorerCounts,
-      stats: this.stats
-    });
+  }
+  private getMonthsOfYear(year: number): string[] {
+    return Array.from({ length: 12 }, (_, i) =>
+      `${year}-${String(i + 1).padStart(2, '0')}`
+    );
   }
 
   /**
@@ -225,49 +231,45 @@ export class DashboardComponent implements OnInit {
    * Groups data by month and counts healthy vs diseased plants
    */
   private processLineChartData(scans: ScanDto[]): void {
-    console.log('[LINE CHART] Raw scan sample (first 3):', scans.slice(0, 3).map(s => ({
-      disease_key: s.disease_key,
-      severity_key: s.severity_key,
-      scanned_at: s.scanned_at
-    })));
 
-    // Group scans by month (YYYY-MM format)
     const monthGroups = this.groupScansByMonth(scans);
+    const currentYear = new Date().getFullYear();
+    const sortedMonths = this.getMonthsOfYear(currentYear);
 
-    // Extract months and sort them
-    const sortedMonths = Object.keys(monthGroups).sort();
-
-    // Update line chart labels (formatted as "Jan", "Feb", etc.)
     this.lineChartData.labels = sortedMonths.map(month => this.formatMonth(month));
 
-    // Initialize data arrays for each disease type
     const healthyCounts: number[] = [];
     const blackPodSevereCounts: number[] = [];
     const mealybugMildCounts: number[] = [];
     const podBorerMildCounts: number[] = [];
 
-    // Process each month group
     sortedMonths.forEach(month => {
-      const scansForMonth = monthGroups[month];
+      const scansForMonth = monthGroups[month] ?? [];
+      if (!scansForMonth) {
+        healthyCounts.push(null as any);
+        blackPodSevereCounts.push(null as any);
+        mealybugMildCounts.push(null as any);
+        podBorerMildCounts.push(null as any);
+        return;
+      }
 
-      // Count by disease type and severity
       const healthyCount = scansForMonth.filter(s =>
         !s.disease_key || this.normalizeDisease(s.disease_key).includes('healthy')
       ).length;
 
       const blackPodCount = scansForMonth.filter(s =>
         this.normalizeDisease(s.disease_key).includes('black pod') &&
-        s.severity_key?.toLowerCase().includes('severe')
+        (s.severity_key?.toLowerCase().includes('mild') || s.severity_key?.toLowerCase().includes('moderate') || s.severity_key?.toLowerCase().includes('severe'))
       ).length;
 
       const mealybugCount = scansForMonth.filter(s =>
-        this.normalizeDisease(s.disease_key).includes('mealy bug') &&
-        s.severity_key?.toLowerCase().includes('mild')
+        this.normalizeDisease(s.disease_key).includes('mealybug') &&
+        (s.severity_key?.toLowerCase().includes('mild') || s.severity_key?.toLowerCase().includes('moderate') || s.severity_key?.toLowerCase().includes('severe'))
       ).length;
 
       const podBorerCount = scansForMonth.filter(s =>
         this.normalizeDisease(s.disease_key).includes('pod borer') &&
-        s.severity_key?.toLowerCase().includes('mild')
+        (s.severity_key?.toLowerCase().includes('mild') || s.severity_key?.toLowerCase().includes('moderate') || s.severity_key?.toLowerCase().includes('severe'))
       ).length;
 
       healthyCounts.push(healthyCount);
@@ -276,16 +278,6 @@ export class DashboardComponent implements OnInit {
       podBorerMildCounts.push(podBorerCount);
     });
 
-    console.log('[LINE CHART] Computed counts before assignment:', {
-      labels: sortedMonths.map(m => this.formatMonth(m)),
-      healthy: healthyCounts,
-      blackPodSevere: blackPodSevereCounts,
-      mealybugMild: mealybugMildCounts,
-      podBorerMild: podBorerMildCounts,
-      allZero: [...healthyCounts, ...blackPodSevereCounts, ...mealybugMildCounts, ...podBorerMildCounts].every(v => v === 0)
-    });
-
-    // Reassign entire object so ng2-charts detects the change (mutation alone won't trigger re-render)
     this.lineChartData = {
       labels: sortedMonths.map(m => this.formatMonth(m)),
       datasets: [
@@ -295,33 +287,27 @@ export class DashboardComponent implements OnInit {
         { ...this.lineChartData.datasets[3], data: podBorerMildCounts }
       ]
     };
-
-    console.log('[LINE CHART] lineChartData after reassignment:', this.lineChartData);
-    console.log('[LINE CHART] NOTE: if allZero=true above, check severity_key values in raw scan data');
   }
 
   /**
    * Normalize disease key to standard format
-   * Handles different formats: "black_pod", "Black Pod", "BLACK POD", etc.
    */
   private normalizeDisease(diseaseKey: string | null | undefined): string {
     if (!diseaseKey) return 'healthy';
 
     return diseaseKey
       .toLowerCase()
-      .replace(/_/g, ' ')  // Replace underscores with spaces
+      .replace(/_/g, ' ')
       .trim();
   }
 
   /**
    * Group scans by date
-   * Returns object with dates as keys and arrays of scans as values
    */
   private groupScansByDate(scans: ScanDto[]): { [date: string]: ScanDto[] } {
     const groups: { [date: string]: ScanDto[] } = {};
 
     scans.forEach(scan => {
-      // Extract date part only (YYYY-MM-DD format)
       const dateStr = scan.scanned_at?.split(' ')[0] || new Date().toISOString().split('T')[0];
 
       if (!groups[dateStr]) {
@@ -335,13 +321,11 @@ export class DashboardComponent implements OnInit {
 
   /**
    * Group scans by month
-   * Returns object with months (YYYY-MM) as keys and arrays of scans as values
    */
   private groupScansByMonth(scans: ScanDto[]): { [month: string]: ScanDto[] } {
     const groups: { [month: string]: ScanDto[] } = {};
 
     scans.forEach(scan => {
-      // Extract month part only (YYYY-MM format)
       const monthStr = scan.scanned_at?.substring(0, 7) || new Date().toISOString().substring(0, 7);
 
       if (!groups[monthStr]) {
@@ -355,7 +339,6 @@ export class DashboardComponent implements OnInit {
 
   /**
    * Format date for chart display
-   * Converts YYYY-MM-DD to short format (e.g., "Jan 15")
    */
   private formatDate(dateStr: string): string {
     try {
@@ -372,7 +355,6 @@ export class DashboardComponent implements OnInit {
 
   /**
    * Format month for chart display
-   * Converts YYYY-MM to short format (e.g., "Jan")
    */
   private formatMonth(monthStr: string): string {
     try {
@@ -392,6 +374,4 @@ export class DashboardComponent implements OnInit {
   navigateToMap(coords?: string) {
     this.router.navigate(['/dashboard/heatmap'], { queryParams: { loc: coords } });
   }
-
-
 }
