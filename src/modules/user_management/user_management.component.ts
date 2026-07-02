@@ -5,10 +5,12 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { UsersApiService } from './api.service';
 import { UserDto, UsersResponseDto } from './user_management.dto';
+import { PaginationComponent } from '../../app/shared/components/pagination/pagination.component';
+
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   templateUrl: './user_management.component.html',
 })
 export class UserManagementComponent implements OnInit, OnDestroy {
@@ -19,10 +21,15 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   users: UserDto[] = [];
   filteredUsers: UserDto[] = [];
+  pagedUsers: UserDto[] = [];
   search = '';
   totalUsers = 0;
   isLoading = false;
   errorMsg = '';
+
+  // ── Pagination state ──────────────────────────────────────
+  pageSize = 10;
+  currentPage = 1;
 
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -32,6 +39,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.search$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => {
+        this.currentPage = 1; // reset to page 1 whenever the search term changes
         this.applyFilters();
       });
 
@@ -43,42 +51,42 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
- loadUsers(): void {
-  this.isLoading = true;
-  this.errorMsg = '';
+  loadUsers(): void {
+    this.isLoading = true;
+    this.errorMsg = '';
 
-  console.log('🚀 Loading users from API...');
+    console.log('🚀 Loading users from API...');
 
-  this.cdr.markForCheck();
+    this.cdr.markForCheck();
 
-  this.usersApi.getUsers()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (res: UsersResponseDto) => {
+    this.usersApi.getUsers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: UsersResponseDto) => {
 
-        console.log('✅ API RESPONSE RECEIVED:', res);
+          console.log('✅ API RESPONSE RECEIVED:', res);
 
-        this.users = res?.data ?? [];
+          this.users = res?.data ?? [];
 
-        console.log('👥 Users loaded:', this.users.length);
-        console.table(this.users);
+          console.log('👥 Users loaded:', this.users.length);
+          console.table(this.users);
 
-        this.isLoading = false;
-        this.applyFilters();
+          this.isLoading = false;
+          this.applyFilters();
 
-        this.cdr.markForCheck();
-      },
+          this.cdr.markForCheck();
+        },
 
-      error: (err) => {
-        console.error('❌ USERS API ERROR:', err);
+        error: (err) => {
+          console.error('❌ USERS API ERROR:', err);
 
-        this.errorMsg = 'Failed to load users';
-        this.isLoading = false;
+          this.errorMsg = 'Failed to load users';
+          this.isLoading = false;
 
-        this.cdr.markForCheck();
-      }
-    });
-}
+          this.cdr.markForCheck();
+        }
+      });
+  }
 
   onSearchChange(): void {
     this.search$.next(this.search);
@@ -96,7 +104,30 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     });
 
     this.totalUsers = this.filteredUsers.length;
+    this.updatePagedUsers();
+  }
 
+  // ── Pagination ─────────────────────────────────────────────
+  private updatePagedUsers(): void {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedUsers = this.filteredUsers.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalUsers / this.pageSize));
+  }
+
+  get pageStart(): number {
+    return this.totalUsers === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalUsers);
+  }
+
+  goToPage(p: number): void {
+    this.currentPage = p;
+    this.updatePagedUsers();
   }
 
   viewUser(): void {
@@ -106,7 +137,13 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   deleteUser(user: UserDto): void {
     if (!confirm(`Delete ${user.name}?`)) return;
     this.users = this.users.filter(u => u.id !== user.id);
+
+    // If deleting the last item on the last page emptied it, step back a page.
     this.applyFilters();
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+      this.updatePagedUsers();
+    }
   }
 
   avatarUrl(user: UserDto): string {

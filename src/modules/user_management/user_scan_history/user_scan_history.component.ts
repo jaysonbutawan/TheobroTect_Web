@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent } from '../../../app/shared/skeletons/disease-guidance/scan-history-skeleton/scan-history-skeleton';
+import { PaginationComponent } from '../../../app/shared/components/pagination/pagination.component';
 
 
 export type Severity = 'Mild' | 'Moderate' | 'Severe';
@@ -44,7 +45,7 @@ interface ScanFilters {
 @Component({
   selector: 'app-scan-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent],
+  imports: [CommonModule, FormsModule, ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent, PaginationComponent],
   templateUrl: './user_scan_history.component.html',
 })
 export class ScanHistoryComponent implements OnInit {

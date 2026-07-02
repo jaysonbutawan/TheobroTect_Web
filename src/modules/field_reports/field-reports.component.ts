@@ -1,242 +1,195 @@
-import { Component, Input, AfterViewInit, inject, ChangeDetectorRef, NgZone  } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MapService } from '../../app/core/services/map.service';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { FieldReportsSkeletonComponent } from '../../app/shared/skeletons/field-reports/field-reports-skeleton/field-reports-skeleton';
-import { BarangayCardsSkeletonComponent } from '../../app/shared/skeletons/field-reports/barangay-cards-skeleton/barangay-cards-skeleton';
-import { ChangeDetectionStrategy } from '@angular/core';
+import { PaginationComponent } from '../../app/shared/components/pagination/pagination.component';
 
+export type Severity = 'Mild' | 'Moderate' | 'Severe';
+export type ReportStatus = 'Pending' | 'Under Review' | 'Resolved';
 
-export interface ScanRecord {
+export interface FieldReport {
   id: string;
-  timestamp: string; // Format: 'Oct 24, 2023 • 14:22'
-  disease: string;
-  techAvatar: string;
-  location: string;
-  status: 'Severe' | 'Moderate' | 'Mild' | 'Healthy';
+  timestamp: string;   // display string, e.g. "Oct 24, 09:15 AM"
+  barangay: string;
+  category: string;
+  severity: Severity;
+  status: ReportStatus;
+}
+
+interface ReportFilters {
+  barangay: string;
+  category: string;
+  severity: Severity | '';
+  date: string;
 }
 
 @Component({
   selector: 'app-field-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, FieldReportsSkeletonComponent, BarangayCardsSkeletonComponent],
+  imports: [CommonModule, FormsModule, FieldReportsSkeletonComponent, PaginationComponent],
   templateUrl: './field-reports-list.component.html',
-  styleUrls: ['./shared-reports.css']
 })
-export class FieldReportsComponent implements AfterViewInit {
-  @Input() recentScans: ScanRecord[] = [
-    { id: '#SCAN-8921', timestamp: 'Oct 24, 2023 • 14:22', disease: 'Healthy', techAvatar: 'assets/1.jpg', location: 'Barangay San Jose', status: 'Healthy' },
-    { id: '#SCAN-8920', timestamp: 'Oct 24, 2023 • 12:45', disease: 'Black Pod Rot', techAvatar: 'assets/2.jpg', location: 'Barangay Mabuhay', status: 'Severe' },
-    { id: '#SCAN-8919', timestamp: 'Oct 23, 2023 • 09:15', disease: 'Pod Borer', techAvatar: 'assets/3.jpg', location: 'Barangay San Jose', status: 'Moderate' },
-    { id: '#SCAN-8918', timestamp: 'Oct 22, 2023 • 16:30', disease: 'Mealy Bug', techAvatar: 'assets/4.jpg', location: 'Barangay Poblacion', status: 'Mild' },
-  ];
+export class FieldReportsComponent implements OnInit {
 
-  // Search and Filter States
-  barangaySearchQuery: string = '';
-  selectedBarangay: string | null = null;
-  selectedDisease: string = 'All';
-  filterDate: string = '';
-  isLoading: boolean = false;
-  isCardsLoading: boolean = true;
-  private cdr = inject(ChangeDetectorRef);
-  private ngZone = inject(NgZone);
+  isLoading = true;
+  isSyncing = false;
+  errorMsg = '';
 
+  barangayOptions: string[] = ['San Jose', 'Poblacion', 'Sta. Maria', 'Sto. Tomas'];
+  categoryOptions: string[] = ['Black Pod', 'Mealybug', 'Pod Borer'];
+  severityOptions: Severity[] = ['Mild', 'Moderate', 'Severe'];
 
+  filters: ReportFilters = { barangay: '', category: '', severity: '', date: '' };
 
+  allReports: FieldReport[] = [];
+  filteredReports: FieldReport[] = [];
+  pagedReports: FieldReport[] = [];
 
-  diseaseCategories = ['All', 'Black Pod Rot', 'Pod Borer', 'Mealy Bug', 'Healthy'];
+  pageSize = 5;
+  currentPage = 1;
 
-  // Logic to filter the Barangay cards based on search
-  get filteredBarangays(): string[] {
-    const uniqueBarangays = [...new Set(this.recentScans.map(scan => scan.location))];
-    return uniqueBarangays.filter(b =>
-      b.toLowerCase().includes(this.barangaySearchQuery.toLowerCase())
-    );
+  ngOnInit(): void {
+    this.loadReports();
   }
 
-  // Logic to filter the table rows (Barangay + Disease + Date)
-  // Add this property
+  // ── Data loading ──────────────────────────────────────────
+  loadReports(): void {
+    this.isLoading = true;
+    this.errorMsg = '';
 
-  // Update the filter logic in get filteredScans()
-  get filteredScans(): ScanRecord[] {
-    let scans = this.recentScans;
+    // Replace with a real API call, e.g.:
+    // this.fieldReportsService.getReports().subscribe({
+    //   next: (reports) => { this.allReports = reports; this.applyFilters(); this.isLoading = false; },
+    //   error: () => { this.errorMsg = 'Could not load field reports.'; this.isLoading = false; }
+    // });
 
-    if (this.selectedBarangay) {
-      scans = scans.filter(s => s.location === this.selectedBarangay);
-    }
-
-    if (this.selectedDisease !== 'All') {
-      scans = scans.filter(s => s.disease === this.selectedDisease);
-    }
-
-    // Exact Date Filter Logic
-    if (this.filterDate) {
-      scans = scans.filter(scan => {
-        // Formats the scanner timestamp to YYYY-MM-DD to match the input type="date"
-        const scanDate = new Date(scan.timestamp.split(' • ')[0]);
-        const formattedScanDate = scanDate.toISOString().split('T')[0];
-        return formattedScanDate === this.filterDate;
-      });
-    }
-
-    return scans;
-  }
-
-  resetFilters() {
-    this.filterDate = '';
-    this.selectedDisease = 'All';
-  }
-
-  constructor(private mapService: MapService) { }
-
-  ngAfterViewInit(): void {
-  try {
-    this.mapService.initMap('map');
-  } catch (e) {
-    console.warn('Map init skipped:', e);
-  }
-
-  this.ngZone.run(() => {
     setTimeout(() => {
-      this.isCardsLoading = false;
+      this.allReports = this.mockReports();
+      this.applyFilters();
       this.isLoading = false;
-      this.cdr.detectChanges();
-      console.log('isCardsLoading:', this.isCardsLoading);
-    }, 3000);
-  });
-}
-
-  setDiseaseFilter(disease: string) {
-    this.selectedDisease = disease;
+    }, 300);
   }
 
-  getStatusClass(status: string): string {
-    const map: Record<string, string> = {
-      'Severe': 'bg-red-100 text-red-700 border border-red-200',
-      'Moderate': 'bg-orange-100 text-orange-700 border border-orange-200',
-      'Mild': 'bg-amber-100 text-amber-700 border border-amber-200',
-      'Healthy': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-    };
-    return map[status] ?? 'bg-slate-100 text-slate-600';
+  private mockReports(): FieldReport[] {
+    return [
+      { id: 'FR-1001', timestamp: 'Oct 24, 09:15 AM', barangay: 'San Jose', category: 'Black Pod', severity: 'Severe', status: 'Pending' },
+      { id: 'FR-1002', timestamp: 'Oct 24, 08:30 AM', barangay: 'Poblacion', category: 'Mealybug', severity: 'Moderate', status: 'Under Review' },
+      { id: 'FR-1003', timestamp: 'Oct 23, 04:45 PM', barangay: 'Sta. Maria', category: 'Pod Borer', severity: 'Mild', status: 'Resolved' },
+      { id: 'FR-1004', timestamp: 'Oct 23, 01:20 PM', barangay: 'Sto. Tomas', category: 'Black Pod', severity: 'Mild', status: 'Resolved' },
+      { id: 'FR-1005', timestamp: 'Oct 22, 11:10 AM', barangay: 'San Jose', category: 'Mealybug', severity: 'Moderate', status: 'Under Review' },
+      { id: 'FR-1006', timestamp: 'Oct 21, 03:05 PM', barangay: 'Poblacion', category: 'Pod Borer', severity: 'Severe', status: 'Pending' },
+      { id: 'FR-1007', timestamp: 'Oct 21, 10:40 AM', barangay: 'Sta. Maria', category: 'Black Pod', severity: 'Mild', status: 'Resolved' },
+    ];
   }
 
-  getDotClass(status: string): string {
-    const map: Record<string, string> = {
-      'Severe': 'bg-red-500 animate-pulse',
-      'Moderate': 'bg-orange-500',
-      'Mild': 'bg-amber-500',
-      'Healthy': 'bg-emerald-500',
-    };
-    return map[status] ?? 'bg-slate-400';
+  // ── Filtering ──────────────────────────────────────────────
+  onFilterChange(): void {
+    this.currentPage = 1;
+    this.applyFilters();
   }
 
-  generatePDF() {
-    const doc = new jsPDF();
-    const data = this.filteredScans;
-    const timestamp = new Date().toLocaleString();
-    const logoPath = 'assets/images/theobrotect_logo.png';
+  resetFilters(): void {
+    this.filters = { barangay: '', category: '', severity: '', date: '' };
+    this.onFilterChange();
+  }
 
-    // 1. HEADER & BRANDING
-    doc.setFillColor(5, 150, 105); // Emerald-600
-    doc.rect(0, 0, 210, 40, 'F');
-
-    // Add Logo to the top right
-    // Parameters: image, type, x, y, width, height
-    doc.addImage(logoPath, 'PNG', 165, 5, 30, 30);
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('THEOBROTECT', 14, 22);
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('AGRICULTURAL INTELLIGENCE & DISEASE SURVEILLANCE', 14, 30);
-
-    // 2. REPORT METADATA
-    doc.setTextColor(15, 23, 42);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Field Intelligence Summary', 14, 52);
-
-    doc.setDrawColor(5, 150, 105);
-    doc.setLineWidth(1);
-    doc.line(14, 54, 35, 54);
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Barangay: ${this.selectedBarangay}`, 14, 62);
-    doc.text(`Total Scans: ${data.length}`, 14, 68);
-    doc.text(`Report Date: ${timestamp}`, 14, 74);
-
-    // 3. DATA TABLE
-    autoTable(doc, {
-      startY: 85,
-      head: [['SCAN ID', 'DIAGNOSIS', 'SEVERITY STATUS', 'TIMESTAMP']],
-      body: data.map(s => [s.id, s.disease, s.status.toUpperCase(), s.timestamp]),
-      theme: 'striped',
-      headStyles: {
-        fillColor: [5, 150, 105],
-        textColor: [255, 255, 255],
-        fontStyle: 'bold'
-      },
-      didParseCell: (cellData) => {
-        if (cellData.section === 'body' && cellData.column.index === 2) {
-          const status = cellData.cell.raw as string;
-          if (status === 'SEVERE') cellData.cell.styles.textColor = [185, 28, 28];
-          if (status === 'HEALTHY') cellData.cell.styles.textColor = [5, 150, 105];
-        }
-      },
-      styles: { fontSize: 9 },
-      margin: { bottom: 60 } // Leave space at the bottom for the signature
+  private applyFilters(): void {
+    this.filteredReports = this.allReports.filter((r) => {
+      const matchesBarangay = !this.filters.barangay || r.barangay === this.filters.barangay;
+      const matchesCategory = !this.filters.category || r.category === this.filters.category;
+      const matchesSeverity = !this.filters.severity || r.severity === this.filters.severity;
+      // Date filtering intentionally omitted from mock data — wire up once timestamps are real ISO dates.
+      return matchesBarangay && matchesCategory && matchesSeverity;
     });
 
-    // 4. SIGNATURE SECTION (Fixed at the bottom of the last page)
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const sigY = pageHeight - 40; // 40mm from the bottom
-
-    doc.setFontSize(10);
-    doc.setTextColor(15, 23, 42);
-
-    // Left Side: Field Officer
-    doc.setDrawColor(15, 23, 42);
-    doc.setLineWidth(0.5);
-    doc.line(14, sigY, 90, sigY);
-    doc.setFont('helvetica', 'bold');
-    doc.text('SIGNATURE OVER PRINTED NAME', 14, sigY + 5);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Field Intelligence Officer', 14, sigY + 10);
-
-    // Right Side: Date Signed
-    doc.line(120, sigY, 196, sigY);
-    doc.setFont('helvetica', 'bold');
-    doc.text('DATE SIGNED', 120, sigY + 5);
-
-    // 5. SYSTEM FOOTER
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(160);
-      doc.text(`System Generated by TheobroTect Admin Suite`, 105, pageHeight - 10, { align: 'center' });
-    }
-
-    doc.save(`TheobroTect_Report_${this.selectedBarangay}.pdf`);
+    this.updatePagedReports();
   }
- selectBarangay(name: string) {
-  this.isLoading = true;
-  this.selectedBarangay = name;
-  this.selectedDisease = 'All';
-  this.filterDate = '';
-  this.cdr.detectChanges();
 
-  this.ngZone.run(() => {
+  // ── Pagination ─────────────────────────────────────────────
+  private updatePagedReports(): void {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedReports = this.filteredReports.slice(start, start + this.pageSize);
+  }
+
+  get totalReports(): number {
+    return this.filteredReports.length;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalReports / this.pageSize));
+  }
+
+  get pageStart(): number {
+    return this.totalReports === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalReports);
+  }
+
+  goToPage(p: number): void {
+    this.currentPage = p;
+    this.updatePagedReports();
+  }
+
+  // ── Sync ───────────────────────────────────────────────────
+  syncData(): void {
+    if (this.isSyncing) return;
+    this.isSyncing = true;
+
+    // Replace with a real sync/refetch call, e.g.:
+    // this.fieldReportsService.getReports().subscribe({
+    //   next: (reports) => { this.allReports = reports; this.applyFilters(); this.isSyncing = false; },
+    //   error: () => { this.errorMsg = 'Sync failed.'; this.isSyncing = false; }
+    // });
+
     setTimeout(() => {
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    }, 3000);
-  });
-}
+      this.allReports = this.mockReports();
+      this.applyFilters();
+      this.isSyncing = false;
+    }, 600);
+  }
+
+  // ── Row actions ────────────────────────────────────────────
+  viewReport(report: FieldReport): void {
+    // Wire up to a detail modal or route, e.g.:
+    // this.router.navigate(['/field-reports', report.id]);
+    console.log('View report', report.id);
+  }
+
+  // ── Style helpers ──────────────────────────────────────────
+  getSeverityClass(sev: Severity): string {
+    switch (sev) {
+      case 'Mild':
+        return 'bg-white/80 text-slate-500 border-white/40';
+      case 'Moderate':
+        return 'bg-emerald-600 text-white border-emerald-600';
+      case 'Severe':
+      default:
+        return 'bg-red-50 text-red-500 border-red-100';
+    }
+  }
+
+  getStatusTextClass(status: ReportStatus): string {
+    switch (status) {
+      case 'Pending':
+        return 'text-red-500';
+      case 'Under Review':
+        return 'text-sky-600';
+      case 'Resolved':
+      default:
+        return 'text-emerald-600';
+    }
+  }
+
+  getStatusDotClass(status: ReportStatus): string {
+    switch (status) {
+      case 'Pending':
+        return 'bg-red-500';
+      case 'Under Review':
+        return 'bg-sky-500';
+      default:
+        return 'bg-emerald-500';
+    }
+  }
 }

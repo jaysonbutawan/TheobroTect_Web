@@ -1,133 +1,166 @@
-<div class="p-6 md:p-10 space-y-8 bg-transparent min-h-screen font-sans">
+<div class="p-6 md:p-10 space-y-6 bg-transparent min-h-screen font-sans">
 
-  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-    <div>
-      <h1 class="text-3xl font-black text-slate-900 tracking-tight">
-        Field <span class="text-[#3D683A]">Intelligence</span>
-      </h1>
-      <p class="text-slate-600 font-medium">Monitoring and disease detection logs by barangay</p>
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <h1 class="text-xl font-black text-emerald-700 tracking-tight">Field Reports</h1>
+      <span class="text-slate-300">/</span>
+      <p class="text-sm font-bold text-slate-500">Field Log <span class="text-slate-300 mx-1">/</span> Data Center</p>
     </div>
 
-    <div class="flex items-center gap-4 w-full lg:w-auto">
-      <div class="relative w-full lg:w-80 grid items-center">
-        <div class="absolute left-0 pl-4 flex items-center pointer-events-none z-10">
-          <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.773 4.773zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5v4.5" />
-          </svg>
-        </div>
-        <input type="text" [(ngModel)]="barangaySearchQuery" placeholder="Search for a barangay..."
-          class="block w-full !pl-11 pr-4 py-3 bg-white/60 backdrop-blur-md border border-white/20 rounded-2xl text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none relative z-0">
+    <button type="button" (click)="syncData()"
+      class="flex items-center gap-2 px-4 py-2.5 bg-white/80 backdrop-blur-md border border-white/40 text-slate-700 rounded-xl text-xs font-black shadow-sm hover:bg-white transition-all active:scale-95">
+      <svg class="w-4 h-4 text-emerald-600" [class.animate-spin]="isSyncing" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24" stroke-width="2">
+        <polyline points="1 4 1 10 7 10" />
+        <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+      </svg>
+      {{ isSyncing ? 'Syncing...' : 'Sync Data' }}
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       Filter bar
+       ═══════════════════════════════════════════ -->
+  <div class="bg-white/60 backdrop-blur-xl border border-white/30 rounded-[2rem] shadow-md p-6">
+    <div class="flex flex-wrap items-end gap-6">
+
+      <!-- Barangay -->
+      <div class="flex flex-col gap-1.5 min-w-[180px]">
+        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Barangay</span>
+        <select [(ngModel)]="filters.barangay" (change)="onFilterChange()"
+          class="px-3.5 py-2.5 bg-white/80 border border-white/40 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition-all">
+          <option value="">All Barangays</option>
+          @for (b of barangayOptions; track b) {
+          <option [value]="b">{{ b }}</option>
+          }
+        </select>
       </div>
 
-      <button type="button"
-        class="flex items-center gap-2 px-5 py-3 bg-white/80 backdrop-blur-md border border-white/30 text-slate-800 rounded-2xl text-sm font-black shadow-md hover:bg-white hover:shadow-lg transition-all active:scale-95 whitespace-nowrap">
-        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+      <!-- Issue Category -->
+      <div class="flex flex-col gap-1.5 min-w-[180px]">
+        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Disease Category</span>
+        <select [(ngModel)]="filters.category" (change)="onFilterChange()"
+          class="px-3.5 py-2.5 bg-white/80 border border-white/40 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition-all">
+          <option value="">All Diseases</option>
+          @for (c of categoryOptions; track c) {
+          <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Severity Level -->
+      <div class="flex flex-col gap-1.5 min-w-[180px]">
+        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Severity Level</span>
+        <select [(ngModel)]="filters.severity" (change)="onFilterChange()"
+          class="px-3.5 py-2.5 bg-white/80 border border-white/40 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition-all">
+          <option value="">All Severity</option>
+          @for (sev of severityOptions; track sev) {
+          <option [value]="sev">{{ sev }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date Range</span>
+        <input type="date" [(ngModel)]="filters.date" (change)="onFilterChange()"
+          class="px-3.5 py-2.5 bg-white/80 border border-white/40 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition-all" />
+      </div>
+
+      <!-- Reset -->
+      <button type="button" (click)="resetFilters()"
+        class="flex items-center gap-2 px-5 py-2.5 bg-white/80 border border-white/40 text-slate-700 rounded-xl text-xs font-black shadow-sm hover:bg-white hover:border-emerald-400 transition-all active:scale-95">
+        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <polyline points="1 4 1 10 7 10" />
+          <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
         </svg>
-        Add Barangay
+        Reset
       </button>
+
     </div>
   </div>
 
-  @if (isCardsLoading) {
-    <app-barangay-cards-skeleton />
-  } @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (b of filteredBarangays; track b; let i = $index) {
-        <button (click)="selectBarangay(b)" [class.ring-2]="selectedBarangay === b"
-          [class.ring-emerald-500]="selectedBarangay === b" [class.scale-[1.02]]="selectedBarangay === b"
-          [class.shadow-xl]="selectedBarangay === b"
-          class="relative h-44 overflow-hidden rounded-[2rem] text-left transition-all shadow-md hover:shadow-xl group active:scale-98">
-          <img [src]="i === 0 ? 'assets/images/b_img1.png' : i === 1 ? 'assets/images/b_img2.png' : 'assets/images/b_img3.png'"
-            alt="Barangay Landscape" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-          <div class="absolute inset-0 p-6 flex flex-col justify-between z-10">
-            <div class="flex justify-between items-center">
-              <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Barangay</span>
-              <div class="w-2.5 h-2.5 rounded-full shadow-sm" [class.bg-emerald-500]="selectedBarangay === b"
-                [class.shadow-emerald-400]="selectedBarangay === b" [class.bg-emerald-500/40]="selectedBarangay !== b">
-              </div>
-            </div>
-            <h4 class="text-xl font-black text-white tracking-tight drop-shadow-sm">{{ b }}</h4>
-          </div>
-        </button>
-      } @empty {
-        <div class="col-span-full py-12 text-center text-slate-500 font-bold italic bg-white/30 backdrop-blur-md rounded-[2rem] border border-white/20">
-          No barangays match your search.
-        </div>
-      }
+  <!-- ═══════════════════════════════════════════
+       Recent Field Reports card
+       ═══════════════════════════════════════════ -->
+  <div class="bg-white/60 backdrop-blur-xl border border-white/30 rounded-[2.5rem] shadow-xl overflow-hidden">
+
+    <div class="flex items-center justify-between px-8 pt-7 pb-5">
+      <h3 class="text-lg font-black text-slate-900">Recent Field Reports</h3>
+      <button type="button" title="Sort / more filters"
+        class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/60 transition-colors">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+        </svg>
+      </button>
     </div>
-  }
 
-  <div class="bg-white/40 backdrop-blur-xl border border-white/30 rounded-[2.5rem] shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-    @if (selectedBarangay) {
-      <div class="p-8 border-b border-white/20 bg-white/20">
-        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
-          <div class="space-y-4 w-full xl:w-auto">
-            <h3 class="text-xl font-black text-slate-900">Scanner Details: <span class="text-emerald-800">{{ selectedBarangay }}</span></h3>
-            <div class="flex flex-wrap gap-2">
-              @for (cat of diseaseCategories; track cat) {
-                <button (click)="setDiseaseFilter(cat)" type="button" [class.bg-slate-900]="selectedDisease === cat"
-                  [class.text-white]="selectedDisease === cat" [class.bg-white/80]="selectedDisease !== cat"
-                  [class.text-slate-700]="selectedDisease !== cat"
-                  class="px-4 py-2 rounded-xl text-xs font-bold border border-white/40 transition-all shadow-sm hover:border-slate-400 hover:bg-white">
-                  {{ cat }}
-                </button>
-              }
-            </div>
-          </div>
-          <div class="flex flex-wrap items-end gap-4 w-full xl:w-auto">
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date</span>
-              <input type="date" [(ngModel)]="filterDate" class="px-3 py-2 bg-white/80 border border-white/30 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition-all">
-            </div>
-            <button (click)="generatePDF()" class="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl text-sm font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all active:scale-95 ml-auto xl:ml-0">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              Export PDF
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto min-h-[300px]">
-        @if (isLoading) {
-          <app-field-reports-skeleton />
-        } @else {
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-white/10">
-                <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-500 tracking-wider">Scanner Identity</th>
-                <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-500 tracking-wider">Diagnosis</th>
-                <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-500 tracking-wider text-center">Severity Status</th>
-                <th class="px-8 py-5 text-[11px] font-black uppercase text-slate-500 tracking-wider text-right">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-white/10">
-              @for (scan of filteredScans; track scan.id) {
-                <tr class="hover:bg-white/30 transition-colors group">
-                  <td class="px-8 py-6"><span class="font-mono text-xs font-bold text-slate-700 bg-white/60 px-3 py-1.5 rounded-lg border border-white/20 transition-colors">{{ scan.id }}</span></td>
-                  <td class="px-8 py-6"><div class="text-sm font-black text-slate-800">{{ scan.disease }}</div></td>
-                  <td class="px-8 py-6"><div class="flex justify-center"><span [ngClass]="getStatusClass(scan.status)" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm border border-white/20"><span class="w-1.5 h-1.5 rounded-full" [ngClass]="getDotClass(scan.status)"></span>{{ scan.status }}</span></div></td>
-                  <td class="px-8 py-6 text-right text-sm font-bold text-slate-600">{{ scan.timestamp }}</td>
-                </tr>
-              } @empty {
-                <tr><td colspan="4" class="px-8 py-20 text-center"><div class="flex flex-col items-center"><p class="text-slate-500 font-bold italic">No records found matching these filters.</p></div></td></tr>
-              }
-            </tbody>
-          </table>
-        }
-      </div>
+    @if (isLoading) {
+    <app-field-reports-skeleton />
     } @else {
-      <div class="py-32 flex flex-col items-center justify-center border-2 border-dashed border-white/40 backdrop-blur-md rounded-[3rem]">
-        <div class="p-5 bg-white/40 rounded-full mb-4 text-slate-400 border border-white/30 shadow-inner">
-          <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
-        </div>
-        <h3 class="text-lg font-bold text-slate-800">Intelligence Ready</h3>
-        <p class="text-slate-600 font-medium">Search or select a barangay card above to view field data.</p>
-      </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse min-w-[760px]">
+        <thead>
+          <tr class="bg-white/10 border-y border-white/20">
+            <th class="px-8 py-4 text-[11px] font-black uppercase text-slate-500 tracking-wider">Date &amp; Time</th>
+            <th class="px-8 py-4 text-[11px] font-black uppercase text-slate-500 tracking-wider">Barangay</th>
+            <th class="px-8 py-4 text-[11px] font-black uppercase text-slate-500 tracking-wider">Category</th>
+            <th class="px-8 py-4 text-[11px] font-black uppercase text-slate-500 tracking-wider text-center">Severity
+            </th>
+            <th class="px-8 py-4 text-[11px] font-black uppercase text-slate-500 tracking-wider">Status</th>
+            <th class="px-8 py-4 text-[11px] font-black uppercase text-slate-500 tracking-wider text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/10">
+          @for (report of pagedReports; track report.id) {
+          <tr class="hover:bg-white/30 transition-colors">
+            <td class="px-8 py-5 whitespace-nowrap text-sm font-bold text-slate-600">{{ report.timestamp }}</td>
+            <td class="px-8 py-5 whitespace-nowrap text-sm font-black text-sky-700">{{ report.barangay }}</td>
+            <td class="px-8 py-5 whitespace-nowrap text-sm font-black text-amber-700">{{ report.category }}</td>
+            <td class="px-8 py-5 whitespace-nowrap">
+              <div class="flex justify-center">
+                <span [ngClass]="getSeverityClass(report.severity)"
+                  class="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border">
+                  {{ report.severity }}
+                </span>
+              </div>
+            </td>
+            <td class="px-8 py-5 whitespace-nowrap">
+              <span [ngClass]="getStatusTextClass(report.status)"
+                class="inline-flex items-center gap-1.5 text-xs font-black">
+                @if (report.status === 'Resolved') {
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                } @else {
+                <span class="w-1.5 h-1.5 rounded-full" [ngClass]="getStatusDotClass(report.status)"></span>
+                }
+                {{ report.status }}
+              </span>
+            </td>
+            <td class="px-8 py-5 text-right whitespace-nowrap">
+              <button (click)="viewReport(report)"
+                class="px-4 py-2 bg-emerald-800 text-white rounded-xl text-xs font-black shadow-sm hover:bg-emerald-900 transition-colors">
+                View Details
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="6" class="px-8 py-20 text-center">
+              <p class="text-slate-500 font-bold italic">No records found matching these filters.</p>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <app-pagination  [currentPage]="currentPage" [totalPages]="totalPages" [pageStart]="pageStart" [pageEnd]="pageEnd"
+      [totalItems]="totalReports" itemLabel="entries" (pageChange)="goToPage($event)" />
     }
+
   </div>
 </div>
