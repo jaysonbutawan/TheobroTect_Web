@@ -208,8 +208,8 @@
       </div>
 
       <!-- Pagination -->
-      <app-pagination [currentPage]="currentPage" [totalPages]="totalPages" [pageStart]="pageStart" [pageEnd]="pageEnd"
-        [totalItems]="totalScans" itemLabel="scans" (pageChange)="goToPage($event)" />
+      <app-pagination variant="compact" [currentPage]="currentPage" [totalPages]="totalPages" [pageStart]="pageStart"
+        [pageEnd]="pageEnd" [totalItems]="totalScans" itemLabel="scans" (pageChange)="goToPage($event)" />
       }
 
     </div>

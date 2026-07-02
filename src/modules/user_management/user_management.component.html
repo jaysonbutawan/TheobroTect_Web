@@ -160,8 +160,8 @@
     </div>
 
     @if (!isLoading && totalUsers > 0) {
-    <app-pagination [currentPage]="currentPage" [totalPages]="totalPages" [pageStart]="pageStart" [pageEnd]="pageEnd"
-      [totalItems]="totalUsers" itemLabel="users" (pageChange)="goToPage($event)" />
+    <app-pagination variant="compact" [currentPage]="currentPage" [totalPages]="totalPages" [pageStart]="pageStart"
+      [pageEnd]="pageEnd" [totalItems]="totalUsers" itemLabel="users" (pageChange)="goToPage($event)" />
     }
 
   </div>

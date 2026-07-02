@@ -8,11 +8,11 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     @if (variant === 'compact') {
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-slate-500">
-          Showing <span class="font-bold text-slate-700">{{ currentPageItemCount }}</span> of
-          <span class="font-bold text-slate-700">{{ totalItems }}</span> {{ itemLabel }}
-        </p>
+  <div class="flex flex-wrap items-center justify-between gap-3 px-8 py-5 border-t border-white/20">
+    <p class="text-sm text-slate-500">
+      Showing <span class="font-bold text-slate-700">{{ currentPageItemCount }}</span> of
+      <span class="font-bold text-slate-700">{{ totalItems }}</span> {{ itemLabel }}
+    </p>
 
         <div class="flex items-center gap-2">
           <button (click)="emitPage(currentPage - 1)" [disabled]="currentPage === 1"

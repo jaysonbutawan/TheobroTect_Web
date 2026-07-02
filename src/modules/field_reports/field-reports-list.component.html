@@ -158,8 +158,10 @@
     </div>
 
     <!-- Pagination -->
-    <app-pagination  [currentPage]="currentPage" [totalPages]="totalPages" [pageStart]="pageStart" [pageEnd]="pageEnd"
+    <app-pagination   variant="compact"
+ [currentPage]="currentPage" [totalPages]="totalPages" [pageStart]="pageStart" [pageEnd]="pageEnd"
       [totalItems]="totalReports" itemLabel="entries" (pageChange)="goToPage($event)" />
+      
     }
 
   </div>

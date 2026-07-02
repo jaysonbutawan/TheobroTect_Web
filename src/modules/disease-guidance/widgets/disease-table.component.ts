@@ -2,11 +2,12 @@ import { Component, Input, Output, EventEmitter, NgZone, ChangeDetectorRef, OnDe
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiseaseDto } from '../disease-guidance.dto';
+import { PaginationComponent } from '../../../app/shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-disease-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   template: `
   <div class="flex items-center justify-between mb-6 gap-3 flex-wrap">
   <div class="flex items-center gap-3 flex-wrap">
@@ -83,7 +84,7 @@ import { DiseaseDto } from '../disease-guidance.dto';
       </thead>
       <tbody class="divide-y divide-slate-100">
 
-        @for (disease of filteredRecords; track disease.id) {
+        @for (disease of pagedRecords; track disease.id) {
           <tr class="hover:bg-slate-50/80 transition-colors group">
 
             <td class="px-6 py-4">
@@ -180,46 +181,22 @@ import { DiseaseDto } from '../disease-guidance.dto';
     </table>
   </div>
 
-  <div class="px-6 py-4 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between">
-    <span class="text-sm text-slate-500">
-      Showing <span class="font-medium text-slate-900">{{ filteredRecords.length }}</span> of <span class="font-medium text-slate-900">{{ existingRecords.length }}</span> diseases
-    </span>
-
-    <div class="flex items-center gap-1">
-      <button
-        type="button"
-        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-200/50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
-        aria-label="Previous page"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-      </button>
-
-      <button
-        type="button"
-        class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-900 text-sm font-medium shadow-sm flex items-center justify-center"
-      >
-        1
-      </button>
-
-      <button
-        type="button"
-        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-200/50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
-        aria-label="Next page"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m9 18 6-6-6-6"/>
-        </svg>
-      </button>
-    </div>
-  </div>
+  <app-pagination
+    variant="compact"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageStart]="pageStart"
+    [pageEnd]="pageEnd"
+    [totalItems]="filteredRecords.length"
+    itemLabel="diseases"
+    (pageChange)="onPageChange($event)" />
 </div>
   `
 })
 export class DiseaseTableComponent implements OnDestroy {
   @Input() existingRecords: DiseaseDto[] = [];
   @Input() diseaseKeys: string[] = [];
+  @Input() pageSize = 10;
 
   @Output() view = new EventEmitter<DiseaseDto>();
   @Output() edit = new EventEmitter<DiseaseDto>();
@@ -227,6 +204,7 @@ export class DiseaseTableComponent implements OnDestroy {
 
   searchQuery: string = '';
   filterLocale: string = '';
+  currentPage = 1;
 
   pendingDeleteDisease: DiseaseDto | null = null;
   deleteToastVisible = false;
@@ -254,6 +232,30 @@ export class DiseaseTableComponent implements OnDestroy {
       const matchesLocale = !this.filterLocale || disease.disease_key === this.filterLocale;
       return matchesSearch && matchesLocale;
     });
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredRecords.length / this.pageSize));
+  }
+
+  get pageStart(): number {
+    return this.filteredRecords.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.filteredRecords.length);
+  }
+
+  get pagedRecords(): DiseaseDto[] {
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages; // clamp if filtering/deleting shrinks the list
+    }
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredRecords.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
   }
 
   formatLabel(key: string): string {
@@ -313,10 +315,10 @@ export class DiseaseTableComponent implements OnDestroy {
     this.deleteCountdown = 5;
   }
 
-
   public onFilterSelect(key: string): void {
     this.filterLocale = key;
     this.isFilterDropdownOpen = false;
+    this.currentPage = 1;
   }
 
   private clearTimers(): void {
