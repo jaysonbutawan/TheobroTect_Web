@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-transparent font-sans">
 
   @if (view === 'list') {
-  <div class="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+  <div class="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto select-none">
 
     <!-- ═══════════════════════════════════════════════
          Profile header — avatar photo, name, verified badge
@@ -223,7 +223,7 @@
      SCAN DETAIL MODAL (unchanged behaviour, restyled to match)
      ═══════════════════════════════════════════════════════════ -->
 @if (selectedScan) {
-<div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="closeDetail()">
+<div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 select-none" (click)="closeDetail()">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
     (click)="$event.stopPropagation()">
 

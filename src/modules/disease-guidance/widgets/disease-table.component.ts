@@ -9,7 +9,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
   standalone: true,
   imports: [CommonModule, FormsModule, PaginationComponent],
   template: `
-  <div class="flex items-center justify-between mb-6 gap-3 flex-wrap">
+  <div class="flex items-center justify-between mb-6 gap-3 flex-wrap select-none">
   <div class="flex items-center gap-3 flex-wrap">
     <div class="relative w-56 shrink-0">
       <button
