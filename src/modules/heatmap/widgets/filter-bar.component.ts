@@ -1,30 +1,22 @@
 import { Component, HostListener, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-// ─── Data Models ────────────────────────────────────────────────────────────
-
 export type DiseaseValue = 'all' | 'black pod' | 'cacao pod borer' | 'mealybug';
-
 export interface DiseaseOption {
   value: DiseaseValue;
   label: string;
 }
-
 export interface FilterState {
   year: number;
   month: number | null;
   disease: DiseaseValue;
 }
 
-// ─── Static Config ───────────────────────────────────────────────────────────
-
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ] as const;
 
-// Updated to match the specific text in your design
 const DISEASE_OPTIONS: DiseaseOption[] = [
 
   { value: 'all', label: 'All Diseases' },
@@ -43,8 +35,6 @@ const DEFAULT_FILTER: FilterState = {
   month: null,
   disease: 'all'
 };
-// ─── Component ───────────────────────────────────────────────────────────────
-
 @Component({
   selector: 'app-filter-bar',
   standalone: true,
@@ -206,28 +196,22 @@ const DEFAULT_FILTER: FilterState = {
 
 </div>`
 })
+
 export class FilterBarComponent implements OnInit {
 
   @Output() filterChange = new EventEmitter<FilterState>();
-
-  // ── Static Config ──────────────────────────────────────────────────────────
 
   readonly months = MONTHS;
   readonly minYear = MIN_YEAR;
   readonly maxYear = MAX_YEAR;
   readonly diseaseOptions = DISEASE_OPTIONS;
 
-  // ── State ──────────────────────────────────────────────────────────────────
-
-  /** Committed filter */
   appliedFilter: FilterState = { ...DEFAULT_FILTER };
 
-  // Date Panel State
   panelOpen = false;
   pendingYear = DEFAULT_FILTER.year;
   pendingMonth = DEFAULT_FILTER.month;
 
-  // Disease Panel State
   diseasePanelOpen = false;
   pendingDisease: DiseaseValue = DEFAULT_FILTER.disease;
   searchQuery = '';
@@ -235,7 +219,7 @@ export class FilterBarComponent implements OnInit {
   ngOnInit(): void {
     this.filterChange.emit(this.appliedFilter);
   }
-get triggerLabel(): string {
+  get triggerLabel(): string {
     if (this.appliedFilter.month !== null) {
       return `${MONTHS[this.appliedFilter.month]} ${this.appliedFilter.year}`;
     }
@@ -246,7 +230,6 @@ get triggerLabel(): string {
     return DISEASE_OPTIONS.find(o => o.value === this.appliedFilter.disease);
   }
 
-  /** Filters the disease list based on the search input */
   get filteredDiseaseOptions(): DiseaseOption[] {
     if (!this.searchQuery.trim()) return this.diseaseOptions;
 
@@ -256,10 +239,9 @@ get triggerLabel(): string {
     );
   }
 
-  // ── Date Panel Methods ─────────────────────────────────────────────────────
 
   togglePanel(): void {
-    this.closeDiseasePanel(); // close the other panel if open
+    this.closeDiseasePanel();
     this.panelOpen ? this.closePanel() : this.openPanel();
   }
 
@@ -289,7 +271,7 @@ get triggerLabel(): string {
 
 
   toggleDiseasePanel(): void {
-    this.closePanel(); // close the date panel if open
+    this.closePanel();
     this.diseasePanelOpen ? this.closeDiseasePanel() : this.openDiseasePanel();
   }
 
