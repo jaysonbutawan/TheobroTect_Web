@@ -6,8 +6,6 @@ import * as L from 'leaflet';
 import 'leaflet.heat';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { ScanDto } from '../dashboard/dashboard.dto';
-import { HeatmapSkeletonComponent } from '../../app/shared/skeletons/heatmap-skeleton/heatmap-skeleton';
-// Import the component and its exported interface
 import { FilterBarComponent, FilterState } from './widgets/filter-bar.component';
 
 interface Observation {
@@ -64,7 +62,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.initMap();
 
-    // Push the state changes to the next macro-task cycle
     setTimeout(() => {
       this.loadScans();
     }, 0);
@@ -78,7 +75,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initMap(): void {
-    // 1. Define your base styles
     const cleanView = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; CartoDB'
     });
@@ -88,24 +84,20 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       maxZoom: 20
     });
 
-    // 2. Initialize map with the detailed terrain view by default
     this.map = L.map('map', {
       center: [7.7512, 125.7231],
       zoom: 12,
       zoomControl: false,
-      layers: [detailedTerrain] // Default layer
+      layers: [detailedTerrain]
     });
 
-    // 3. Create a toggle control menu
     const baseMaps = {
       "Detailed Terrain": detailedTerrain,
       "Clean View": cleanView
     };
 
-    // Adds a tiny control button to the map interface
     L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
 
-    // Render your Sawata boundary lines
     this.drawBoundary();
   }
 
@@ -169,30 +161,27 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       [7.808920959985727, 125.64199646739989]
     ];
 
-    // 1. Bottom Layer: Solid Red Line
     L.polygon(boundaryCoords, {
-      color: '#dc2626',   // Deep red color
-      weight: 5,          // Thickness of the line
-      fillColor: '#000',  // Optional: darken the inside slightly
-      fillOpacity: 0.05,  // Very subtle inner fill
-      interactive: false  // Prevent it from blocking clicks on your markers
+      color: '#dc2626',
+      weight: 5,
+      fillColor: '#000',
+      fillOpacity: 0.05,
+      interactive: false
     }).addTo(this.map);
     L.polygon(boundaryCoords, {
-      color: '#ffffff',   // White color
-      weight: 5,          // Same thickness
-      dashArray: '10, 15', // 10px line, 15px gap
-      fill: false,        // No fill on the top layer
+      color: '#ffffff',
+      weight: 5,
+      dashArray: '10, 15',
+      fill: false,
       interactive: false
     }).addTo(this.map);
   }
 
   applyFilters(): void {
     if (!this.map) {
-      console.warn('⚠️ [HeatmapFilter] Map is not initialized yet. Skipping filter application.');
       return;
     }
 
-    // 1. Clear previous map layers
     this.map.eachLayer((layer) => {
       if (
         layer instanceof (L as any).HeatLayer ||
@@ -204,24 +193,26 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    const monthString = String(this.activeFilter.month + 1).padStart(2, '0');
-    const targetYearMonth = `${this.activeFilter.year}-${monthString}`;
+    const targetYearStr = String(this.activeFilter.year);
+    const isMonthFilterActive =
+      this.activeFilter.month !== undefined &&
+      this.activeFilter.month !== null &&
+      this.activeFilter.month !== -1;
 
-    console.log(`%c🔍 [HeatmapFilter] Applying Criteria: ${targetYearMonth} | Disease: "${this.activeFilter.disease}"`, 'color: #0f172a; font-weight: bold; background: #f1f5f9; padding: 4px 8px; border-radius: 4px;');
-    console.log(`📊 Total scans available in memory: ${this.allScans.length}`);
+    let dateMatchPrefix = targetYearStr;
+    if (isMonthFilterActive && this.activeFilter.month !== null) {
+      const monthString = String(this.activeFilter.month + 1).padStart(2, '0');
+      dateMatchPrefix = `${targetYearStr}-${monthString}`;
+    }
 
-    // Counters for logging diagnostics
     let dateMatchesCount = 0;
     const uniqueDiseasesInSelectedPeriod: { [key: string]: number } = {};
 
-    // 3. Execute filtering loop
     const filteredData = this.allScans.filter(scan => {
-      // Check if scan string exists and matches YYYY-MM prefix
-      const matchesDate = !!scan.created_at?.startsWith(targetYearMonth);
+      const matchesDate = !!scan.created_at?.startsWith(dateMatchPrefix);
 
       if (matchesDate) {
         dateMatchesCount++;
-        // Keep track of what diseases actually exist inside this month/year window
         const dKey = (scan.disease_key || 'unknown').toLowerCase();
         uniqueDiseasesInSelectedPeriod[dKey] = (uniqueDiseasesInSelectedPeriod[dKey] || 0) + 1;
       }
@@ -233,19 +224,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       return matchesDate && matchesDisease;
     });
 
-    // 4. Print Summary to the Console
-    console.group(`📈 Filter Results for ${targetYearMonth}`);
-    console.log(`📅 Scans matching the date [${targetYearMonth}]: ${dateMatchesCount}`);
-    console.log(`🎯 Scans matching BOTH Date and Disease ["${this.activeFilter.disease}"]: ${filteredData.length}`);
-
-    if (dateMatchesCount > 0) {
-      console.log('🦠 Distribution of all diseases found in this specific period:', uniqueDiseasesInSelectedPeriod);
-    } else if (this.allScans.length > 0) {
-      console.warn(`⚠️ Zero scans matched "${targetYearMonth}". Here is a sample "created_at" value from your API data to check formatting:`, this.allScans[0]?.created_at);
-    }
     console.groupEnd();
-
-    // 5. Render to map
     this.plotMarkers(filteredData);
   }
 
@@ -257,10 +236,8 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const lat = Number(scan.location_lat);
       const lng = Number(scan.location_lng);
-
       const diseaseKey = (scan.disease_key || '').toLowerCase();
       const severity = (scan.severity_key || 'mild').toLowerCase();
-
       let intensity = 0.4;
 
       if (diseaseKey.includes('healthy')) {
@@ -286,7 +263,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       heatPoints.push([lat, lng, intensity, diseaseKey]);
     });
 
-    // --- Healthy layer (green) ---
     const healthyPoints = heatPoints
       .filter(p => p[2] !== undefined && (p[3] as string).includes('healthy'))
       .map(p => [p[0], p[1], p[2]]);
@@ -306,7 +282,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       }).addTo(this.map);
     }
 
-    // --- Mealybug layer (dark blue → faded blue) ---
     const mealybugPoints = heatPoints
       .filter(p => (p[3] as string).includes('mealybug'))
       .map(p => [p[0], p[1], p[2]]);
@@ -325,28 +300,46 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }).addTo(this.map);
     }
+    // Helper function to determine the heat intensity based on severity keywords in your point data
+    const getSeverityWeight = (p: any[]): number => {
+      // Serializes the point data to safely search for severity keywords regardless of which index they are in
+      const pointDataStr = JSON.stringify(p).toLowerCase();
 
-    // --- Black Pod layer (dark red → light red) ---
+      if (pointDataStr.includes('severe')) {
+        return 1.0;  // Thick, deep red
+      } else if (pointDataStr.includes('moderate')) {
+        return 0.6;  // Standard solid red
+      } else if (pointDataStr.includes('mild')) {
+        return 0.25; // Faint, translucent red
+      }
+
+      // Fallback to the original weight (p[2]) if no explicit severity is found
+      return typeof p[2] === 'number' ? p[2] : 0.5;
+    };
+
     const blackPodPoints = heatPoints
-      .filter(p => (p[3] as string).includes('black pod') || (p[3] as string).includes('blackpod'))
-      .map(p => [p[0], p[1], p[2]]);
+      .filter(p => (p[3] as string).toLowerCase().includes('black pod') || (p[3] as string).toLowerCase().includes('blackpod'))
+      .map(p => {
+        const lat = p[0];
+        const lng = p[1];
+        const weight = getSeverityWeight(p);
+        return [lat, lng, weight];
+      });
 
     if (blackPodPoints.length) {
       (L as any).heatLayer(blackPodPoints, {
         radius: 50,
         blur: 25,
         max: 1.0,
-        minOpacity: 0.45,
+        minOpacity: 0.40,
         gradient: {
-          0.2: '#fecaca',
-          0.5: '#f87171',
-          0.8: '#dc2626',
-          1.0: '#7f1d1d'
+          0.25: '#fca5a5', // Mild: soft pinkish-red (Tailwind Red 300)
+          0.60: '#ef4444', // Moderate: clear, vibrant red (Tailwind Red 500)
+          1.00: '#7f1d1d'  // Severe: very thick, dark blood-red (Tailwind Red 900)
         }
       }).addTo(this.map);
     }
 
-    // --- Pod Borer layer (yellow) ---
     const podBorerPoints = heatPoints
       .filter(p => (p[3] as string).includes('pod borer') || (p[3] as string).includes('podborer'))
       .map(p => [p[0], p[1], p[2]]);
@@ -366,7 +359,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       }).addTo(this.map);
     }
 
-    // --- Other / fallback diseases (blue, same as mealybug) ---
     const otherPoints = heatPoints
       .filter(p => {
         const d = p[3] as string;
@@ -394,7 +386,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       }).addTo(this.map);
     }
 
-    // --- Plot clickable ghost markers on top of all heat layers ---
     scans.forEach(scan => {
       if (!scan.location_lat || !scan.location_lng) return;
       this.addClickableMarker(

@@ -13,7 +13,7 @@ export interface DiseaseOption {
 
 export interface FilterState {
   year: number;
-  month: number;
+  month: number | null;
   disease: DiseaseValue;
 }
 
@@ -40,7 +40,7 @@ const now = new Date();
 
 const DEFAULT_FILTER: FilterState = {
   year: now.getFullYear(),
-  month: now.getMonth(),
+  month: null,
   disease: 'all'
 };
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -235,8 +235,11 @@ export class FilterBarComponent implements OnInit {
   ngOnInit(): void {
     this.filterChange.emit(this.appliedFilter);
   }
-  get triggerLabel(): string {
-    return `${MONTHS[this.appliedFilter.month]} ${this.appliedFilter.year}`;
+get triggerLabel(): string {
+    if (this.appliedFilter.month !== null) {
+      return `${MONTHS[this.appliedFilter.month]} ${this.appliedFilter.year}`;
+    }
+    return `${this.appliedFilter.year}`;
   }
 
   get activeDisease(): DiseaseOption | undefined {
