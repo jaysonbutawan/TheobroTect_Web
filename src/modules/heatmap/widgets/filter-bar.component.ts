@@ -43,7 +43,9 @@ const DEFAULT_FILTER: FilterState = {
 
   <div class="relative" (clickOutside)="closePanel()">
     <button
-      class="flex items-center gap-[7px] px-[14px] py-[9px] bg-white border border-slate-200 rounded-[10px] cursor-pointer text-[13px] font-medium text-slate-900 transition-all duration-150 whitespace-nowrap select-none leading-none hover:bg-slate-50 hover:border-slate-300"
+      aria-label="Filter by period: {{ triggerLabel }}"
+      title="Filter by period: {{ triggerLabel }}"
+      class="flex items-center gap-[7px] px-[10px] sm:px-[14px] py-[9px] bg-white border border-slate-200 rounded-[10px] cursor-pointer text-[13px] font-medium text-slate-900 transition-all duration-150 whitespace-nowrap select-none leading-none hover:bg-slate-50 hover:border-slate-300"
       [class.border-slate-900]="panelOpen"
       [class.shadow-[0_0_0_3px_rgba(15,23,42,0.06)]]="panelOpen"
       (click)="togglePanel()"
@@ -51,9 +53,9 @@ const DEFAULT_FILTER: FilterState = {
       <svg class="w-[15px] h-[15px] text-slate-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
       </svg>
-      <span class="text-slate-400 font-normal">Period:</span>
-      <span>{{ triggerLabel }}</span>
-      <svg class="w-[13px] h-[13px] text-slate-400 transition-transform duration-200" [class.rotate-180]="panelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="hidden sm:inline text-slate-400 font-normal">Period:</span>
+      <span class="hidden sm:inline">{{ triggerLabel }}</span>
+      <svg class="hidden sm:block w-[13px] h-[13px] text-slate-400 transition-transform duration-200" [class.rotate-180]="panelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
 
     @if (panelOpen) {
@@ -93,28 +95,30 @@ const DEFAULT_FILTER: FilterState = {
   <div class="relative" (clickOutside)="closeDiseasePanel()">
 
     <button
-      class="flex items-center gap-[7px] px-[14px] py-[9px] bg-white border border-slate-200 rounded-[10px] cursor-pointer text-[13px] font-medium text-slate-900 transition-all duration-150 whitespace-nowrap select-none leading-none hover:bg-slate-50 hover:border-slate-300"
+      aria-label="Filter by disease: {{ activeDisease?.label || 'Select Disease' }}"
+      title="Filter by disease: {{ activeDisease?.label || 'Select Disease' }}"
+      class="flex items-center gap-[7px] px-[10px] sm:px-[14px] py-[9px] bg-white border border-slate-200 rounded-[10px] cursor-pointer text-[13px] font-medium text-slate-900 transition-all duration-150 whitespace-nowrap select-none leading-none hover:bg-slate-50 hover:border-slate-300"
       [class.border-slate-900]="diseasePanelOpen"
       [class.shadow-[0_0_0_3px_rgba(15,23,42,0.06)]]="diseasePanelOpen"
       (click)="toggleDiseasePanel()"
     >
-      <svg class="w-[14px] h-[14px] text-slate-400 flex-shrink-0" [class.text-slate-900]="diseasePanelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="w-[15px] h-[15px] text-slate-400 flex-shrink-0" [class.text-slate-900]="diseasePanelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      <span>{{ activeDisease?.label || 'Select Disease' }}</span>
-      <svg class="w-[13px] h-[13px] text-slate-400 transition-transform duration-200" [class.rotate-180]="diseasePanelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="hidden sm:inline">{{ activeDisease?.label || 'Select Disease' }}</span>
+      <svg class="hidden sm:block w-[13px] h-[13px] text-slate-400 transition-transform duration-200" [class.rotate-180]="diseasePanelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
 
     @if (diseasePanelOpen) {
       <div class="hidden max-[480px]:block fixed inset-0 bg-slate-900/35 z-[199]" (click)="closeDiseasePanel()"></div>
-      <div class="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white border border-slate-200 rounded-[12px] p-0 w-[340px] shadow-[0_10px_35px_rgba(15,23,42,0.12)] flex flex-col max-[480px]:fixed max-[480px]:top-auto max-[480px]:bottom-0 max-[480px]:left-0 max-[480px]:right-0 max-[480px]:w-full max-[480px]:rounded-t-[18px]">
+      <div class="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white border border-slate-200 rounded-[12px] p-0 w-[300px] sm:w-[340px] shadow-[0_10px_35px_rgba(15,23,42,0.12)] flex flex-col max-[480px]:fixed max-[480px]:top-auto max-[480px]:bottom-0 max-[480px]:left-0 max-[480px]:right-0 max-[480px]:w-full max-[480px]:rounded-t-[18px]">
 
         <div class="flex items-start justify-between p-4 pb-3 border-b border-slate-100">
           <div>
             <h3 class="text-[15px] font-semibold text-slate-900 leading-tight">Disease Filter</h3>
             <p class="text-[12px] text-slate-500 mt-0.5">Select specific diseases for reporting</p>
           </div>
-          <button class="text-slate-400 hover:text-slate-700 transition-colors" (click)="closeDiseasePanel()">
+          <button aria-label="Close" class="text-slate-400 hover:text-slate-700 transition-colors" (click)="closeDiseasePanel()">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
@@ -178,20 +182,26 @@ const DEFAULT_FILTER: FilterState = {
   </div>
 
   @if (activeDisease && activeDisease.value !== 'all') {
-    <span class="inline-flex items-center gap-[6px] px-[11px] py-[5px] bg-green-50 border border-green-200 rounded-full text-[12px] font-medium text-green-700">
+    <span
+      aria-label="Active filter: {{ activeDisease.label }}"
+      title="Active filter: {{ activeDisease.label }}"
+      class="inline-flex items-center gap-[6px] px-[9px] sm:px-[11px] py-[5px] bg-green-50 border border-green-200 rounded-full text-[12px] font-medium text-green-700"
+    >
       <span class="w-[6px] h-[6px] rounded-full bg-green-500 flex-shrink-0"></span>
-      {{ activeDisease.label }}
+      <span class="hidden sm:inline">{{ activeDisease.label }}</span>
     </span>
   }
 
   <button
-    class="flex items-center gap-[6px] px-[14px] py-[9px] bg-slate-50 border border-slate-200 rounded-[10px] text-[13px] font-medium text-slate-500 cursor-pointer transition-all hover:bg-white hover:text-slate-900"
+    aria-label="Reset filters"
+    title="Reset filters"
+    class="flex items-center gap-[6px] px-[10px] sm:px-[14px] py-[9px] bg-slate-50 border border-slate-200 rounded-[10px] text-[13px] font-medium text-slate-500 cursor-pointer transition-all hover:bg-white hover:text-slate-900"
     (click)="resetFilters()"
   >
     <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
     </svg>
-    Reset
+    <span class="hidden sm:inline">Reset</span>
   </button>
 
 </div>`

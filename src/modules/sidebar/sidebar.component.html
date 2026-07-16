@@ -1,34 +1,43 @@
+@if (!isCollapsed) {
+  <div
+    (click)="toggleSidebar()"
+    class="fixed inset-0 z-40 bg-white/20 backdrop-blur-md border-r border-white/40 md:hidden transition-all duration-500"
+  ></div>
+}
+
 <aside
-  [class.w-[280px]]="!isCollapsed"
-  [class.w-[90px]]="isCollapsed"
-  class="h-full flex flex-col py-8 px-5 bg-white/50 backdrop-blur-2xl border-r border-white/80 shadow-[8px_0_48px_rgba(0,0,0,0.02)] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] overflow-x-hidden relative z-10"
+  [class.w-[260px]]="!isCollapsed"
+  [class.md:w-[280px]]="!isCollapsed"
+  [class.w-[76px]]="isCollapsed"
+  [class.md:w-[90px]]="isCollapsed"
+  class="absolute md:relative inset-y-0 left-0 z-50 h-[100dvh] md:h-full flex flex-col py-6 md:py-8 px-3 md:px-5 bg-white/70 md:bg-white/50 backdrop-blur-2xl border-r border-white/80 shadow-[12px_0_48px_rgba(0,0,0,0.05)] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] overflow-x-hidden"
 >
   <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-green-100/40 to-transparent pointer-events-none -z-10"></div>
 
   <div
     (click)="toggleSidebar()"
-    class="flex items-center gap-4 mb-12 px-1 group cursor-pointer justify-start relative"
+    class="flex items-center gap-3 md:gap-4 mb-10 md:mb-12 px-1 group cursor-pointer justify-start relative"
   >
-    <div class="absolute inset-0 w-16 h-16 bg-green-200/40 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+    <div class="absolute inset-0 w-14 h-14 md:w-16 md:h-16 bg-green-200/40 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
 
     <div
-      class="relative flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-2xl bg-white/70 shadow-[inset_0_2px_4px_rgba(255,255,255,1),0_4px_12px_rgba(0,0,0,0.03)] border border-white/60 transition-all duration-500 ease-out group-hover:scale-105 group-hover:shadow-[inset_0_2px_4px_rgba(255,255,255,1),0_12px_24px_rgba(34,197,94,0.15)]"
+      class="relative flex-shrink-0 w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl bg-white/70 shadow-[inset_0_2px_4px_rgba(255,255,255,1),0_4px_12px_rgba(0,0,0,0.03)] border border-white/60 transition-all duration-500 ease-out group-hover:scale-105 group-hover:shadow-[inset_0_2px_4px_rgba(255,255,255,1),0_12px_24px_rgba(34,197,94,0.15)]"
     >
       <img
         src="assets/images/theobrotect_logo.png"
         alt="Theobrotect Logo"
-        class="w-8 h-8 object-contain transition-all duration-500 drop-shadow-sm"
+        class="w-7 h-7 md:w-8 md:h-8 object-contain transition-all duration-500 drop-shadow-sm"
       />
     </div>
 
     @if (!isCollapsed) {
-      <span class="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-slate-800 to-slate-500 whitespace-nowrap transition-all duration-500">
+      <span class="font-extrabold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-slate-800 to-slate-500 whitespace-nowrap transition-all duration-500">
         Theobrotect
       </span>
     }
   </div>
 
-  <nav class="flex-1 space-y-2">
+  <nav class="flex-1 space-y-1.5 md:space-y-2">
     @for (item of navItems; track item.link) {
       <ng-container
         *ngTemplateOutlet="
@@ -45,15 +54,15 @@
     }
   </nav>
 
-  <div class="mt-auto pt-6 border-t border-slate-200/50 space-y-2 relative">
+  <div class="mt-auto pt-5 md:pt-6 border-t border-slate-200/50 space-y-1.5 md:space-y-2 relative">
     <a
       routerLink="/settings"
       routerLinkActive="active bg-gradient-to-tr from-green-600 to-green-500 text-white shadow-[0_8px_24px_-8px_rgba(34,197,94,0.5)] border-transparent"
-      class="group relative flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-500 font-semibold text-sm tracking-wide transition-all duration-300 border border-transparent hover:bg-white/80 hover:text-green-700 hover:shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_2px_4px_rgba(255,255,255,1)] hover:border-white/80 overflow-hidden"
+      class="group relative flex items-center gap-3 md:gap-4 px-3 md:px-4 py-3 md:py-3.5 rounded-2xl text-slate-500 font-semibold text-sm tracking-wide transition-all duration-300 border border-transparent hover:bg-white/80 hover:text-green-700 hover:shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_2px_4px_rgba(255,255,255,1)] hover:border-white/80 overflow-hidden"
       [title]="isCollapsed ? 'Settings' : ''"
     >
       <div class="relative w-6 flex justify-center shrink-0 z-10">
-        <i class="pi pi-cog text-xl transition-all duration-500 group-hover:rotate-90 group-[.active]:drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]"></i>
+        <i class="pi pi-cog text-lg md:text-xl transition-all duration-500 group-hover:rotate-90 group-[.active]:drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]"></i>
       </div>
       @if (!isCollapsed) {
         <span class="relative whitespace-nowrap z-10 transition-transform duration-300 group-hover:translate-x-1">Settings</span>
@@ -61,11 +70,11 @@
     </a>
 
     <button
-      class="group relative flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-400 font-semibold text-sm tracking-wide transition-all duration-300 border border-transparent hover:bg-red-50/80 hover:text-red-500 hover:shadow-[0_4px_16px_rgba(239,68,68,0.05),inset_0_2px_4px_rgba(255,255,255,1)] hover:border-red-100 w-full text-left overflow-hidden"
+      class="group relative flex items-center gap-3 md:gap-4 px-3 md:px-4 py-3 md:py-3.5 rounded-2xl text-slate-400 font-semibold text-sm tracking-wide transition-all duration-300 border border-transparent hover:bg-red-50/80 hover:text-red-500 hover:shadow-[0_4px_16px_rgba(239,68,68,0.05),inset_0_2px_4px_rgba(255,255,255,1)] hover:border-red-100 w-full text-left overflow-hidden"
       [title]="isCollapsed ? 'Sign Out' : ''"
     >
       <div class="relative w-6 flex justify-center shrink-0 z-10">
-        <i class="pi pi-sign-out text-xl transition-transform duration-300 ease-out group-hover:translate-x-1"></i>
+        <i class="pi pi-sign-out text-lg md:text-xl transition-transform duration-300 ease-out group-hover:translate-x-1"></i>
       </div>
       @if (!isCollapsed) {
         <span class="relative whitespace-nowrap z-10 transition-transform duration-300 group-hover:translate-x-1">Sign Out</span>
@@ -91,7 +100,7 @@
       fragment: 'ignored',
     }"
     routerLinkActive="active bg-gradient-to-tr from-green-600 to-green-500 text-white shadow-[0_8px_24px_-8px_rgba(34,197,94,0.6)] border-transparent"
-    class="group relative flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-500 font-semibold text-sm tracking-wide transition-all duration-300 border border-transparent hover:bg-white/80 hover:text-green-700 hover:shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_2px_4px_rgba(255,255,255,1)] hover:border-white overflow-hidden"
+    class="group relative flex items-center gap-3 md:gap-4 px-3 md:px-4 py-3 md:py-3.5 rounded-2xl text-slate-500 font-semibold text-sm tracking-wide transition-all duration-300 border border-transparent hover:bg-white/80 hover:text-green-700 hover:shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_2px_4px_rgba(255,255,255,1)] hover:border-white overflow-hidden"
     [title]="collapsed ? label : ''"
   >
     <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-0 bg-white rounded-r-full opacity-0 group-[.active]:opacity-100 group-[.active]:h-3/5 shadow-[0_0_12px_rgba(255,255,255,0.9)] transition-all duration-300 ease-out z-20"></div>
@@ -101,7 +110,7 @@
     <div class="relative w-6 flex justify-center shrink-0 z-10">
       <i
         [class]="icon"
-        class="text-xl transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5 group-[.active]:drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+        class="text-lg md:text-xl transition-all duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5 group-[.active]:drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
       ></i>
     </div>
 

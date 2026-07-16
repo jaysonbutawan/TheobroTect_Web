@@ -260,6 +260,8 @@ export class HeatmapMapService {
     [7.808920959985727, 125.64199646739989]
   ];
 
+  private resizeObserver?: ResizeObserver;
+
   initMap(containerId: string): void {
     const streetsAndBuildings = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
       attribution: '&copy; Google Maps',
@@ -276,14 +278,16 @@ export class HeatmapMapService {
       maxZoom: 20
     });
 
-    const mapBounds = L.latLngBounds(this.boundaryCoords);
+    // Pad the bounds so users can pan slightly past the polygon edge —
+    // keeps heatmap points near the boundary from feeling clipped/stuck.
+    const mapBounds = L.latLngBounds(this.boundaryCoords).pad(0.15);
 
     this.map = L.map(containerId, {
       center: [7.7512, 125.7231],
       zoom: 14,
       minZoom: 11,
       maxBounds: mapBounds,
-      maxBoundsViscosity: 1.0,
+      maxBoundsViscosity: 0.8, // softer resistance instead of a hard wall
       zoomControl: false,
       layers: [streetsAndBuildings]
     });
@@ -297,8 +301,27 @@ export class HeatmapMapService {
     L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
 
     this.drawBoundary();
+
+    // Leaflet doesn't know the container resized (e.g. clamp()-based
+    // height, orientation change, sidebar toggle) unless told explicitly.
+    this.observeResize(containerId);
   }
+
+  private observeResize(containerId: string): void {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    this.resizeObserver = new ResizeObserver(() => {
+      // invalidateSize recalculates tile layout + re-centers correctly
+      // after the container's actual pixel size changes.
+      this.map?.invalidateSize({ animate: false });
+    });
+
+    this.resizeObserver.observe(container);
+  }
+
   destroyMap(): void {
+    this.resizeObserver?.disconnect();
     if (this.map) this.map.remove();
   }
 
