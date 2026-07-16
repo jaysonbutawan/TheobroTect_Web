@@ -1,57 +1,64 @@
-<div class="flex min-h-screen bg-[#F5FAF3] text-white overflow-x-hidden">
-
+<div class="flex min-h-screen bg-[#F5FAF3] text-slate-800 overflow-x-hidden">
   <app-sidebar
     [isCollapsed]="sideCollapsed"
     (collapseChanged)="sideCollapsed = $event"
-    [class.w-64]="!sideCollapsed"
-    [class.w-[90px]]="sideCollapsed"
-    class="hidden md:flex h-screen fixed left-0 top-0 shrink-0 z-20 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
+    [style.width.px]="sideCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH"
+    class="hidden md:flex h-screen fixed left-0 top-0 shrink-0 z-20 overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"
+  >
   </app-sidebar>
 
   <main
-    [class.md:ml-64]="!sideCollapsed"
-    [class.md:ml-[90px]]="sideCollapsed"
-    class="flex-1 flex flex-col min-w-0 ml-0 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
+    [style.--sbw.px]="sideCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH"
+    class="flex-1 flex flex-col min-w-0 ml-0 md:ml-[var(--sbw)] transition-[margin] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"
+  >
+    <header class="md:hidden flex h-16 border-b border-slate-200/60 items-center justify-between px-4 bg-[#F5FAF3]/95 backdrop-blur sticky top-0 z-30">
 
-    <header
-      class="md:hidden flex h-16 border-b border-white/5 items-center justify-between px-6 bg-[#F5FAF3] sticky top-0 z-30"
-    >
       <button
         (click)="toggleMobileMenu()"
         type="button"
-        aria-label="Toggle Button"
-        class="p-2 text-green-500 hover:text-green-400 active:scale-95 transition-transform"
+        aria-label="Open menu"
+        class="p-2 -ml-2 text-slate-600 hover:text-green-600 active:scale-95 transition-transform"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="6" x2="21" y2="6" />
           <line x1="3" y1="12" x2="21" y2="12" />
           <line x1="3" y1="18" x2="21" y2="18" />
         </svg>
       </button>
+
+      <div class="flex items-center gap-2.5">
+        <img src="assets/images/theobrotect_logo.png" alt="Theobrotect" class="w-8 h-8 object-contain" />
+      </div>
+
     </header>
 
-    <div class="p-4 md:p-10 lg:p-14">
+    <div class="p-4 sm:p-6 lg:p-10">
       <router-outlet></router-outlet>
     </div>
   </main>
 
   @if (isMobileMenuOpen) {
     <div class="fixed inset-0 z-[100] md:hidden">
-      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300" (click)="toggleMobileMenu()"></div>
+      <div
+        class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+        (click)="closeMenu()"
+      ></div>
 
-      <div class="absolute inset-y-0 left-0 w-72 bg-white shadow-2xl animate-in slide-in-from-left duration-300 border-r border-white/5">
+      <div class="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-white shadow-2xl animate-in slide-in-from-left duration-300 border-r border-slate-100">
+
         <button
-          (click)="toggleMobileMenu()"
+          (click)="closeMenu()"
           type="button"
           aria-label="Close menu"
-          class="absolute top-4 right-4 z-50 text-green-500 hover:text-green-400 active:scale-95 transition-transform p-2"
+          class="absolute top-4 right-4 z-50 text-slate-400 hover:text-red-500 active:scale-95 transition-transform p-2 bg-white/50 rounded-lg"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-        <app-sidebar [isCollapsed]="false" class="w-full h-full"></app-sidebar>
+
+        <app-sidebar [isCollapsed]="false" class="block w-full h-full" (click)="closeMenu()"></app-sidebar>
       </div>
     </div>
   }
@@ -63,9 +70,9 @@
         [type]="toast.type"
         [title]="toast.title"
         [message]="toast.message"
-        (closeToast)="toastService.hide()">
+        (closeToast)="toastService.hide()"
+      >
       </app-toast-notification>
     </div>
   }
-
 </div>
