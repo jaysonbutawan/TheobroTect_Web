@@ -14,6 +14,10 @@ export class LineChartComponent implements OnChanges {
   @Input({ required: true }) chartData!: ChartConfiguration<'line'>['data'];
   @Output() yearSelected = new EventEmitter<string>();
 
+    years: string[] = ['2026', '2025', '2024'];
+  selectedYear: string = '2026';
+  isYearDropdownOpen: boolean = false;
+
 
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -60,8 +64,17 @@ export class LineChartComponent implements OnChanges {
     console.log(this.chartData);
   }
 
-  onYearChange(event: Event): void {
-    const selectElement = event.target as HTMLSelectElement;
-    this.yearSelected.emit(selectElement.value);
+   toggleYearDropdown(): void {
+    this.isYearDropdownOpen = !this.isYearDropdownOpen;
+  }
+
+  closeYearDropdown(): void {
+    this.isYearDropdownOpen = false;
+  }
+
+  selectYear(year: string): void {
+    this.selectedYear = year;
+    this.isYearDropdownOpen = false;
+    this.yearSelected.emit(year);
   }
 }
