@@ -6,19 +6,19 @@
 >
 </app-disease-view-modal>
 
-<div class="flex flex-col h-screen w-full m-0 p-0 overflow-hidden bg-slate-50/50 select-none">
+<div class="flex flex-col h-screen w-full m-0 p-0 overflow-hidden bg-transparent select-none">
   <div
-    class="flex items-start gap-4 px-5 md:px-8 py-5 border-b border-white/60 bg-white/40 flex-shrink-0 z-30"
+    class="flex flex-col sm:flex-row sm:items-start gap-4 px-4 sm:px-5 md:px-8 py-5 bg-[#f8fafc] shadow-[0_4px_16px_rgba(0,0,0,0.03)] flex-shrink-0 z-30"
   >
     <div class="flex-1 min-w-0">
-      <p class="text-sm text-slate-500 mt-0.5 font-medium">
+      <p class="text-sm text-slate-500 font-medium">
         Configure detection labels, monitoring logic, and severity-based guidance. Filipino fields
         auto-translate as you type.
       </p>
     </div>
-    <div class="flex items-center gap-3 flex-shrink-0">
+    <div class="flex flex-wrap items-center gap-3 flex-shrink-0">
       <span
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-700 text-xs font-semibold border border-violet-500/20 shadow-sm"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f1f5f9] text-violet-700 text-xs font-bold shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)]"
       >
         <svg
           width="12"
@@ -41,11 +41,11 @@
       <button
         type="button"
         (click)="onToggleView()"
-        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm transition-all duration-300"
+        class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black transition-all duration-300 active:scale-95"
         [ngClass]="
           showAddedDiseases
-            ? 'bg-green-500 text-white border-green-500 shadow-green-500/20'
-            : 'bg-white/60 text-slate-600 border-slate-200 hover:border-green-400 hover:text-green-600'
+            ? 'bg-[#3D683A] text-white shadow-[3px_3px_8px_rgba(61,104,58,0.35)]'
+            : 'bg-[#f1f5f9] text-slate-500 shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-[#3D683A]'
         "
       >
         @if (showAddedDiseases) {
@@ -81,17 +81,17 @@
 
   @if (!showAddedDiseases) {
     <div class="flex flex-1 overflow-hidden">
-      <div class="flex-1 w-full h-full bg-white/70 backdrop-blur-xl overflow-y-auto flex flex-col">
+      <div class="flex-1 w-full h-full bg-transparent overflow-y-auto flex flex-col">
         <div
-          class="px-4 md:px-10 py-5 bg-white/30 backdrop-blur-md border-b border-slate-200/40 shadow-[0_4px_20px_rgba(0,0,0,0.01)] sticky top-0 z-20"
+          class="px-4 md:px-10 py-5 bg-[#f8fafc] shadow-[0_4px_16px_rgba(0,0,0,0.02)] sticky top-0 z-20"
         >
           @if (currentEditId) {
             <div
-              class="max-w-4xl mx-auto mb-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border border-emerald-100 rounded-2xl px-4 py-3 shadow-sm ring-1 ring-black/5"
+              class="max-w-4xl mx-auto mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#f1f5f9] rounded-2xl px-4 py-3 shadow-[3px_3px_8px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)]"
             >
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-3 min-w-0">
                 <div
-                  class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-100 to-green-50 border border-emerald-200/50 flex items-center justify-center text-emerald-600 shadow-inner"
+                  class="w-9 h-9 rounded-full bg-[#e6efe5] flex items-center justify-center text-[#3D683A] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.06),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] flex-shrink-0"
                 >
                   <svg
                     width="16"
@@ -107,28 +107,28 @@
                     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
                   </svg>
                 </div>
-                <div class="flex flex-col justify-center">
+                <div class="flex flex-col justify-center min-w-0">
                   <span
-                    class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-0.5 flex items-center gap-1.5"
+                    class="text-[10px] font-black text-[#3D683A] uppercase tracking-widest mb-0.5 flex items-center gap-1.5"
                   >
                     <span class="relative flex h-1.5 w-1.5">
                       <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3D683A] opacity-75"
                       ></span>
                       <span
-                        class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"
+                        class="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#3D683A]"
                       ></span>
                     </span>
                     Editing Mode
                   </span>
-                  <h3 class="text-sm font-bold text-slate-800 leading-none">
+                  <h3 class="text-sm font-black text-slate-800 leading-none truncate">
                     {{ form.get('nameEn')?.value || 'Loading disease details...' }}
                   </h3>
                 </div>
               </div>
-              <div class="hidden sm:flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-shrink-0">
                 <span
-                  class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase bg-slate-100 text-slate-500 border border-slate-200"
+                  class="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase bg-[#e2e8f0] text-slate-500 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]"
                 >
                   Key: {{ selectedDiseaseKey || 'N/A' }}
                 </span>
@@ -143,11 +143,11 @@
               class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 group focus:outline-none z-10 transition-all duration-300"
             >
               <div
-                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
+                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black tracking-wider transition-all duration-500 ease-out"
                 [ngClass]="{
-                  'bg-gradient-to-tr from-green-500 to-emerald-400 text-white border-transparent shadow-[0_4px_12px_rgba(16,185,129,0.3)] scale-110':
+                  'bg-[#3D683A] text-white shadow-[0_4px_12px_rgba(61,104,58,0.35)] scale-110':
                     currentStep === 1,
-                  'bg-white/80 text-green-600 border-green-200 shadow-sm': currentStep > 1,
+                  'bg-[#f1f5f9] text-[#3D683A] shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)]': currentStep > 1,
                 }"
               >
                 @if (currentStep > 1) {
@@ -157,10 +157,10 @@
                 }
               </div>
               <span
-                class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
+                class="text-[10px] md:text-xs font-bold tracking-wide transition-colors duration-300 text-center sm:text-left"
                 [ngClass]="{
-                  'text-slate-800 font-bold': currentStep === 1,
-                  'text-green-600': currentStep > 1,
+                  'text-slate-800 font-black': currentStep === 1,
+                  'text-[#3D683A]': currentStep > 1,
                 }"
               >
                 General Info
@@ -168,10 +168,10 @@
             </button>
 
             <div
-              class="flex-1 h-[3px] bg-slate-200/50 rounded-full mx-2 md:mx-4 overflow-hidden relative"
+              class="flex-1 h-[3px] bg-[#e2e8f0] rounded-full mx-2 md:mx-4 overflow-hidden relative"
             >
               <div
-                class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500 ease-out rounded-full"
+                class="absolute top-0 left-0 h-full bg-[#3D683A] transition-all duration-500 ease-out rounded-full"
                 [style.width.%]="currentStep > 1 ? 100 : 0"
               ></div>
             </div>
@@ -185,12 +185,12 @@
               [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
             >
               <div
-                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
+                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black tracking-wider transition-all duration-500 ease-out"
                 [ngClass]="{
-                  'bg-gradient-to-tr from-green-500 to-emerald-400 text-white border-transparent shadow-[0_4px_12px_rgba(16,185,129,0.3)] scale-110':
+                  'bg-[#3D683A] text-white shadow-[0_4px_12px_rgba(61,104,58,0.35)] scale-110':
                     currentStep === 2,
-                  'bg-white/80 text-green-600 border-green-200 shadow-sm': currentStep > 2,
-                  'bg-white/60 text-slate-400 border-slate-200': currentStep < 2,
+                  'bg-[#f1f5f9] text-[#3D683A] shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)]': currentStep > 2,
+                  'bg-[#f1f5f9] text-slate-400 shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)]': currentStep < 2,
                 }"
               >
                 @if (currentStep > 2) {
@@ -202,10 +202,10 @@
                 }
               </div>
               <span
-                class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
+                class="text-[10px] md:text-xs font-bold tracking-wide transition-colors duration-300 text-center sm:text-left"
                 [ngClass]="{
-                  'text-slate-800 font-bold': currentStep === 2,
-                  'text-green-600': currentStep > 2,
+                  'text-slate-800 font-black': currentStep === 2,
+                  'text-[#3D683A]': currentStep > 2,
                   'text-slate-400 group-hover:text-slate-600': currentStep < 2,
                 }"
               >
@@ -214,10 +214,10 @@
             </button>
 
             <div
-              class="flex-1 h-[3px] bg-slate-200/50 rounded-full mx-2 md:mx-4 overflow-hidden relative"
+              class="flex-1 h-[3px] bg-[#e2e8f0] rounded-full mx-2 md:mx-4 overflow-hidden relative"
             >
               <div
-                class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500 ease-out rounded-full"
+                class="absolute top-0 left-0 h-full bg-[#3D683A] transition-all duration-500 ease-out rounded-full"
                 [style.width.%]="currentStep > 2 ? 100 : 0"
               ></div>
             </div>
@@ -231,11 +231,11 @@
               [title]="!isDiseaseContextActive ? 'Please save or select a disease first' : ''"
             >
               <div
-                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold tracking-wider transition-all duration-500 ease-out border"
+                class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black tracking-wider transition-all duration-500 ease-out"
                 [ngClass]="{
-                  'bg-gradient-to-tr from-green-500 to-emerald-400 text-white border-transparent shadow-[0_4px_12px_rgba(16,185,129,0.3)] scale-110':
+                  'bg-[#3D683A] text-white shadow-[0_4px_12px_rgba(61,104,58,0.35)] scale-110':
                     currentStep === 3,
-                  'bg-white/60 text-slate-400 border-slate-200': currentStep < 3,
+                  'bg-[#f1f5f9] text-slate-400 shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)]': currentStep < 3,
                 }"
               >
                 @if (!isDiseaseContextActive) {
@@ -245,9 +245,9 @@
                 }
               </div>
               <span
-                class="text-[10px] md:text-xs font-semibold tracking-wide transition-colors duration-300 text-center sm:text-left"
+                class="text-[10px] md:text-xs font-bold tracking-wide transition-colors duration-300 text-center sm:text-left"
                 [ngClass]="{
-                  'text-slate-800 font-bold': currentStep === 3,
+                  'text-slate-800 font-black': currentStep === 3,
                   'text-slate-400 group-hover:text-slate-600': currentStep < 3,
                 }"
               >
@@ -258,7 +258,7 @@
 
           @if (!isDiseaseContextActive) {
             <p
-              class="text-center text-xs text-amber-600 mt-4 font-medium bg-amber-50/80 backdrop-blur-sm rounded-xl py-2 border border-amber-200/50 shadow-sm mx-auto max-w-2xl"
+              class="text-center text-xs text-amber-700 mt-4 font-bold bg-amber-50 rounded-xl py-2.5 px-3 shadow-[inset_2px_2px_6px_rgba(0,0,0,0.03)] mx-auto max-w-2xl"
             >
               ⚠️ Please select an entry from the sidebar or fill in general information and click
               "Save Configuration" to unlock subsequent setup modules.
@@ -269,7 +269,7 @@
         <form class="flex-1 flex flex-col" [formGroup]="form" (ngSubmit)="onSaveInternal()">
           <div class="flex-1 overflow-y-auto">
             @if (currentStep === 1) {
-              <div class="px-5 md:px-8 py-6">
+              <div class="px-4 sm:px-5 md:px-8 py-6">
                 <app-general-info-form
                   [form]="form"
                   [translating]="translating"
@@ -286,7 +286,7 @@
             }
 
             @if (currentStep === 2) {
-              <div class="px-5 md:px-8 py-6">
+              <div class="px-4 sm:px-5 md:px-8 py-6">
                 <app-monitoring-setup
                   [form]="form"
                   [diseaseId]="currentEditId"
@@ -297,7 +297,7 @@
             }
 
             @if (currentStep === 3) {
-              <div class="px-5 md:px-8 py-6">
+              <div class="px-4 sm:px-5 md:px-8 py-6">
                 <app-recommendations-setup
                   [form]="form"
                   [diseaseKey]="selectedDiseaseKey ?? ''"
@@ -310,24 +310,24 @@
           </div>
 
           <div
-            class="px-5 md:px-8 py-4 bg-white/50 backdrop-blur-lg border-t border-white/60 flex items-center justify-between gap-3 mt-auto"
+            class="px-4 sm:px-5 md:px-8 py-4 bg-[#f8fafc] shadow-[0_-4px_16px_rgba(0,0,0,0.02)] flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-auto"
           >
             <div>
               @if (currentStep > 1) {
                 <button
                   type="button"
                   (click)="setStep(currentStep - 1)"
-                  class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-all"
+                  class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-black text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-slate-800 transition-all active:scale-95"
                 >
                   Back
                 </button>
               }
             </div>
-            <div class="flex items-center gap-2 md:gap-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3">
               <button
                 type="button"
                 (click)="onCancelInternal()"
-                class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100/50 transition-all inline-flex items-center gap-1.5"
+                class="px-5 py-2.5 rounded-xl text-sm font-black text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-slate-800 transition-all inline-flex items-center justify-center gap-1.5 active:scale-95"
               >
                 @if (editOpenedFromTable) {
                   <svg
@@ -355,7 +355,7 @@
                       ? 'Save disease before proceeding'
                       : ''
                   "
-                  class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-bold hover:bg-slate-700 hover:shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:bg-slate-800"
+                  class="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-xl bg-[#3D683A] text-white text-sm font-black shadow-[3px_3px_10px_rgba(61,104,58,0.3)] hover:bg-[#2f5230] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#3D683A] active:scale-95"
                 >
                   Next Step
                 </button>
@@ -368,7 +368,7 @@
   }
 
   @if (showAddedDiseases) {
-    <div class="flex-1 overflow-auto px-6 py-6">
+    <div class="flex-1 overflow-auto px-4 sm:px-6 py-6">
       @if (isLoading) {
         <app-disease-table-skeleton />
       } @else {

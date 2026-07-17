@@ -1,7 +1,7 @@
 @if (isOpen && disease) {
   <!-- Backdrop -->
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 select-none"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 select-none"
     (click)="onBackdropClick($event)"
   >
     <!-- Blur overlay -->
@@ -9,24 +9,24 @@
 
     <!-- Modal -->
     <div
-      class="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-white rounded-3xl shadow-[0_32px_80px_rgba(0,0,0,0.18)] overflow-hidden"
+      class="relative z-10 w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] flex flex-col bg-[#eef3ec] rounded-2xl sm:rounded-3xl shadow-[16px_16px_40px_rgba(163,177,163,0.55),-16px_-16px_40px_rgba(255,255,255,0.9)] overflow-hidden"
       (click)="$event.stopPropagation()"
     >
 
       <!-- Modal Header -->
-      <div class="flex items-start justify-between px-7 pt-7 pb-5 border-b border-slate-100">
-        <div class="flex items-center gap-4">
-          <div class="w-11 h-11 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-start justify-between gap-3 px-4 sm:px-7 pt-5 sm:pt-7 pb-5 border-b border-black/5">
+        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#eef3ec] shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff] flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
           </div>
-          <div>
-            <h2 class="text-lg font-bold text-slate-800 leading-tight">
+          <div class="min-w-0">
+            <h2 class="text-base sm:text-lg font-bold text-slate-800 leading-tight truncate">
               {{ disease.display_name.en || 'Disease Details' }}
             </h2>
-            <p class="text-sm text-slate-400 mt-0.5 font-medium">
+            <p class="text-sm text-slate-400 mt-0.5 font-medium truncate">
               {{ disease.display_name.tl || '—' }}
             </p>
           </div>
@@ -34,14 +34,14 @@
       </div>
 
       <!-- Tabs -->
-      <div class="flex gap-1 px-7 pt-4 pb-0 border-b border-slate-100 flex-shrink-0">
+      <div class="flex gap-2 px-4 sm:px-7 pt-4 pb-4 border-b border-black/5 flex-shrink-0 overflow-x-auto custom-scrollbar">
         <button
           type="button"
           (click)="activeTab = 'general'"
-          class="px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all duration-200 border-b-2 -mb-px"
+          class="flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap"
           [ngClass]="activeTab === 'general'
-            ? 'text-green-600 border-green-500 bg-green-50/50'
-            : 'text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50'"
+            ? 'text-white bg-emerald-500 shadow-[3px_3px_8px_#c3cfc3,-3px_-3px_8px_#ffffff]'
+            : 'text-slate-500 hover:bg-[#e6ede5]'"
         >
           <span class="flex items-center gap-1.5">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -53,10 +53,10 @@
         <button
           type="button"
           (click)="activeTab = 'monitoring'"
-          class="px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all duration-200 border-b-2 -mb-px"
+          class="flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap"
           [ngClass]="activeTab === 'monitoring'
-            ? 'text-green-600 border-green-500 bg-green-50/50'
-            : 'text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50'"
+            ? 'text-white bg-emerald-500 shadow-[3px_3px_8px_#c3cfc3,-3px_-3px_8px_#ffffff]'
+            : 'text-slate-500 hover:bg-[#e6ede5]'"
         >
           <span class="flex items-center gap-1.5">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -68,10 +68,10 @@
         <button
           type="button"
           (click)="activeTab = 'recommendations'"
-          class="px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all duration-200 border-b-2 -mb-px"
+          class="flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap"
           [ngClass]="activeTab === 'recommendations'
-            ? 'text-green-600 border-green-500 bg-green-50/50'
-            : 'text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50'"
+            ? 'text-white bg-emerald-500 shadow-[3px_3px_8px_#c3cfc3,-3px_-3px_8px_#ffffff]'
+            : 'text-slate-500 hover:bg-[#e6ede5]'"
         >
           <span class="flex items-center gap-1.5">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -83,12 +83,12 @@
       </div>
 
       <!-- Tab Content -->
-      <div class="flex-1 overflow-y-auto px-7 py-6">
+      <div class="flex-1 overflow-y-auto px-4 sm:px-7 py-6 custom-scrollbar">
 
         <!-- Loading -->
         @if (isLoading) {
           <div class="flex flex-col items-center justify-center py-16 gap-3">
-            <div class="w-8 h-8 border-2 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+            <div class="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
             <p class="text-sm text-slate-400 font-medium">Loading details...</p>
           </div>
         }
@@ -101,14 +101,14 @@
 
               <!-- Key badge + locale + ID row -->
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wide uppercase bg-[#eef3ec] text-slate-600 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]">
                   {{ disease.disease_key }}
                 </span>
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]"
                   [ngClass]="{
-                    'bg-blue-50 text-blue-700 border border-blue-100': disease.locale === 'en',
-                    'bg-amber-50 text-amber-700 border border-amber-100': disease.locale === 'tl',
-                    'bg-slate-50 text-slate-600 border border-slate-100': !disease.locale
+                    'bg-blue-50 text-blue-700': disease.locale === 'en',
+                    'bg-amber-50 text-amber-700': disease.locale === 'tl',
+                    'bg-[#eef3ec] text-slate-600': !disease.locale
                   }">
                   {{ (disease.locale || 'en') | uppercase }}
                 </span>
@@ -121,7 +121,7 @@
               </div>
 
               <!-- English Name -->
-              <div class="rounded-2xl border border-slate-100 bg-slate-50/40 p-5 space-y-4">
+              <div class="rounded-2xl bg-[#eef3ec] p-5 space-y-4 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff]">
                 <div class="flex items-center gap-2 mb-1">
                   <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
                   <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Disease Name</span>
@@ -132,7 +132,7 @@
               </div>
 
               <!-- Filipino Name -->
-              <div class="rounded-2xl border border-amber-100 bg-amber-50/30 p-5">
+              <div class="rounded-2xl bg-[#f0ece0] p-5 shadow-[inset_3px_3px_8px_#d9d3c4,inset_-3px_-3px_8px_#ffffff]">
                 <div class="flex items-center gap-2 mb-1">
                   <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
                   <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Pangalan sa Filipino</span>
@@ -143,7 +143,7 @@
               </div>
 
               <!-- Description EN -->
-              <div class="rounded-2xl border border-slate-100 bg-slate-50/40 p-5">
+              <div class="rounded-2xl bg-[#eef3ec] p-5 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff]">
                 <div class="flex items-center gap-2 mb-2">
                   <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
                   <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Description</span>
@@ -154,7 +154,7 @@
               </div>
 
               <!-- Description TL -->
-              <div class="rounded-2xl border border-amber-100 bg-amber-50/30 p-5">
+              <div class="rounded-2xl bg-[#f0ece0] p-5 shadow-[inset_3px_3px_8px_#d9d3c4,inset_-3px_-3px_8px_#ffffff]">
                 <div class="flex items-center gap-2 mb-2">
                   <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
                   <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Paglalarawan sa Filipino</span>
@@ -170,8 +170,8 @@
         @if (activeTab === 'monitoring') {
             <div class="space-y-6">
               @if (monitoringPlans.length === 0) {
-                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-12 text-center">
-                  <svg class="w-10 h-10 mx-auto text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="rounded-2xl bg-[#eef3ec] p-10 sm:p-12 text-center shadow-[inset_4px_4px_10px_#d3ddd3,inset_-4px_-4px_10px_#ffffff]">
+                  <svg class="w-10 h-10 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
                   </svg>
                   <p class="text-sm font-medium text-slate-500">No monitoring plans configured</p>
@@ -190,13 +190,13 @@
                         'text-slate-600': group.severity === 'general'
                       }">
                     {{ group.severity }} Severity Plans
-                    <div class="h-px flex-1 bg-slate-100"></div>
+                    <div class="h-px flex-1 bg-black/10"></div>
                   </h4>
 
                   <div class="space-y-4">
                     @for (plan of group.items; track plan.id) {
-                      <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-                        <div class="flex items-center justify-between px-5 py-3.5 bg-slate-50/60 border-b border-slate-100">
+                      <div class="rounded-2xl bg-[#eef3ec] shadow-[5px_5px_14px_#d3ddd3,-5px_-5px_14px_#ffffff] overflow-hidden">
+                        <div class="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-black/5">
                           <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
@@ -205,7 +205,7 @@
                           </div>
                         </div>
 
-                        <div class="p-5 grid grid-cols-2 gap-4">
+                        <div class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div class="flex flex-col gap-1">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rescan After</span>
                             <span class="text-sm font-semibold text-slate-700">
@@ -224,22 +224,22 @@
                             </span>
                           </div>
 
-                          <div class="col-span-2 flex flex-col gap-1.5">
+                          <div class="col-span-1 sm:col-span-2 flex flex-col gap-1.5">
                             <div class="flex items-center gap-1.5">
                               <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
                               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Guidance Message</span>
                             </div>
-                            <p class="text-sm text-slate-600 leading-relaxed bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-100">
+                            <p class="text-sm text-slate-600 leading-relaxed rounded-xl px-3 py-2.5 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]">
                               {{ plan.message.en || '—' }}
                             </p>
                           </div>
 
-                          <div class="col-span-2 flex flex-col gap-1.5">
+                          <div class="col-span-1 sm:col-span-2 flex flex-col gap-1.5">
                             <div class="flex items-center gap-1.5">
                               <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
                               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mensahe sa Filipino</span>
                             </div>
-                            <p class="text-sm text-slate-600 leading-relaxed bg-amber-50/40 rounded-xl px-3 py-2.5 border border-amber-100">
+                            <p class="text-sm text-slate-600 leading-relaxed rounded-xl px-3 py-2.5 shadow-[inset_2px_2px_5px_#d9d3c4,inset_-2px_-2px_5px_#ffffff]">
                               {{ plan.message.tl || '—' }}
                             </p>
                           </div>
@@ -257,8 +257,8 @@
             <div class="space-y-4">
 
               @if (recommendations.length === 0) {
-                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-12 text-center">
-                  <svg class="w-10 h-10 mx-auto text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="rounded-2xl bg-[#eef3ec] p-10 sm:p-12 text-center shadow-[inset_4px_4px_10px_#d3ddd3,inset_-4px_-4px_10px_#ffffff]">
+                  <svg class="w-10 h-10 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
                   </svg>
                   <p class="text-sm font-medium text-slate-500">No recommendations configured</p>
@@ -266,25 +266,18 @@
                 </div>
               }
 
-              <!-- BUG FIX: Group loop was intact but rec loop was entirely missing inside it -->
               @for (group of groupedRecommendations; track group.severity) {
-                <div class="rounded-2xl border overflow-hidden"
-                  [ngClass]="{
-                    'border-emerald-100': group.severity === 'mild',
-                    'border-amber-100':   group.severity === 'moderate',
-                    'border-red-100':     group.severity === 'severe',
-                    'border-slate-100':   group.severity === 'general'
-                  }">
+                <div class="rounded-2xl overflow-hidden shadow-[5px_5px_14px_#d3ddd3,-5px_-5px_14px_#ffffff]">
 
                   <!-- Severity header -->
-                  <div class="flex items-center gap-2 px-5 py-3 border-b"
+                  <div class="flex items-center gap-2 px-4 sm:px-5 py-3 border-b border-black/5"
                     [ngClass]="{
-                      'bg-emerald-50/60 border-emerald-100': group.severity === 'mild',
-                      'bg-amber-50/60 border-amber-100':     group.severity === 'moderate',
-                      'bg-red-50/60 border-red-100':         group.severity === 'severe',
-                      'bg-slate-50/60 border-slate-100':     group.severity === 'general'
+                      'bg-emerald-50/60': group.severity === 'mild',
+                      'bg-amber-50/60':   group.severity === 'moderate',
+                      'bg-red-50/60':     group.severity === 'severe',
+                      'bg-[#e6ede5]':     group.severity === 'general'
                     }">
-                    <div class="w-2 h-2 rounded-full"
+                    <div class="w-2 h-2 rounded-full flex-shrink-0"
                       [ngClass]="{
                         'bg-emerald-500': group.severity === 'mild',
                         'bg-amber-500':   group.severity === 'moderate',
@@ -306,23 +299,21 @@
                     </span>
                   </div>
 
-                  <!-- BUG FIX: This @for loop over rec was completely missing -->
-                  <div class="divide-y divide-slate-50">
+                  <div class="divide-y divide-black/5 bg-[#eef3ec]">
                     @for (rec of group.items; track rec.id) {
                       <div class="p-4 space-y-3">
 
                         <!-- Category label -->
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-[#e6ede5] text-slate-500 text-[10px] font-bold uppercase tracking-wide">
                           {{ rec.category_key | titlecase }}
                         </span>
 
-                        <!-- BUG FIX: Array.isArray was used in the template but never exposed on the class -->
                         @if (isArray(rec.content)) {
 
                           <!-- ARRAY CONTENT (action_items / prevention_items) -->
                           <div class="space-y-3">
                             @for (item of asArray(rec.content); track $index) {
-                              <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+                              <div class="rounded-xl p-3 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]">
                                 @if (item.en) {
                                   <div class="mb-2">
                                     <div class="flex items-center gap-1.5 mb-1">
@@ -351,7 +342,7 @@
                               <div class="flex items-center gap-1.5 mb-1">
                                 <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">EN</span>
                               </div>
-                              <p class="text-sm text-slate-600 leading-relaxed bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+                              <p class="text-sm text-slate-600 leading-relaxed rounded-lg px-3 py-2 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]">
                                 {{ asObject(rec.content)!.en }}
                               </p>
                             </div>
@@ -361,7 +352,7 @@
                               <div class="flex items-center gap-1.5 mb-1">
                                 <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">TL</span>
                               </div>
-                              <p class="text-sm text-slate-600 leading-relaxed bg-amber-50/40 rounded-lg px-3 py-2 border border-amber-100">
+                              <p class="text-sm text-slate-600 leading-relaxed rounded-lg px-3 py-2 shadow-[inset_2px_2px_5px_#d9d3c4,inset_-2px_-2px_5px_#ffffff]">
                                 {{ asObject(rec.content)!.tl }}
                               </p>
                             </div>
@@ -382,16 +373,16 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="flex items-center justify-between px-7 py-4 border-t border-slate-100 bg-slate-50/40 flex-shrink-0">
+      <div class="flex items-center justify-between px-4 sm:px-7 py-4 border-t border-black/5 flex-shrink-0">
         <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-green-400"></div>
-          <span class="text-xs text-slate-400 font-medium">Read-only view</span>
+          <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+          <span class="text-xs text-slate-400 font-medium hidden xs:inline">Read-only view</span>
         </div>
         <div class="flex items-center gap-2">
           <button
             type="button"
             (click)="close()"
-            class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all"
+            class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-[#e6ede5] hover:shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff] transition-all"
           >
             Close
           </button>

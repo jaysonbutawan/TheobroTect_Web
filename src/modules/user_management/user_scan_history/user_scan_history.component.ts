@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent } from '../../../app/shared/skeletons/disease-guidance/scan-history-skeleton/scan-history-skeleton';
@@ -77,6 +77,9 @@ export class ScanHistoryComponent implements OnInit {
 
   selectedScan: Scan | null = null;
 
+
+  constructor(private cdr: ChangeDetectorRef) { }
+
   ngOnInit(): void {
     this.loadScans();
   }
@@ -96,6 +99,7 @@ export class ScanHistoryComponent implements OnInit {
       this.allScans = this.mockScans();
       this.applyFilters();
       this.isLoading = false;
+      this.cdr.markForCheck(); 
     }, 300);
   }
 

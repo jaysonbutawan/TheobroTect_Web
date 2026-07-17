@@ -1,20 +1,20 @@
 <!-- Main Container: Clean, modern background with specific DM Sans font -->
-<div class="min-h-screen bg-[#f5f5f7] flex items-center justify-center p-4 font-sans relative overflow-hidden">
+<div class="min-h-screen bg-[#f5f5f7] flex items-center justify-center p-4 sm:p-6 font-sans relative overflow-hidden">
 
   <!-- Background Decorative Blobs -->
   <div class="fixed top-[-120px] right-[-120px] w-[400px] h-[400px] rounded-full bg-[#3D683A]/5 blur-[80px] pointer-events-none"></div>
   <div class="fixed bottom-[-120px] left-[-120px] w-[400px] h-[400px] rounded-full bg-slate-500/5 blur-[80px] pointer-events-none"></div>
 
-  <!-- Master Card: Max-width 780px -->
-  <div class="w-full max-w-[780px] bg-white rounded-[32px] shadow-xl overflow-hidden flex animate-in fade-in slide-in-from-bottom-2 duration-500">
+  <!-- Master Card: Max-width 780px, raised neumorphic surface -->
+  <div class="w-full max-w-[780px] bg-[#f5f5f7] rounded-[24px] sm:rounded-[32px] shadow-[16px_16px_40px_#d1d1d5,-16px_-16px_40px_#ffffff] overflow-hidden flex animate-in fade-in slide-in-from-bottom-2 duration-500">
 
-    <!-- LEFT SIDE: Branding (42% width) -->
+    <!-- LEFT SIDE: Branding (42% width, hidden below lg) -->
     <div class="hidden lg:flex w-[42%] bg-[#3D683A] p-8 flex-col justify-between relative overflow-hidden">
       <!-- Background overlay for depth -->
       <div class="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent opacity-50"></div>
-      
+
       <div class="relative z-10">
-        <div class="w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-6">
+        <div class="w-10 h-10 bg-white/10 backdrop-blur-md shadow-[inset_2px_2px_5px_rgba(0,0,0,0.15),inset_-1px_-1px_3px_rgba(255,255,255,0.15)] rounded-2xl flex items-center justify-center mb-6">
           <img src="assets/images/theobrotect_logo.png" alt="Logo" class="w-6 h-6 brightness-0 invert" />
         </div>
         <p class="text-green-100/60 text-[10px] font-bold tracking-[2px] uppercase mb-2">TheobroTect System</p>
@@ -23,32 +23,43 @@
       </div>
 
       <div class="relative z-10 space-y-5 mt-auto">
-        <!-- Icons updated to match the visual style of image_7ab499.png -->
         <div class="flex items-center gap-4 text-white/90 text-[13px] font-medium">
-          <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center"><i class="pi pi-briefcase text-[12px]"></i></div>
+          <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center shadow-[inset_1px_1px_3px_rgba(0,0,0,0.15),inset_-1px_-1px_2px_rgba(255,255,255,0.1)]"><i class="pi pi-briefcase text-[12px]"></i></div>
           <span>Disease Detection Reports</span>
         </div>
         <div class="flex items-center gap-4 text-white/90 text-[13px] font-medium">
-          <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center"><i class="pi pi-users text-[12px]"></i></div>
+          <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center shadow-[inset_1px_1px_3px_rgba(0,0,0,0.15),inset_-1px_-1px_2px_rgba(255,255,255,0.1)]"><i class="pi pi-users text-[12px]"></i></div>
           <span>Heatmap Distribution</span>
         </div>
         <div class="flex items-center gap-4 text-white/90 text-[13px] font-medium">
-          <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center"><i class="pi pi-file-edit text-[12px]"></i></div>
+          <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center shadow-[inset_1px_1px_3px_rgba(0,0,0,0.15),inset_-1px_-1px_2px_rgba(255,255,255,0.1)]"><i class="pi pi-file-edit text-[12px]"></i></div>
           <span>Field Reports Location</span>
         </div>
       </div>
     </div>
 
     <!-- RIGHT SIDE: Form -->
-    <div class="flex-1 p-8 lg:p-12 bg-white">
+    <div class="flex-1 p-6 sm:p-8 lg:p-12 bg-[#f5f5f7]">
+
+      <!-- Mobile-only compact brand header (shown when the left panel is hidden) -->
+      <div class="flex lg:hidden items-center gap-3 mb-8">
+        <div class="w-10 h-10 bg-[#3D683A] rounded-2xl flex items-center justify-center shadow-[4px_4px_10px_#d1d1d5,-4px_-4px_10px_#ffffff] flex-shrink-0">
+          <img src="assets/images/theobrotect_logo.png" alt="Logo" class="w-5 h-5 brightness-0 invert" />
+        </div>
+        <div class="min-w-0">
+          <p class="text-[#3D683A] text-[10px] font-bold tracking-[2px] uppercase">TheobroTect System</p>
+          <p class="text-[#1a202c] text-sm font-bold truncate">Admin Portal</p>
+        </div>
+      </div>
+
       <div class="mb-8">
-        <h2 class="font-['Syne'] text-[24px] font-bold text-[#1a202c] tracking-tight">Sign in</h2>
+        <h2 class="font-['Syne'] text-[22px] sm:text-[24px] font-bold text-[#1a202c] tracking-tight">Sign in</h2>
         <p class="text-[#718096] text-[13px] mt-1">Welcome back! Enter your credentials below.</p>
       </div>
 
       @if (errorMessage) {
-        <div class="mb-6 flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 rounded-2xl p-4 text-[12px] font-semibold animate-in fade-in">
-          <i class="pi pi-exclamation-circle text-lg"></i>
+        <div class="mb-6 flex items-center gap-3 bg-red-50 rounded-2xl p-4 text-[12px] font-semibold text-red-600 shadow-[inset_2px_2px_6px_#e3bcbc,inset_-2px_-2px_6px_#ffffff] animate-in fade-in">
+          <i class="pi pi-exclamation-circle text-lg flex-shrink-0"></i>
           <span>{{ errorMessage }}</span>
         </div>
       }
@@ -60,10 +71,10 @@
             <label class="text-[11px] font-bold text-[#718096] tracking-widest uppercase block mb-2 ml-1">Email Address</label>
             <div class="relative group">
               <i class="pi pi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#a0aec0] group-focus-within:text-[#3D683A] transition-colors"></i>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 formControlName="email"
-                class="w-full border border-[#e2e8f0] rounded-2xl px-4 py-3.5 text-[13px] focus:border-[#3D683A] focus:ring-4 focus:ring-[#3D683A]/5 outline-none pl-11 transition-all"
+                class="w-full border-none rounded-2xl px-4 py-3.5 text-[13px] bg-[#f5f5f7] shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:ring-2 focus:ring-[#3D683A]/30 outline-none pl-11 transition-all"
                 placeholder="you@example.com">
             </div>
           </div>
@@ -73,27 +84,27 @@
             <label class="text-[11px] font-bold text-[#718096] tracking-widest uppercase block mb-2 ml-1">Password</label>
             <div class="relative group">
               <i class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#a0aec0] group-focus-within:text-[#3D683A] transition-colors"></i>
-              <input 
-                [type]="showPassword ? 'text' : 'password'" 
+              <input
+                [type]="showPassword ? 'text' : 'password'"
                 formControlName="password"
-                class="w-full border border-[#e2e8f0] rounded-2xl px-4 py-3.5 text-[13px] focus:border-[#3D683A] focus:ring-4 focus:ring-[#3D683A]/5 outline-none pl-11 pr-12 transition-all"
+                class="w-full border-none rounded-2xl px-4 py-3.5 text-[13px] bg-[#f5f5f7] shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:ring-2 focus:ring-[#3D683A]/30 outline-none pl-11 pr-12 transition-all"
                 placeholder="••••••••">
-              
+
               <!-- Icon for show password -->
-              <button 
+              <button
                 type="button"
                 (click)="showPassword = !showPassword"
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-[#a0aec0] hover:text-[#3D683A] focus:outline-none transition-colors z-10 p-1">
+                class="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-[#a0aec0] hover:text-[#3D683A] hover:shadow-[2px_2px_6px_#d1d1d5,-2px_-2px_6px_#ffffff] focus:outline-none transition-all z-10">
                 <i [className]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           [disabled]="loading"
-          class="mt-8 w-full bg-[#2C2C2A] hover:bg-black text-white font-bold py-4 rounded-2xl text-[13px] flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98]">
+          class="mt-8 w-full bg-[#2C2C2A] text-white font-bold py-4 rounded-2xl text-[13px] flex items-center justify-center gap-2 transition-all shadow-[6px_6px_16px_#d1d1d5,-6px_-6px_16px_#ffffff] hover:shadow-[3px_3px_10px_#d1d1d5,-3px_-3px_10px_#ffffff] active:shadow-[inset_3px_3px_8px_#000000,inset_-3px_-3px_8px_#3a3a38] disabled:opacity-60 disabled:cursor-not-allowed">
           @if (loading) {
             <i class="pi pi-spin pi-spinner"></i>
             <span>Signing in...</span>

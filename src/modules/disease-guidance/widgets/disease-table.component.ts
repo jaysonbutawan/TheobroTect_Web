@@ -10,12 +10,12 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
   imports: [CommonModule, FormsModule, PaginationComponent],
   template: `
   <div class="flex items-center justify-between mb-6 gap-3 flex-wrap select-none">
-  <div class="flex items-center gap-3 flex-wrap">
-    <div class="relative w-56 shrink-0">
+  <div class="flex items-center gap-3 flex-wrap w-full sm:w-auto">
+    <div class="relative w-full sm:w-56 shrink-0">
       <button
         type="button"
         (click)="isFilterDropdownOpen = !isFilterDropdownOpen"
-        class="w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all shadow-sm font-medium"
+        class="w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-xl bg-[#f1f5f9] text-slate-700 shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-[#3D683A] transition-all font-bold"
       >
         <span class="truncate">{{ filterLocale ? formatLabel(filterLocale) : 'All Disease Types' }}</span>
         <svg
@@ -28,19 +28,19 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
       </button>
 
       @if (isFilterDropdownOpen) {
-        <div class="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden flex flex-col left-0 origin-top animate-in fade-in slide-in-from-top-2 duration-200">
+        <div class="absolute z-50 w-full mt-2 bg-[#f8fafc] rounded-xl shadow-[10px_10px_20px_rgba(0,0,0,0.08),inset_2px_2px_5px_rgba(255,255,255,1)] overflow-hidden flex flex-col left-0 origin-top animate-in fade-in slide-in-from-top-2 duration-200">
           <ul class="max-h-64 overflow-y-auto p-1.5 space-y-0.5 custom-scrollbar">
 
             <li>
               <button
                 type="button"
                 (click)="onFilterSelect('')"
-                class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left"
-                [ngClass]="!filterLocale ? 'bg-slate-50 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-left"
+                [ngClass]="!filterLocale ? 'bg-[#e2e8f0] text-slate-900 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]' : 'text-slate-600 hover:bg-[#e2e8f0]/60 hover:text-slate-900'"
               >
                 <span class="truncate">All Disease Types</span>
                 @if (!filterLocale) {
-                  <svg class="w-4 h-4 text-slate-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="w-4 h-4 text-[#3D683A] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 6 9 17l-5-5"/>
                   </svg>
                 }
@@ -52,12 +52,12 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 <button
                   type="button"
                   (click)="onFilterSelect(key)"
-                  class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left"
-                  [ngClass]="filterLocale === key ? 'bg-slate-50 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+                  class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-left"
+                  [ngClass]="filterLocale === key ? 'bg-[#e2e8f0] text-slate-900 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]' : 'text-slate-600 hover:bg-[#e2e8f0]/60 hover:text-slate-900'"
                 >
                   <span class="truncate">{{ formatLabel(key) }}</span>
                   @if (filterLocale === key) {
-                    <svg class="w-4 h-4 text-slate-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="w-4 h-4 text-[#3D683A] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M20 6 9 17l-5-5"/>
                     </svg>
                   }
@@ -71,125 +71,119 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
   </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm text-left whitespace-nowrap">
-      <thead>
-        <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-          <th class="px-6 py-4 w-[32%]">Disease Name</th>
-          <th class="px-6 py-4 w-[22%]">Disease Key</th>
-          <th class="px-6 py-4 w-[20%]">Created At</th>
-          <th class="px-6 py-4 w-[21%] text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100">
+<div class="bg-[#f8fafc] rounded-[2.5rem] p-4 md:p-6 shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)] select-none">
 
-        @for (disease of pagedRecords; track disease.id) {
-          <tr class="hover:bg-slate-50/80 transition-colors group">
-
-            <td class="px-6 py-4">
-              <div class="flex flex-col">
-                <span class="font-medium text-slate-900">{{ disease.display_name.en || '—' }}</span>
-                <span class="text-xs text-slate-500 mt-0.5">{{ disease.display_name.tl || '—' }}</span>
-              </div>
-            </td>
-
-            <td class="px-6 py-4">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase bg-slate-100 text-slate-600">
-                {{ disease.disease_key }}
-              </span>
-            </td>
-
-            <td class="px-6 py-4">
-              @if (disease.created_at) {
-                <div class="flex flex-col">
-                  <span class="text-slate-700">{{ disease.created_at | date: 'MMM dd, yyyy' }}</span>
-                  <span class="text-xs text-slate-400 mt-0.5">{{ disease.created_at | date: 'h:mm a' }}</span>
-                </div>
-              } @else {
-                <span class="text-slate-400">—</span>
-              }
-            </td>
-
-            <td class="px-6 py-4">
-              <div class="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-
-                <button
-                  type="button"
-                  (click)="onTableViewDisease(disease)"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
-                  title="View details"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  View
-                </button>
-
-                <button
-                  type="button"
-                  (click)="onTableEditDisease(disease)"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
-                  title="Edit disease"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
-                    <path d="m15 5 4 4"/>
-                  </svg>
-                  Edit
-                </button>
-
-                <button
-                  type="button"
-                  (click)="onTableDeleteDisease(disease)"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                  title="Delete disease"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18"/>
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                    <line x1="10" x2="10" y1="11" y2="17"/>
-                    <line x1="14" x2="14" y1="11" y2="17"/>
-                  </svg>
-                  Delete
-                </button>
-
-              </div>
-            </td>
-          </tr>
-        }
-
-        @if (filteredRecords.length === 0) {
-          <tr>
-            <td colspan="4" class="px-6 py-20 text-center">
-              <div class="flex flex-col items-center justify-center">
-                <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
-                  <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.3-4.3"/>
-                  </svg>
-                </div>
-                <h3 class="text-sm font-semibold text-slate-900">No diseases found</h3>
-                <p class="text-sm text-slate-500 mt-1">Try adjusting your filter to find what you're looking for.</p>
-              </div>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+  <div class="hidden md:grid md:grid-cols-12 gap-4 px-6 pb-4 border-b border-slate-200/50 mb-4">
+    <div class="md:col-span-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Disease Name</div>
+    <div class="md:col-span-3 text-[11px] font-black uppercase tracking-widest text-slate-400">Disease Key</div>
+    <div class="md:col-span-2 text-[11px] font-black uppercase tracking-widest text-slate-400">Created At</div>
+    <div class="md:col-span-3 text-[11px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</div>
   </div>
 
-  <app-pagination
-    variant="compact"
-    [currentPage]="currentPage"
-    [totalPages]="totalPages"
-    [pageStart]="pageStart"
-    [pageEnd]="pageEnd"
-    [totalItems]="filteredRecords.length"
-    itemLabel="diseases"
-    (pageChange)="onPageChange($event)" />
+  <div class="flex flex-col gap-4 md:gap-3">
+
+    @for (disease of pagedRecords; track disease.id) {
+      <div class="group flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 p-5 md:px-6 md:py-4 bg-[#f1f5f9] rounded-[2rem] md:rounded-[1.5rem] md:items-center shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[6px_6px_12px_rgba(0,0,0,0.06),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] hover:bg-[#f4f7f9]">
+
+        <!-- Disease Name -->
+        <div class="md:col-span-4">
+          <p class="text-base md:text-sm font-black text-slate-800">{{ disease.display_name.en || '—' }}</p>
+          <p class="text-xs font-bold text-slate-400 mt-0.5">{{ disease.display_name.tl || '—' }}</p>
+        </div>
+
+        <!-- Disease Key -->
+        <div class="flex flex-col md:block md:col-span-3 mt-1 md:mt-0">
+          <span class="md:hidden text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Disease Key</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wide uppercase bg-[#e2e8f0] text-slate-600 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]">
+            {{ disease.disease_key }}
+          </span>
+        </div>
+
+        <!-- Created At -->
+        <div class="flex flex-col md:block md:col-span-2 mt-1 md:mt-0">
+          <span class="md:hidden text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Created At</span>
+          @if (disease.created_at) {
+            <p class="text-sm font-bold text-slate-700">{{ disease.created_at | date: 'MMM dd, yyyy' }}</p>
+            <p class="text-xs text-slate-400 mt-0.5 font-medium">{{ disease.created_at | date: 'h:mm a' }}</p>
+          } @else {
+            <span class="text-slate-400 font-medium">—</span>
+          }
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between md:col-span-3 md:justify-end gap-2 mt-4 md:mt-0 pt-4 md:pt-0 border-t border-slate-200/50 md:border-none">
+          <span class="md:hidden text-[10px] font-black uppercase text-slate-400 tracking-wider">Actions</span>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              (click)="onTableViewDisease(disease)"
+              class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-blue-600 hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95"
+              title="View details"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              (click)="onTableEditDisease(disease)"
+              class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-[#3D683A] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95"
+              title="Edit disease"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+                <path d="m15 5 4 4"/>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              (click)="onTableDeleteDisease(disease)"
+              class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-red-500 hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95"
+              title="Delete disease"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                <line x1="10" x2="10" y1="11" y2="17"/>
+                <line x1="14" x2="14" y1="11" y2="17"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (filteredRecords.length === 0) {
+      <div class="py-20 flex flex-col items-center justify-center text-center bg-[#e2e8f0] rounded-[2rem] shadow-[inset_4px_4px_10px_rgba(0,0,0,0.06),inset_-4px_-4px_10px_rgba(255,255,255,0.7)] mx-2 my-4">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-[#f1f5f9] shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_5px_rgba(255,255,255,1)] mb-5">
+          <svg class="w-9 h-9 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-black text-slate-800">No diseases found</h3>
+        <p class="text-sm font-medium text-slate-500 mt-2 max-w-sm">Try adjusting your filter to find what you're looking for.</p>
+      </div>
+    }
+  </div>
+
+  @if (filteredRecords.length > 0) {
+    <div class="mt-6">
+      <app-pagination
+        variant="compact"
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        [pageStart]="pageStart"
+        [pageEnd]="pageEnd"
+        [totalItems]="filteredRecords.length"
+        itemLabel="diseases"
+        (pageChange)="onPageChange($event)" />
+    </div>
+  }
 </div>
   `
 })

@@ -1,12 +1,12 @@
-<div [formGroup]="form" class="space-y-8">
-  <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-    <div class="border-b border-slate-100 px-6 py-5 flex items-center gap-3">
+<div [formGroup]="form" class="space-y-6 sm:space-y-8">
+  <div class="rounded-3xl bg-[#eef3ec] shadow-[8px_8px_20px_#d3ddd3,-8px_-8px_20px_#ffffff]">
+    <div class="border-b border-black/5 px-4 sm:px-6 py-5 flex items-center gap-3">
       <span
-         class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700"
+        class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[#eef3ec] text-xs font-bold text-emerald-700 shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff]"
       >
         03
       </span>
-      <div>
+      <div class="min-w-0">
         <h2 class="text-base font-semibold text-slate-800">Recommendations per Severity</h2>
         <p class="text-sm text-slate-500">
           Define custom operational guidance for Mild, Moderate, and Severe detections.
@@ -14,16 +14,16 @@
       </div>
     </div>
 
-    <div class="p-6 space-y-8">
+    <div class="p-4 sm:p-6 space-y-6 sm:space-y-8">
       @if (displaySeverities.length > 0) {
         <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <label class="text-sm font-semibold text-slate-700">
               Select Target Severity Level
             </label>
             @if (activeSev) {
               <span
-                class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/60 shadow-sm"
+                class="w-fit text-xs font-medium text-slate-500 bg-[#eef3ec] px-2.5 py-1 rounded-full shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff]"
               >
                 Current:
                 <span class="font-semibold text-slate-700">{{ activeSev | titlecase }}</span>
@@ -40,19 +40,19 @@
                 type="button"
                 [attr.aria-label]="'Select ' + config.label + ' severity'"
                 (click)="onSeveritySelect(severity)"
-                class="group relative flex items-center gap-4 rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+                class="group relative flex items-center gap-4 rounded-2xl p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-1 focus:ring-offset-[#eef3ec]"
                 [class]="
                   isActive
-                    ? 'border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                    ? 'bg-emerald-500 shadow-[inset_3px_3px_8px_#3a7355,inset_-3px_-3px_8px_#4c8f6a]'
+                    : 'bg-[#eef3ec] shadow-[4px_4px_10px_#d3ddd3,-4px_-4px_10px_#ffffff] hover:shadow-[2px_2px_6px_#d3ddd3,-2px_-2px_6px_#ffffff]'
                 "
               >
                 <div
                   class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition-colors duration-200"
                   [class]="
                     isActive
-                      ? 'border-indigo-600 bg-indigo-600 text-white'
-                      : 'border-slate-300 bg-white group-hover:border-slate-400'
+                      ? 'border-white bg-white/20 text-white'
+                      : 'border-slate-300 bg-[#eef3ec] group-hover:border-slate-400'
                   "
                 >
                   @if (isActive) {
@@ -70,10 +70,10 @@
                 </div>
 
                 <div class="flex-1 min-w-0">
-                  <span class="block text-sm font-semibold text-slate-700">
+                  <span class="block text-sm font-semibold" [class]="isActive ? 'text-white' : 'text-slate-700'">
                     {{ config.label }}
                   </span>
-                  <span class="mt-0.5 block text-xs text-slate-500 line-clamp-1">
+                  <span class="mt-0.5 block text-xs line-clamp-1" [class]="isActive ? 'text-emerald-50' : 'text-slate-500'">
                     {{ config.description }}
                   </span>
                 </div>
@@ -82,9 +82,7 @@
           </div>
         </div>
       } @else {
-        <div
-          class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center"
-        >
+        <div class="rounded-2xl bg-[#eef3ec] p-8 text-center shadow-[inset_4px_4px_10px_#d3ddd3,inset_-4px_-4px_10px_#ffffff]">
           <svg
             class="w-10 h-10 mx-auto text-slate-300 mb-3"
             fill="none"
@@ -106,29 +104,29 @@
       }
 
       @if (allowedSeverities.includes(activeSev)) {
-        <div class="space-y-8 pt-4 border-t border-slate-100">
+        <div class="space-y-6 sm:space-y-8 pt-4 border-t border-black/5">
           <div class="space-y-4">
             <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
-              <i class="pi pi-check-square text-indigo-500"></i> What to do now
+              <i class="pi pi-check-square text-emerald-500"></i> What to do now
             </h3>
 
             <div class="space-y-3">
               @for (item of sevData[activeSev].actions; track $index; let i = $index) {
                 <div
-                  class="group relative bg-white rounded-xl border border-slate-200 p-4 pr-14 shadow-sm hover:border-slate-300 transition-all"
+                  class="group relative rounded-2xl bg-[#eef3ec] p-4 pr-14 shadow-[5px_5px_12px_#d3ddd3,-5px_-5px_12px_#ffffff] transition-shadow hover:shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff]"
                 >
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                       <label class="flex items-center gap-2 text-xs font-semibold text-slate-600">
                         <span
-                          class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200 select-none"
+                          class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff] select-none"
                           >EN</span
                         >
                         Action Step
                       </label>
                       <input
                         type="text"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        class="w-full rounded-xl border-none bg-[#eef3ec] px-4 py-2 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
                         [(ngModel)]="item.en"
                         [ngModelOptions]="{ standalone: true }"
                         placeholder="Action step in English..."
@@ -137,18 +135,18 @@
                     </div>
 
                     <div class="flex flex-col gap-2">
-                      <div class="flex items-center justify-between">
+                      <div class="flex items-center justify-between gap-2">
                         <label class="flex items-center gap-2 text-xs font-semibold text-slate-600">
                           <span
-                            class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200 select-none"
+                            class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-amber-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff] select-none"
                             >TL</span
                           >
                           Mensahe sa Filipino
                         </label>
                         @if (item.translating) {
-                          <span class="flex items-center gap-1 text-[11px] text-slate-400">
+                          <span class="flex flex-shrink-0 items-center gap-1 text-[11px] text-slate-400">
                             <span
-                              class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600"
+                              class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600"
                             ></span>
                             Nagsasalin...
                           </span>
@@ -156,11 +154,11 @@
                       </div>
                       <input
                         type="text"
-                        class="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-4 py-2 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        class="w-full rounded-xl border-none bg-[#e6ede5] px-4 py-2 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#ccd6cc,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
                         [(ngModel)]="item.tl"
                         [ngModelOptions]="{ standalone: true }"
                         placeholder="Awtomatikong isasalin..."
-                        [class.opacity-50]="item.translating"
+                        [class.opacity-60]="item.translating"
                       />
                     </div>
                   </div>
@@ -168,7 +166,7 @@
                   <button
                     aria-label="Remove Step"
                     type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors duration-200"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 hover:shadow-[inset_2px_2px_5px_#e5b3b3,inset_-2px_-2px_5px_#ffffff] transition-all duration-200"
                     (click)="removeBullet(sevData[activeSev].actions, i)"
                   >
                     <svg
@@ -188,7 +186,7 @@
 
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-all"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#eef3ec] text-xs font-semibold text-emerald-700 shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff] hover:shadow-[2px_2px_6px_#d3ddd3,-2px_-2px_6px_#ffffff] transition-all"
               (click)="addBullet(sevData[activeSev].actions)"
             >
               <svg
@@ -205,7 +203,7 @@
             </button>
           </div>
 
-          <div class="space-y-4 pt-4 border-t border-slate-100">
+          <div class="space-y-4 pt-4 border-t border-black/5">
             <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
               <i class="pi pi-shield text-emerald-500"></i> Prevention Tips
             </h3>
@@ -213,20 +211,20 @@
             <div class="space-y-3">
               @for (item of sevData[activeSev].prevention; track $index; let i = $index) {
                 <div
-                  class="group relative bg-white rounded-xl border border-slate-200 p-4 pr-14 shadow-sm hover:border-slate-300 transition-all"
+                  class="group relative rounded-2xl bg-[#eef3ec] p-4 pr-14 shadow-[5px_5px_12px_#d3ddd3,-5px_-5px_12px_#ffffff] transition-shadow hover:shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff]"
                 >
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                       <label class="flex items-center gap-2 text-xs font-semibold text-slate-600">
                         <span
-                          class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200 select-none"
+                          class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff] select-none"
                           >EN</span
                         >
                         Prevention Tip
                       </label>
                       <input
                         type="text"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        class="w-full rounded-xl border-none bg-[#eef3ec] px-4 py-2 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
                         [(ngModel)]="item.en"
                         [ngModelOptions]="{ standalone: true }"
                         placeholder="Prevention tip in English..."
@@ -235,18 +233,18 @@
                     </div>
 
                     <div class="flex flex-col gap-2">
-                      <div class="flex items-center justify-between">
+                      <div class="flex items-center justify-between gap-2">
                         <label class="flex items-center gap-2 text-xs font-semibold text-slate-600">
                           <span
-                            class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200 select-none"
+                            class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-amber-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff] select-none"
                             >TL</span
                           >
                           Mensahe sa Filipino
                         </label>
                         @if (item.translating) {
-                          <span class="flex items-center gap-1 text-[11px] text-slate-400">
+                          <span class="flex flex-shrink-0 items-center gap-1 text-[11px] text-slate-400">
                             <span
-                              class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600"
+                              class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600"
                             ></span>
                             Nagsasalin...
                           </span>
@@ -254,11 +252,11 @@
                       </div>
                       <input
                         type="text"
-                        class="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-4 py-2 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        class="w-full rounded-xl border-none bg-[#e6ede5] px-4 py-2 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#ccd6cc,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
                         [(ngModel)]="item.tl"
                         [ngModelOptions]="{ standalone: true }"
                         placeholder="Awtomatikong isasalin..."
-                        [class.opacity-50]="item.translating"
+                        [class.opacity-60]="item.translating"
                       />
                     </div>
                   </div>
@@ -266,7 +264,7 @@
                   <button
                     aria-label="Remove Tip"
                     type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors duration-200"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 hover:shadow-[inset_2px_2px_5px_#e5b3b3,inset_-2px_-2px_5px_#ffffff] transition-all duration-200"
                     (click)="removeBullet(sevData[activeSev].prevention, i)"
                   >
                     <svg
@@ -286,7 +284,7 @@
 
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-all"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#eef3ec] text-xs font-semibold text-emerald-700 shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff] hover:shadow-[2px_2px_6px_#d3ddd3,-2px_-2px_6px_#ffffff] transition-all"
               (click)="addBullet(sevData[activeSev].prevention)"
             >
               <svg
@@ -303,24 +301,24 @@
             </button>
           </div>
 
-          <div class="space-y-4 pt-4 border-t border-slate-100">
+          <div class="space-y-4 pt-4 border-t border-black/5">
             <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
               <i class="pi pi-exclamation-triangle text-amber-500"></i> When to Escalate
             </h3>
 
-            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="rounded-2xl bg-[#eef3ec] p-4 shadow-[5px_5px_12px_#d3ddd3,-5px_-5px_12px_#ffffff]">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex flex-col gap-2">
                   <label class="flex items-center gap-2 text-xs font-semibold text-slate-600">
                     <span
-                      class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200 select-none"
+                      class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff] select-none"
                       >EN</span
                     >
                     Escalation Guidance
                   </label>
                   <input
                     type="text"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    class="w-full rounded-xl border-none bg-[#eef3ec] px-4 py-2 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
                     [(ngModel)]="sevData[activeSev].escalateEn"
                     [ngModelOptions]="{ standalone: true }"
                     placeholder="Signs that indicate escalation..."
@@ -329,18 +327,18 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                  <div class="flex items-center justify-between">
+                  <div class="flex items-center justify-between gap-2">
                     <label class="flex items-center gap-2 text-xs font-semibold text-slate-600">
                       <span
-                        class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200 select-none"
+                        class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-amber-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff] select-none"
                         >TL</span
                       >
                       Mensahe sa Filipino
                     </label>
                     @if (translating[activeSev + '_escalate']) {
-                      <span class="flex items-center gap-1 text-[11px] text-slate-400">
+                      <span class="flex flex-shrink-0 items-center gap-1 text-[11px] text-slate-400">
                         <span
-                          class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600"
+                          class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600"
                         ></span>
                         Nagsasalin...
                       </span>
@@ -348,11 +346,11 @@
                   </div>
                   <input
                     type="text"
-                    class="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-4 py-2 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    class="w-full rounded-xl border-none bg-[#e6ede5] px-4 py-2 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#ccd6cc,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
                     [(ngModel)]="sevData[activeSev].escalateTl"
                     [ngModelOptions]="{ standalone: true }"
                     placeholder="Awtomatikong isasalin..."
-                    [class.opacity-50]="translating[activeSev + '_escalate']"
+                    [class.opacity-60]="translating[activeSev + '_escalate']"
                   />
                 </div>
               </div>
@@ -360,9 +358,7 @@
           </div>
         </div>
       } @else {
-        <div
-          class="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-10 text-center"
-        >
+        <div class="rounded-2xl bg-[#eef3ec] p-8 sm:p-10 text-center shadow-[inset_4px_4px_10px_#d3ddd3,inset_-4px_-4px_10px_#ffffff]">
           <p class="text-sm font-medium text-slate-500">
             Select an active severity above to edit workflow recommendations.
           </p>
@@ -371,21 +367,21 @@
     </div>
 
     <div
-      class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-end gap-4 rounded-b-xl"
+      class="border-t border-black/5 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-4"
     >
       <button
         type="button"
         (click)="onSaveRecommendations()"
         [disabled]="isSaving"
-        class="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        class="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-[#eef3ec]"
         [class]="
           isSaving
-            ? 'cursor-not-allowed bg-slate-300'
-            : 'bg-indigo-600 hover:bg-indigo-700 shadow-sm'
+            ? 'cursor-not-allowed bg-[#dfe6de] text-slate-400 shadow-[inset_2px_2px_5px_#c9d1c9,inset_-2px_-2px_5px_#ffffff]'
+            : 'bg-emerald-500 text-white shadow-[5px_5px_12px_#c3cfc3,-5px_-5px_12px_#ffffff] hover:bg-emerald-600 hover:shadow-[3px_3px_8px_#c3cfc3,-3px_-3px_8px_#ffffff] active:shadow-[inset_3px_3px_6px_#4c8f6a,inset_-3px_-3px_6px_#3a7355]'
         "
       >
         @if (isSaving) {
-          <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+          <svg class="animate-spin h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24">
             <circle
               class="opacity-25"
               cx="12"
