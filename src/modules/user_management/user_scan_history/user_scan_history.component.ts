@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent } from '../../../app/shared/skeletons/disease-guidance/scan-history-skeleton/scan-history-skeleton';
 import { PaginationComponent } from '../../../app/shared/components/pagination/pagination.component';
-
+import { ScanDetailModalComponent } from './modal/scan-detail-modal.component'; // adjust path to wherever you saved it
 
 export type Severity = 'Mild' | 'Moderate' | 'Severe';
 export type ScanStatus = 'complete' | 'failed';
@@ -45,7 +45,7 @@ interface ScanFilters {
 @Component({
   selector: 'app-scan-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, ScanHistorySkeletonComponent, ScanHistoryProfileSkeletonComponent, PaginationComponent,ScanDetailModalComponent],
   templateUrl: './user_scan_history.component.html',
 })
 export class ScanHistoryComponent implements OnInit {
