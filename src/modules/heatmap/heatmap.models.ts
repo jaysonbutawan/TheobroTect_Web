@@ -1,4 +1,4 @@
-import { ScanDto } from '../dashboard/dashboard.dto';
+import { Scan } from '../../app/shared/models';
 
 export interface DiseaseCounts {
   healthy: number;

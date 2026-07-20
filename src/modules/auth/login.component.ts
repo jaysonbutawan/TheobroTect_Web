@@ -1,8 +1,9 @@
-import { Component, inject ,ChangeDetectorRef} from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from './api.service';
-import { AdminLoginPayload, AdminLoginResponse } from './login.component.dto';
+import { AuthApiService } from '../../app/core/services/api/auth-api.service';
+import { LoginPayload, LoginResponse } from '../../app/shared/models';
+import { ToastService } from '../../app/shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -13,9 +14,10 @@ import { AdminLoginPayload, AdminLoginResponse } from './login.component.dto';
 export class LoginComponent {
 
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private authApiService = inject(AuthApiService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   errorMessage = '';
   loading = false;
@@ -38,18 +40,24 @@ export class LoginComponent {
 
     const { email, password } = this.loginForm.getRawValue();
 
-    const payload: AdminLoginPayload = {
+    const payload: LoginPayload = {
       email,
       password
     };
 
-    this.authService.login(payload).subscribe({
-      next: (res: AdminLoginResponse) => {
+    this.authApiService.login(payload).subscribe({
+      next: (res: LoginResponse) => {
         localStorage.setItem('access_token', res.token);
+        this.toastService.show('success', 'Login Successful', 'Welcome back!');
         this.router.navigate(['/dashboard']);
         this.loading = false;
         this.cdr.markForCheck();
-
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
+        this.toastService.show('error', 'Login Failed', this.errorMessage);
+        this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

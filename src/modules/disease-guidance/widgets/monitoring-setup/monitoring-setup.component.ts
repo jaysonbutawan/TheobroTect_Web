@@ -243,7 +243,6 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       );
 
       if (!exists) {
-        console.log(`[MonitoringSetup] Creating missing severity configuration layout step context entry matching: "${level}"`);
         const diseaseId = this.diseaseId;
         if (!diseaseId) return;
 
@@ -254,7 +253,6 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
 
         this.severityService.createSeverity(payload).subscribe({
           next: (res: any) => {
-            console.log(`✅ [MonitoringSetup] "${level}" severity record created dynamically:`, res);
             this.existingSeverities.push(res?.data ?? res);
             this.loadMonitoringPlan();
             this.cdr.markForCheck();

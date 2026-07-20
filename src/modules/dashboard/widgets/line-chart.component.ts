@@ -60,8 +60,7 @@ export class LineChartComponent implements OnChanges {
     }
   };
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('CHILD RECEIVED');
-    console.log(this.chartData);
+    // Chart data received
   }
 
    toggleYearDropdown(): void {

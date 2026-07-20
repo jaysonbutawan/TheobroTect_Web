@@ -7,6 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 import { DiseaseGuideService } from './services/disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
 import { TranslationService } from './services/translation.service';
+import { ToastService } from '../../app/shared/components/toast/toast.service';
 
 import { DiseaseViewModalComponent } from './widgets/disease-view-modal/disease-view-modal.component';
 import { DiseaseTableSkeletonComponent } from '../../app/shared/skeletons/disease-guidance/disease-table-skeleton/disease-table-skeleton';
@@ -65,6 +66,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private diseaseService = inject(DiseaseGuideService);
   private translationService = inject(TranslationService);
+  private toastService = inject(ToastService);
 
   diseaseKeys: string[] = [
     'black_pod_disease',
@@ -255,9 +257,12 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         const saved = res?.data ?? res;
         this.currentEditId = saved.id;
         this.isEditMode = true;
+        const action = this.isEditMode ? 'updated' : 'created';
+        this.toastService.show('success', 'Success', `Disease guidance ${action} successfully.`);
         this.fetchExistingDiseases();
       },
       error: () => {
+        this.toastService.show('error', 'Error', 'Failed to save disease guidance. Please try again.');
       }
     });
   }

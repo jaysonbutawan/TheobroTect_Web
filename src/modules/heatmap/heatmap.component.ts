@@ -3,11 +3,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../dashboard/dashboard.service';
-import { ScanDto } from '../dashboard/dashboard.dto';
+import { Scan } from '../../app/shared/models';
 import { FilterBarComponent } from './widgets/filter-bar.component';
 import { FilterState, DiseaseCounts, Observation } from './heatmap.models';
 import { HeatmapLogicService } from './heatmap-logic.service';
 import { HeatmapMapService } from './heatmap-map.service';
+import { ToastService } from '../../app/shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-heatmap',
@@ -19,8 +20,8 @@ import { HeatmapMapService } from './heatmap-map.service';
 export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
-  allScans: ScanDto[] = [];
-  selectedScan: ScanDto | null = null;
+  allScans: Scan[] = [];
+  selectedScan: Scan | null = null;
 
   activeFilter: FilterState = { year: new Date().getFullYear(), month: new Date().getMonth(), disease: 'all' };
   diseaseCounts: DiseaseCounts = { healthy: 0, blackPod: 0, mealybug: 0, podBorer: 0, other: 0, total: 0 };
@@ -40,7 +41,8 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private dashboardService: DashboardService,
     public logic: HeatmapLogicService,
-    private mapService: HeatmapMapService
+    private mapService: HeatmapMapService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit() {
@@ -75,8 +77,8 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Failed to load scans:', err);
         this.errorMessage = 'Failed to load scans data';
+        this.toastService.show('error', 'Load Failed', 'Could not load heatmap data from the server.');
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -92,7 +94,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     const filteredData = this.logic.filterScans(this.allScans, this.activeFilter);
     const validScans = filteredData.filter(s => s.location_lat && s.location_lng);
     this.diseaseCounts = this.logic.getDiseaseCounts(validScans);
-    this.mapService.plotMarkers(filteredData, (scan: ScanDto) => {
+    this.mapService.plotMarkers(filteredData, (scan: Scan) => {
       this.selectedScan = scan;
       this.cdr.markForCheck();
     });

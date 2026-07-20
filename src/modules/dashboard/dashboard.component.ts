@@ -1,10 +1,9 @@
 import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DashboardService } from './dashboard.service';
-import { ScanDto } from './dashboard.dto';
+import { Scan } from '../../app/shared/models';
 import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-mobile/field-log-skeleton-mobile';
 import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-desktop/field-log-skeleton-desktop';
 import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
@@ -46,7 +45,7 @@ export class DashboardComponent implements OnInit {
   };
 
   // Recent scans table data
-  recentScans: any[] = [];
+  recentScans: Scan[] = [];
 
   // Bar Chart - Disease counts by date
   public barChartData: ChartConfiguration<'bar'>['data'] = {
@@ -119,16 +118,6 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService.getUsersScan().subscribe({
       next: (res) => {
-        console.log('===== RAW API DATA =====');
-        console.log(res.data);
-
-        console.table(
-          res.data.map(s => ({
-            disease: s.disease_key,
-            severity: s.severity_key,
-            scanned_at: s.scanned_at
-          }))
-        );
         // charts
         this.processBarChartData(res.data);
         this.processLineChartData(res.data);
@@ -142,21 +131,12 @@ export class DashboardComponent implements OnInit {
             const createdAt = new Date(scan.scanned_at);
             createdAt.setHours(0, 0, 0, 0);
             return createdAt.getTime() === today.getTime();
-          })
-          .map(scan => ({
-            farmer: scan.user_name || 'Unknown',
-            locationName: scan.location_label || 'Unknown Location',
-            type: scan.disease_key || 'Unknown Disease',
-            severity_key: scan.severity_key || 'Unknown Severity',
-            confidence: scan.confidence || 0,
-            coordinates: `${scan.location_lat},${scan.location_lng}`
-          }));
+          });
 
         this.isLoading = false;
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Failed to load dashboard data:', err);
         this.errorMessage = 'Failed to load data';
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -168,7 +148,7 @@ export class DashboardComponent implements OnInit {
    * Process API data to generate bar chart labels, datasets, and stats
    * Groups data by date and counts by disease type
    */
-  private processBarChartData(scans: ScanDto[]): void {
+  private processBarChartData(scans: Scan[]): void {
     const dateGroups = this.groupScansByDate(scans);
     const sortedDates = Object.keys(dateGroups).sort(
       (a, b) => new Date(a).getTime() - new Date(b).getTime()
@@ -230,7 +210,7 @@ export class DashboardComponent implements OnInit {
    * Process API data to generate line chart
    * Groups data by month and counts healthy vs diseased plants
    */
-  private processLineChartData(scans: ScanDto[]): void {
+  private processLineChartData(scans: Scan[]): void {
 
     const monthGroups = this.groupScansByMonth(scans);
     const currentYear = new Date().getFullYear();
@@ -304,8 +284,8 @@ export class DashboardComponent implements OnInit {
   /**
    * Group scans by date
    */
-  private groupScansByDate(scans: ScanDto[]): { [date: string]: ScanDto[] } {
-    const groups: { [date: string]: ScanDto[] } = {};
+  private groupScansByDate(scans: Scan[]): { [date: string]: Scan[] } {
+    const groups: { [date: string]: Scan[] } = {};
 
     scans.forEach(scan => {
       const dateStr = scan.scanned_at?.split(' ')[0] || new Date().toISOString().split('T')[0];
@@ -322,8 +302,8 @@ export class DashboardComponent implements OnInit {
   /**
    * Group scans by month
    */
-  private groupScansByMonth(scans: ScanDto[]): { [month: string]: ScanDto[] } {
-    const groups: { [month: string]: ScanDto[] } = {};
+  private groupScansByMonth(scans: Scan[]): { [month: string]: Scan[] } {
+    const groups: { [month: string]: Scan[] } = {};
 
     scans.forEach(scan => {
       const monthStr = scan.scanned_at?.substring(0, 7) || new Date().toISOString().substring(0, 7);

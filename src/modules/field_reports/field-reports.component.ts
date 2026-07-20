@@ -1,27 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { FieldReportsSkeletonComponent } from '../../app/shared/skeletons/field-reports/field-reports-skeleton/field-reports-skeleton';
 import { PaginationComponent } from '../../app/shared/components/pagination/pagination.component';
-
-export type Severity = 'Mild' | 'Moderate' | 'Severe';
-export type ReportStatus = 'Pending' | 'Under Review' | 'Resolved';
-
-export interface FieldReport {
-  id: string;
-  timestamp: string;   // display string, e.g. "Oct 24, 09:15 AM"
-  barangay: string;
-  category: string;
-  severity: Severity;
-  status: ReportStatus;
-}
-
-interface ReportFilters {
-  barangay: string;
-  category: string;
-  severity: Severity | '';
-  date: string;
-}
+import { FieldReportsApiService } from '../../app/core/services/api/field-reports-api.service';
+import { FieldReport, ReportFilters, Severity, ReportStatus } from '../../app/shared/models';
 
 @Component({
   selector: 'app-field-reports',
@@ -29,7 +13,9 @@ interface ReportFilters {
   imports: [CommonModule, FormsModule, FieldReportsSkeletonComponent, PaginationComponent],
   templateUrl: './field-reports-list.component.html',
 })
-export class FieldReportsComponent implements OnInit {
+export class FieldReportsComponent implements OnInit, OnDestroy {
+  private reportsApi = inject(FieldReportsApiService);
+  private destroy$ = new Subject<void>();
 
   isLoading = true;
   isSyncing = false;
@@ -52,34 +38,32 @@ export class FieldReportsComponent implements OnInit {
     this.loadReports();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   // ── Data loading ──────────────────────────────────────────
   loadReports(): void {
     this.isLoading = true;
     this.errorMsg = '';
 
-    // Replace with a real API call, e.g.:
-    // this.fieldReportsService.getReports().subscribe({
-    //   next: (reports) => { this.allReports = reports; this.applyFilters(); this.isLoading = false; },
-    //   error: () => { this.errorMsg = 'Could not load field reports.'; this.isLoading = false; }
-    // });
-
-    setTimeout(() => {
-      this.allReports = this.mockReports();
-      this.applyFilters();
-      this.isLoading = false;
-    }, 300);
-  }
-
-  private mockReports(): FieldReport[] {
-    return [
-      { id: 'FR-1001', timestamp: 'Oct 24, 09:15 AM', barangay: 'San Jose', category: 'Black Pod', severity: 'Severe', status: 'Pending' },
-      { id: 'FR-1002', timestamp: 'Oct 24, 08:30 AM', barangay: 'Poblacion', category: 'Mealybug', severity: 'Moderate', status: 'Under Review' },
-      { id: 'FR-1003', timestamp: 'Oct 23, 04:45 PM', barangay: 'Sta. Maria', category: 'Pod Borer', severity: 'Mild', status: 'Resolved' },
-      { id: 'FR-1004', timestamp: 'Oct 23, 01:20 PM', barangay: 'Sto. Tomas', category: 'Black Pod', severity: 'Mild', status: 'Resolved' },
-      { id: 'FR-1005', timestamp: 'Oct 22, 11:10 AM', barangay: 'San Jose', category: 'Mealybug', severity: 'Moderate', status: 'Under Review' },
-      { id: 'FR-1006', timestamp: 'Oct 21, 03:05 PM', barangay: 'Poblacion', category: 'Pod Borer', severity: 'Severe', status: 'Pending' },
-      { id: 'FR-1007', timestamp: 'Oct 21, 10:40 AM', barangay: 'Sta. Maria', category: 'Black Pod', severity: 'Mild', status: 'Resolved' },
-    ];
+    this.reportsApi.getReports()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.allReports = response.data || [];
+          this.applyFilters();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.errorMsg = 'Could not load field reports. Please try again.';
+          this.isLoading = false;
+          // Fallback to empty array
+          this.allReports = [];
+          this.applyFilters();
+        }
+      });
   }
 
   // ── Filtering ──────────────────────────────────────────────
@@ -137,24 +121,25 @@ export class FieldReportsComponent implements OnInit {
     if (this.isSyncing) return;
     this.isSyncing = true;
 
-    // Replace with a real sync/refetch call, e.g.:
-    // this.fieldReportsService.getReports().subscribe({
-    //   next: (reports) => { this.allReports = reports; this.applyFilters(); this.isSyncing = false; },
-    //   error: () => { this.errorMsg = 'Sync failed.'; this.isSyncing = false; }
-    // });
-
-    setTimeout(() => {
-      this.allReports = this.mockReports();
-      this.applyFilters();
-      this.isSyncing = false;
-    }, 600);
+    this.reportsApi.getReports()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.allReports = response.data || [];
+          this.applyFilters();
+          this.isSyncing = false;
+        },
+        error: () => {
+          this.errorMsg = 'Sync failed.';
+          this.isSyncing = false;
+        }
+      });
   }
 
   // ── Row actions ────────────────────────────────────────────
   viewReport(report: FieldReport): void {
     // Wire up to a detail modal or route, e.g.:
     // this.router.navigate(['/field-reports', report.id]);
-    console.log('View report', report.id);
   }
 
   // ── Style helpers ──────────────────────────────────────────

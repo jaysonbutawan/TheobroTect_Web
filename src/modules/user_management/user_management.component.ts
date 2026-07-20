@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
-import { UsersApiService } from './api.service';
-import { UserDto, UsersResponseDto } from './user_management.dto';
+import { UsersApiService } from '../../app/core/services/api/users-api.service';
+import { User, UsersResponse } from '../../app/shared/models';
 import { PaginationComponent } from '../../app/shared/components/pagination/pagination.component';
+import { ToastService } from '../../app/shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-user-management',
@@ -16,12 +17,13 @@ import { PaginationComponent } from '../../app/shared/components/pagination/pagi
 export class UserManagementComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
-    private usersApi: UsersApiService
+    private usersApi: UsersApiService,
+    private toastService: ToastService
   ) { }
 
-  users: UserDto[] = [];
-  filteredUsers: UserDto[] = [];
-  pagedUsers: UserDto[] = [];
+  users: User[] = [];
+  filteredUsers: User[] = [];
+  pagedUsers: User[] = [];
   search = '';
   totalUsers = 0;
   isLoading = false;
@@ -53,34 +55,22 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMsg = '';
 
-    console.log('🚀 Loading users from API...');
-
     this.cdr.markForCheck();
 
     this.usersApi.getUsers()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res: UsersResponseDto) => {
-
-          console.log('✅ API RESPONSE RECEIVED:', res);
-
+        next: (res: UsersResponse) => {
           this.users = res?.data ?? [];
-
-          console.log('👥 Users loaded:', this.users.length);
-          console.table(this.users);
-
           this.isLoading = false;
           this.applyFilters();
-
           this.cdr.markForCheck();
         },
 
         error: (err) => {
-          console.error('❌ USERS API ERROR:', err);
-
           this.errorMsg = 'Failed to load users';
+          this.toastService.show('error', 'Load Failed', 'Could not load users from the server.');
           this.isLoading = false;
-
           this.cdr.markForCheck();
         }
       });
@@ -127,11 +117,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.updatePagedUsers();
   }
 
-  viewUser(user: UserDto): void {
+  viewUser(user: User): void {
   this.router.navigate(['/dashboard/users', user.id]);
 }
 
-  deleteUser(user: UserDto): void {
+  deleteUser(user: User): void {
     if (!confirm(`Delete ${user.name}?`)) return;
     this.users = this.users.filter(u => u.id !== user.id);
 

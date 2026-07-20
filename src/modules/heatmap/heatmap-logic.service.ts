@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ScanDto } from '../dashboard/dashboard.dto';
+import { Scan } from '../../app/shared/models';
 import { DiseaseCounts, FilterState } from './heatmap.models';
 
 @Injectable({ providedIn: 'root' })
 export class HeatmapLogicService {
 
-  filterScans(scans: ScanDto[], filter: FilterState): ScanDto[] {
+  filterScans(scans: Scan[], filter: FilterState): Scan[] {
     const targetYearStr = String(filter.year);
     const isMonthFilterActive = filter.month !== null && filter.month !== undefined && filter.month !== -1;
     let dateMatchPrefix = targetYearStr;
@@ -24,7 +24,7 @@ export class HeatmapLogicService {
     });
   }
 
-  getDiseaseCounts(scans: ScanDto[]): DiseaseCounts {
+  getDiseaseCounts(scans: Scan[]): DiseaseCounts {
     const counts: DiseaseCounts = { healthy: 0, blackPod: 0, mealybug: 0, podBorer: 0, other: 0, total: scans.length };
 
     scans.forEach(scan => {
