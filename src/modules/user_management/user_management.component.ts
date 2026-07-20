@@ -26,8 +26,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   totalUsers = 0;
   isLoading = false;
   errorMsg = '';
-
-  // ── Pagination state ──────────────────────────────────────
   pageSize = 10;
   currentPage = 1;
 
@@ -39,7 +37,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.search$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => {
-        this.currentPage = 1; // reset to page 1 whenever the search term changes
+        this.currentPage = 1;
         this.applyFilters();
       });
 
@@ -107,7 +105,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.updatePagedUsers();
   }
 
-  // ── Pagination ─────────────────────────────────────────────
   private updatePagedUsers(): void {
     const start = (this.currentPage - 1) * this.pageSize;
     this.pagedUsers = this.filteredUsers.slice(start, start + this.pageSize);
@@ -130,9 +127,9 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.updatePagedUsers();
   }
 
-  viewUser(): void {
-    this.router.navigate(['/dashboard/users']);
-  }
+  viewUser(user: UserDto): void {
+  this.router.navigate(['/dashboard/users', user.id]);
+}
 
   deleteUser(user: UserDto): void {
     if (!confirm(`Delete ${user.name}?`)) return;
@@ -144,11 +141,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       this.currentPage = this.totalPages;
       this.updatePagedUsers();
     }
-  }
-
-  avatarUrl(user: UserDto): string {
-    const encoded = encodeURIComponent(user.name || 'Unknown');
-    return `https://ui-avatars.com/api/?name=${encoded}&background=random&color=fff&bold=true`;
   }
 
 

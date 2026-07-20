@@ -301,9 +301,6 @@ export class HeatmapMapService {
     L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
 
     this.drawBoundary();
-
-    // Leaflet doesn't know the container resized (e.g. clamp()-based
-    // height, orientation change, sidebar toggle) unless told explicitly.
     this.observeResize(containerId);
   }
 
@@ -312,8 +309,6 @@ export class HeatmapMapService {
     if (!container) return;
 
     this.resizeObserver = new ResizeObserver(() => {
-      // invalidateSize recalculates tile layout + re-centers correctly
-      // after the container's actual pixel size changes.
       this.map?.invalidateSize({ animate: false });
     });
 
