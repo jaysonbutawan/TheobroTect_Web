@@ -26,7 +26,7 @@ export class TranslationService {
 
       return response.translatedText || '';
     } catch (error) {
-      console.error('Translation failed:', error);
+      // Translation failed, return original text
       return text;
     }
   }

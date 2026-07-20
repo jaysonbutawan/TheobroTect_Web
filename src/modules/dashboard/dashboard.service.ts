@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment.prod';
-import { ScanResponseDto } from './dashboard.dto';
+import { environment } from '../../environments/environment';
+import { ScanResponse } from '../../app/shared/models';
 import { Observable } from 'rxjs';
 
 
@@ -12,7 +12,7 @@ export class DashboardService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/scans`
 
-  getUsersScan(): Observable<ScanResponseDto> {
-    return this.http.get<ScanResponseDto>(`${this.baseUrl}`);
+  getUsersScan(): Observable<ScanResponse> {
+    return this.http.get<ScanResponse>(`${this.baseUrl}`);
   }
 }

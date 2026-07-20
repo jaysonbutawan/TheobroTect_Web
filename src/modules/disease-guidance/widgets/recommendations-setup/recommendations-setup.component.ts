@@ -95,13 +95,9 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   // ─── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
-    console.log(`[RecommendationsSetup] ngOnInit -> diseaseId: ${this.diseaseId}, diseaseKey: "${this.diseaseKey}"`);
     if (this.diseaseId && this.diseaseKey) {
-      console.log('[RecommendationsSetup] ngOnInit: Both inputs ready — loading severities.');
       this.initialLoadDone = true;
       this.Severities();
-    } else {
-      console.warn('[RecommendationsSetup] ngOnInit: Waiting for diseaseId and diseaseKey to both be set.');
     }
   }
 
@@ -120,14 +116,12 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     const keyChanged = !!changes['diseaseKey'];
 
     if ((idChanged || keyChanged) && idReady && keyReady) {
-      console.log(`[RecommendationsSetup] ngOnChanges: Both inputs synced -> ID: ${this.diseaseId}, Key: "${this.diseaseKey}"`);
 
       if (!this.initialLoadDone) {
         this.initialLoadDone = true;
         this.Severities();
       } else if (!changes['diseaseId']?.firstChange || !changes['diseaseKey']?.firstChange) {
         // Re-load only when it is a genuine update (not the very first emission caught by ngOnInit)
-        console.log('[RecommendationsSetup] ngOnChanges: Disease changed — reloading.');
         this.initialLoadDone = true;
         this.Severities();
       }
@@ -140,8 +134,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
 
   Severities(): void {
     if (this.diseaseKey === 'healthy') {
-      console.log('🌿 [Severities] "healthy" key detected. Adapting UI.');
-
       this.displaySeverities = ['mild'];
       this.activeSev = 'mild';
 
@@ -157,8 +149,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     // 🌟 2. Reset the label back to "Mild" for actual diseases (in case the component is reused)
     this.severityConfig.mild.label = 'Mild';
     this.severityConfig.mild.description = 'Early or low-impact signs';
-
-    console.log(`[RecommendationsSetup] Severities(): Fetching for diseaseId=${this.diseaseId}`);
 
     this.severityService.getSeverities().subscribe({
       next: (res: any) => {
@@ -184,7 +174,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('[RecommendationsSetup] Severities(): Failed to fetch severities', err);
         this.displaySeverities = [];
         this.cdr.markForCheck();
       }
@@ -241,9 +230,8 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       try {
         const translated = await this.translationService.translate(text);
         item[targetKey] = translated;
-        console.log(`[onBulletEnInput] Translated "${text}" -> "${translated}"`);
       } catch (error) {
-        console.error('[onBulletEnInput] Translation failed:', error);
+        // Translation failed silently
       } finally {
         item.translating = false;
         this.cdr.markForCheck();
@@ -270,9 +258,8 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       try {
         const translated = await this.translationService.translate(text);
         (this.sevData[severity][targetField] as string) = translated;
-        console.log(`[onSingleEnInput] ${translatingKey} translated -> "${translated}"`);
       } catch (error) {
-        console.error(`[onSingleEnInput] Translation failed for ${translatingKey}:`, error);
+        // Translation failed silently
       } finally {
         this.translating[translatingKey] = false;
         this.cdr.markForCheck();

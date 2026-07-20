@@ -1,8 +1,12 @@
-<div class="min-h-screen w-full bg-[#f5f5f7] flex items-center justify-center p-6 font-sans relative overflow-hidden">
-
-  <!-- Background decorative blobs, consistent with the login page -->
-  <div class="fixed top-[-120px] right-[-120px] w-[400px] h-[400px] rounded-full bg-[#3D683A]/5 blur-[80px] pointer-events-none"></div>
-  <div class="fixed bottom-[-120px] left-[-120px] w-[400px] h-[400px] rounded-full bg-slate-500/5 blur-[80px] pointer-events-none"></div>
+<div
+  class="min-h-screen w-full bg-[#f5f5f7] flex items-center justify-center p-6 font-sans relative overflow-hidden"
+>
+  <div
+    class="fixed top-[-120px] right-[-120px] w-[400px] h-[400px] rounded-full bg-[#3D683A]/5 blur-[80px] pointer-events-none"
+  ></div>
+  <div
+    class="fixed bottom-[-120px] left-[-120px] w-[400px] h-[400px] rounded-full bg-slate-500/5 blur-[80px] pointer-events-none"
+  ></div>
 
   <!-- Drifting dotted "trail" particles across the whole page -->
   <span class="nf-dot nf-dot-1"></span>
@@ -11,17 +15,17 @@
   <span class="nf-dot nf-dot-4"></span>
 
   <div class="relative z-10 w-full max-w-md text-center">
-
-    <!-- ── Ghost pod character ── -->
     <div class="relative mx-auto mb-6 w-40 h-40 flex items-center justify-center">
-
-      <!-- Floating character (bobs up and down) -->
       <div class="nf-float">
-        <svg width="128" height="140" viewBox="0 0 128 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- soft glow behind it -->
+        <svg
+          width="128"
+          height="140"
+          viewBox="0 0 128 140"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <ellipse cx="64" cy="66" rx="52" ry="50" fill="#3D683A" fill-opacity="0.06" />
 
-          <!-- ghost/pod body: rounded top, wavy bottom like a little cacao-pod ghost -->
           <path
             d="M64 8
                C93 8 112 32 112 62
@@ -33,93 +37,127 @@
                C16 98 16 108 16 108
                L16 62
                C16 32 35 8 64 8 Z"
-            fill="#EAF1E9" stroke="#3D683A" stroke-width="2.5" stroke-linejoin="round" />
+            fill="#EAF1E9"
+            stroke="#3D683A"
+            stroke-width="2.5"
+            stroke-linejoin="round"
+          />
 
-          <!-- subtle pod ridge lines, like a cacao pod -->
-          <path d="M64 12 C64 40 64 78 64 106" stroke="#3D683A" stroke-opacity="0.15" stroke-width="2" stroke-linecap="round" />
-          <path d="M42 18 C48 44 48 82 40 104" stroke="#3D683A" stroke-opacity="0.12" stroke-width="2" stroke-linecap="round" />
-          <path d="M86 18 C80 44 80 82 88 104" stroke="#3D683A" stroke-opacity="0.12" stroke-width="2" stroke-linecap="round" />
+          <path
+            d="M42 18 C48 44 48 82 40 104"
+            stroke="#3D683A"
+            stroke-opacity="0.12"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <path
+            d="M86 18 C80 44 80 82 88 104"
+            stroke="#3D683A"
+            stroke-opacity="0.12"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
 
-          <!-- blinking eyes -->
-          <g class="nf-blink" style="transform-origin: 64px 60px;">
+          <g class="nf-blink" style="transform-origin: 64px 60px">
             <circle cx="50" cy="58" r="5" fill="#3D683A" />
             <circle cx="78" cy="58" r="5" fill="#3D683A" />
           </g>
 
-          <!-- little worried/curious mouth -->
-          <path d="M56 76 Q64 70 72 76" stroke="#3D683A" stroke-width="2.5" stroke-linecap="round" fill="none" />
+          <path
+            d="M56 76 Q64 70 72 76"
+            stroke="#3D683A"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            fill="none"
+          />
 
-          <!-- blush -->
           <circle cx="42" cy="68" r="4" fill="#3D683A" fill-opacity="0.15" />
           <circle cx="86" cy="68" r="4" fill="#3D683A" fill-opacity="0.15" />
         </svg>
       </div>
 
-      <!-- squishing shadow underneath -->
-      <div class="nf-shadow absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-3 rounded-full bg-slate-400/25 blur-[2px]"></div>
+      <div
+        class="nf-shadow absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-3 rounded-full bg-slate-400/25 blur-[2px]"
+      ></div>
 
-      <!-- floating "?" particles orbiting the character -->
       <span class="nf-question nf-question-1">?</span>
       <span class="nf-question nf-question-2">?</span>
     </div>
 
-    <p class="font-['DM_Sans',sans-serif] text-[80px] leading-none font-black text-[#1a202c] tracking-tight">404</p>
-    <h1 class="font-['Syne'] text-[22px] font-bold text-[#1a202c] mt-2">This pod wandered off</h1>
-    <p class="text-[#718096] text-[13px] mt-2 leading-relaxed">
-      We couldn't find the page you're looking for. It might have been moved, renamed, or never existed.
+    <p
+      class="font-['DM_Sans',sans-serif] text-[80px] leading-none font-black text-[#1a202c] tracking-tight"
+    >
+      404
     </p>
+    <h1 class="font-['Syne'] text-[22px] font-bold text-[#1a202c] mt-2">This pod wandered off</h1>
+    <p class="text-[#718096] text-[13px] mt-2 leading-relaxed"></p>
 
     <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
       <button
         (click)="goBack()"
-        class="w-full sm:w-auto px-6 py-3 rounded-2xl text-[13px] font-bold text-slate-600 bg-[#f5f5f7] shadow-[5px_5px_12px_#d1d1d5,-5px_-5px_12px_#ffffff] hover:shadow-[3px_3px_8px_#d1d1d5,-3px_-3px_8px_#ffffff] active:shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] transition-all">
+        class="w-full sm:w-auto px-6 py-3 rounded-2xl text-[13px] font-bold text-slate-600 bg-[#f5f5f7] shadow-[5px_5px_12px_#d1d1d5,-5px_-5px_12px_#ffffff] hover:shadow-[3px_3px_8px_#d1d1d5,-3px_-3px_8px_#ffffff] active:shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] transition-all"
+      >
         Go back
       </button>
       <a
         routerLink="/dashboard"
-        class="w-full sm:w-auto px-6 py-3 rounded-2xl text-[13px] font-bold text-white bg-[#3D683A] shadow-[5px_5px_12px_#d1d1d5,-5px_-5px_12px_#ffffff] hover:bg-[#2f5230] hover:shadow-[3px_3px_8px_#d1d1d5,-3px_-3px_8px_#ffffff] active:shadow-[inset_3px_3px_8px_#2a4a28,inset_-3px_-3px_8px_#4a7c47] transition-all">
+        class="w-full sm:w-auto px-6 py-3 rounded-2xl text-[13px] font-bold text-white bg-[#3D683A] shadow-[5px_5px_12px_#d1d1d5,-5px_-5px_12px_#ffffff] hover:bg-[#2f5230] hover:shadow-[3px_3px_8px_#d1d1d5,-3px_-3px_8px_#ffffff] active:shadow-[inset_3px_3px_8px_#2a4a28,inset_-3px_-3px_8px_#4a7c47] transition-all"
+      >
         Back to Dashboard
       </a>
     </div>
-
   </div>
 </div>
 
 <style>
-  /* Gentle up/down float for the character */
   .nf-float {
     animation: nf-bob 3.2s ease-in-out infinite;
   }
   @keyframes nf-bob {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-14px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
   }
 
-  /* Shadow squishes opposite to the float, as if it's casting depth */
   .nf-shadow {
     animation: nf-shadow 3.2s ease-in-out infinite;
   }
   @keyframes nf-shadow {
-    0%, 100% { transform: translateX(-50%) scale(1);    opacity: 0.35; }
-    50%      { transform: translateX(-50%) scale(0.7);  opacity: 0.18; }
+    0%,
+    100% {
+      transform: translateX(-50%) scale(1);
+      opacity: 0.35;
+    }
+    50% {
+      transform: translateX(-50%) scale(0.7);
+      opacity: 0.18;
+    }
   }
 
-  /* Slow blink */
   .nf-blink {
     animation: nf-blink 4.5s ease-in-out infinite;
   }
   @keyframes nf-blink {
-    0%, 92%, 100% { transform: scaleY(1); }
-    96%           { transform: scaleY(0.1); }
+    0%,
+    92%,
+    100% {
+      transform: scaleY(1);
+    }
+    96% {
+      transform: scaleY(0.1);
+    }
   }
 
-  /* Floating question marks drifting around the character */
   .nf-question {
     position: absolute;
     font-family: 'DM Sans', sans-serif;
     font-weight: 900;
     font-size: 14px;
-    color: #3D683A;
+    color: #3d683a;
     opacity: 0;
   }
   .nf-question-1 {
@@ -134,34 +172,71 @@
     animation: nf-question-float 3.6s ease-in-out 1.2s infinite;
   }
   @keyframes nf-question-float {
-    0%   { opacity: 0; transform: translateY(6px) scale(0.8); }
-    20%  { opacity: 0.7; }
-    60%  { opacity: 0.7; transform: translateY(-14px) scale(1); }
-    85%  { opacity: 0; }
-    100% { opacity: 0; transform: translateY(-18px) scale(1); }
+    0% {
+      opacity: 0;
+      transform: translateY(6px) scale(0.8);
+    }
+    20% {
+      opacity: 0.7;
+    }
+    60% {
+      opacity: 0.7;
+      transform: translateY(-14px) scale(1);
+    }
+    85% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-18px) scale(1);
+    }
   }
 
-  /* Ambient dots drifting slowly across the background */
   .nf-dot {
     position: fixed;
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background: #3D683A;
+    background: #3d683a;
     opacity: 0.12;
     pointer-events: none;
   }
-  .nf-dot-1 { top: 20%; left: 15%; animation: nf-drift 9s ease-in-out infinite; }
-  .nf-dot-2 { top: 65%; left: 20%; animation: nf-drift 11s ease-in-out infinite reverse; }
-  .nf-dot-3 { top: 30%; right: 18%; animation: nf-drift 10s ease-in-out infinite; }
-  .nf-dot-4 { top: 75%; right: 12%; animation: nf-drift 8s ease-in-out infinite reverse; }
+  .nf-dot-1 {
+    top: 20%;
+    left: 15%;
+    animation: nf-drift 9s ease-in-out infinite;
+  }
+  .nf-dot-2 {
+    top: 65%;
+    left: 20%;
+    animation: nf-drift 11s ease-in-out infinite reverse;
+  }
+  .nf-dot-3 {
+    top: 30%;
+    right: 18%;
+    animation: nf-drift 10s ease-in-out infinite;
+  }
+  .nf-dot-4 {
+    top: 75%;
+    right: 12%;
+    animation: nf-drift 8s ease-in-out infinite reverse;
+  }
   @keyframes nf-drift {
-    0%, 100% { transform: translate(0, 0); }
-    50%      { transform: translate(18px, -22px); }
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(18px, -22px);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .nf-float, .nf-shadow, .nf-blink, .nf-question, .nf-dot {
+    .nf-float,
+    .nf-shadow,
+    .nf-blink,
+    .nf-question,
+    .nf-dot {
       animation: none !important;
     }
   }

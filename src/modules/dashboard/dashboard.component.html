@@ -156,8 +156,8 @@
           </div>
 
           <div class="divide-y divide-gray-100 md:divide-y-0">
-            @for (scan of recentScans; track scan.coordinates) {
-            <div (click)="navigateToMap(scan.coordinates)"
+            @for (scan of recentScans; track scan.id) {
+            <div (click)="navigateToMap(scan.location_lat + ',' + scan.location_lng)"
               class="group p-4 sm:p-5 md:px-6 md:py-4 bg-white md:grid md:grid-cols-12 md:gap-4 md:items-center hover:md:bg-green-50/30 active:scale-[0.98] md:active:scale-100 transition-all duration-200 cursor-pointer md:border-b md:border-gray-100 last:md:border-b-0">
 
               <!-- Farmer Details -->
@@ -165,13 +165,13 @@
                 <div class="flex items-center gap-3 flex-1 min-w-0">
                   <div
                     class="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-green-100 to-emerald-50 border border-green-200 flex items-center justify-center font-bold text-green-700 text-base md:text-sm flex-shrink-0 group-hover:md:scale-105 transition-transform">
-                    {{ scan.farmer.charAt(0).toUpperCase() }}
+                    {{ scan.user_name.charAt(0).toUpperCase() }}
                   </div>
                   <div class="min-w-0 flex-1">
-                    <div class="font-bold text-gray-900 text-sm md:text-sm line-clamp-1 group-hover:md:text-green-700 transition-colors">{{ scan.farmer }}</div>
+                    <div class="font-bold text-gray-900 text-sm md:text-sm line-clamp-1 group-hover:md:text-green-700 transition-colors">{{ scan.user_name }}</div>
                     <div class="text-xs text-gray-500 font-medium mt-0.5 flex items-center gap-1 line-clamp-1">
                       <span class="material-symbols-rounded text-[14px]">location_on</span>
-                      {{ scan.locationName }}
+                      {{ scan.location_label }}
                     </div>
                   </div>
                 </div>
@@ -184,7 +184,7 @@
               <!-- Disease Type -->
               <div class="flex items-center gap-2 mt-3 md:mt-0 md:col-span-2">
                 <span class="text-base md:text-lg">🌿</span>
-                <span class="text-xs md:text-sm font-semibold text-gray-700 group-hover:md:text-gray-900">{{ scan.type }}</span>
+                <span class="text-xs md:text-sm font-semibold text-gray-700 group-hover:md:text-gray-900">{{ scan.disease_key }}</span>
               </div>
 
               <!-- Severity -->

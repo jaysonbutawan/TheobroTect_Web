@@ -41,7 +41,7 @@
 //     });
 //   }
 
-//   plotMarkers(scans: ScanDto[], onMarkerClick: (scan: ScanDto) => void): void {
+//   plotMarkers(scans: Scan[], onMarkerClick: (scan: Scan) => void): void {
 //     this.clearScanLayers();
 //     const heatPoints: any[] = [];
 //     const validScans = scans.filter(s => s.location_lat && s.location_lng);
@@ -162,7 +162,7 @@
 //     }
 //   }
 
-//   private addClickableMarker(lat: number, lng: number, scan: ScanDto, onClick: (scan: ScanDto) => void): void {
+//   private addClickableMarker(lat: number, lng: number, scan: Scan, onClick: (scan: Scan) => void): void {
 //     const ghostMarker = L.circleMarker([lat, lng], { radius: 20, stroke: false, fillColor: '#000', fillOpacity: 0 }).addTo(this.map);
 
 //     ghostMarker.bindTooltip(`<div style="font-size:11px;font-weight:700;padding:2px 4px;white-space:nowrap;">${scan.user_name || 'Unknown'} &nbsp;·&nbsp; ${scan.disease_key || '—'}</div>`, { sticky: true, direction: 'top' });
@@ -222,7 +222,7 @@
 import { Injectable } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet.heat';
-import { ScanDto } from '../dashboard/dashboard.dto';
+import { Scan } from '../../app/shared/models';
 
 @Injectable({ providedIn: 'root' })
 export class HeatmapMapService {
@@ -335,7 +335,7 @@ export class HeatmapMapService {
     });
   }
 
-  plotMarkers(scans: ScanDto[], onMarkerClick: (scan: ScanDto) => void): void {
+  plotMarkers(scans: Scan[], onMarkerClick: (scan: Scan) => void): void {
     this.clearScanLayers();
     const heatPoints: any[] = [];
     const validScans = scans.filter(s => s.location_lat && s.location_lng);
@@ -456,7 +456,7 @@ export class HeatmapMapService {
     }
   }
 
-  private addClickableMarker(lat: number, lng: number, scan: ScanDto, onClick: (scan: ScanDto) => void): void {
+  private addClickableMarker(lat: number, lng: number, scan: Scan, onClick: (scan: Scan) => void): void {
     const ghostMarker = L.circleMarker([lat, lng], { radius: 20, stroke: false, fillColor: '#000', fillOpacity: 0 }).addTo(this.map);
 
     ghostMarker.bindTooltip(`<div style="font-size:11px;font-weight:700;padding:2px 4px;white-space:nowrap;">${scan.user_name || 'Unknown'} &nbsp;·&nbsp; ${scan.disease_key || '—'}</div>`, { sticky: true, direction: 'top' });
