@@ -1,27 +1,20 @@
 import { Severity, ReportStatus } from './common.model';
-
 export interface FieldReport {
   id: string;
-  timestamp: string;
-  barangay: string;
-  category: string;
-  severity: Severity;
-  status: ReportStatus;
-  description?: string;
-  location?: {
-    lat: number;
-    lng: number;
-  };
-  images?: string[];
-  assigned_to?: string;
-  created_at?: string;
-  updated_at?: string;
+  user_id: number;
+  scanned_at: string;
+  user_address: string;
+  disease_key: string;
+  severity_key: Severity;
+  location_lat?: number;
+  location_lng?: number;
+  confidence: number;
+  status: ReportStatus | number | string;
+  location_label?: string;
 }
-
 export interface ReportFilters {
-  barangay: string;
-  category: string;
-  severity: Severity | '';
+  disease_key: string;
+  severity_key: Severity | '';
+  address: string;
   date: string;
-  status?: ReportStatus | '';
 }

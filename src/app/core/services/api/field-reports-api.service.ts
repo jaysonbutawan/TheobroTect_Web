@@ -11,7 +11,7 @@ export interface FieldReportsResponse extends ApiResponse<FieldReport[]> {
   providedIn: 'root'
 })
 export class FieldReportsApiService extends BaseApiService {
-  protected endpoint = '/field-reports';
+  protected endpoint = '/scans';
 
   getReports(): Observable<FieldReportsResponse> {
     return this.get<FieldReportsResponse>('');
