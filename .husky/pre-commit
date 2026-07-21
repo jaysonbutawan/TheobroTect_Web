@@ -1,0 +1,103 @@
+#!/bin/sh
+
+# Pre-commit hook to validate code before committing
+# This ensures no errors are committed to the repository
+
+echo "🔍 Running pre-commit validation..."
+echo ""
+
+# Check if Node is installed
+if ! command -v node >/dev/null 2>&1; then
+    echo "❌ Node.js is not installed. Please install Node.js."
+    exit 1
+fi
+
+# Check if npm is installed
+if ! command -v npm >/dev/null 2>&1; then
+    echo "❌ npm is not installed. Please install npm."
+    exit 1
+fi
+
+# Run TypeScript compilation check
+echo "📝 Checking TypeScript compilation..."
+npx tsc --noEmit
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ TypeScript compilation failed!"
+    echo "Fix all type errors before committing."
+    echo ""
+    exit 1
+fi
+echo "✅ TypeScript check passed"
+echo ""
+
+# Check for console.log statements in staged files
+echo "🔍 Checking for console statements..."
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|js)$' || true)
+
+if [ -n "$staged_files" ]; then
+    console_found=0
+    for file in $staged_files; do
+        if [ -f "$file" ]; then
+            # Skip logger service and main.ts
+            if echo "$file" | grep -q "logger.service.ts\|main.ts"; then
+                continue
+            fi
+            
+            # Check for console statements
+            if grep -n "console\.\(log\|error\|warn\|info\|table\)" "$file" >/dev/null 2>&1; then
+                if [ $console_found -eq 0 ]; then
+                    echo "⚠️  Console statements found in:"
+                    console_found=1
+                fi
+                echo "   - $file"
+            fi
+        fi
+    done
+    
+    if [ $console_found -eq 1 ]; then
+        echo ""
+        echo "⚠️  Warning: Console statements detected in staged files"
+        echo "Consider removing them for production code"
+        echo ""
+    else
+        echo "✅ No console statements in staged files"
+        echo ""
+    fi
+fi
+
+# Check for TODO/FIXME in staged files
+echo "📋 Checking for TODO/FIXME comments..."
+todo_found=0
+for file in $staged_files; do
+    if [ -f "$file" ]; then
+        if grep -n "TODO\|FIXME" "$file" >/dev/null 2>&1; then
+            if [ $todo_found -eq 0 ]; then
+                echo "ℹ️  TODO/FIXME comments found (informational)"
+                todo_found=1
+            fi
+        fi
+    fi
+done
+
+if [ $todo_found -eq 0 ]; then
+    echo "✅ No TODO/FIXME comments in staged files"
+fi
+echo ""
+
+# Run linter on staged files
+echo "🧹 Running linter on staged files..."
+npm run lint --if-present >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "⚠️  Linting issues detected"
+    echo "Run 'npm run lint:fix' to auto-fix"
+    echo ""
+else
+    echo "✅ Linting passed"
+    echo ""
+fi
+
+echo "✅ Pre-commit validation complete!"
+echo ""
+
+exit 0

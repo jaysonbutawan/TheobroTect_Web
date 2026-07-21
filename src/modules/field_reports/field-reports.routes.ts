@@ -7,18 +7,8 @@ export const FIELD_REPORTS_ROUTES: Routes = [
       import('./field-reports.component').then((m) => m.FieldReportsComponent),
   },
   {
-    path: 'black-pod',
+    path: ':id',
     loadComponent: () =>
-      import('./field-reports.component').then((m) => m.FieldReportsComponent),
-  },
-  {
-    path: 'mealybug',
-    loadComponent: () =>
-      import('./field-reports.component').then((m) => m.FieldReportsComponent),
-  },
-  {
-    path: 'pod-borer',
-    loadComponent: () =>
-      import('./field-reports.component').then((m) => m.FieldReportsComponent),
+      import('./field-report-detail.component').then((m) => m.FieldReportDetailComponent),
   },
 ];

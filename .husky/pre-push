@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Pre-push hook to run comprehensive validation before pushing
+# This ensures the build works before code reaches the remote repository
+
+echo "🚀 Running pre-push validation..."
+echo "This may take a few minutes..."
+echo ""
+
+# Run the comprehensive pre-build check
+node scripts/pre-build-check.js
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Pre-push validation failed!"
+    echo "Fix all errors before pushing to remote."
+    echo ""
+    echo "To skip this check (not recommended):"
+    echo "git push --no-verify"
+    echo ""
+    exit 1
+fi
+
+echo ""
+echo "✅ All validations passed! Pushing to remote..."
+echo ""
+
+exit 0

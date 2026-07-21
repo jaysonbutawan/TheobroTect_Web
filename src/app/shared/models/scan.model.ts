@@ -1,4 +1,4 @@
-import { ApiResponse, ScanStatus } from './common.model';
+import { ApiResponse } from './common.model';
 
 export interface Scan {
   id: number;

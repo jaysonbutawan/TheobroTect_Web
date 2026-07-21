@@ -190,10 +190,10 @@
               <!-- Severity -->
               <div class="mt-2 md:mt-0 md:col-span-2">
                 <span [ngClass]="{
-                        'bg-red-50 text-red-700 border-red-100': scan.severity_key?.toLowerCase() === 'severe',
-                        'bg-amber-50 text-amber-700 border-amber-100': scan.severity_key?.toLowerCase() === 'moderate',
-                        'bg-green-50 text-green-700 border-green-100': scan.severity_key?.toLowerCase() === 'mild' || !scan.severity_key,
-                        'bg-gray-50 text-gray-700 border-gray-100': !['severe', 'moderate', 'mild'].includes(scan.severity_key?.toLowerCase() || '')
+                        'bg-red-50 text-red-700 border-red-100': scan.severity_key.toLowerCase() === 'severe',
+                        'bg-amber-50 text-amber-700 border-amber-100': scan.severity_key.toLowerCase() === 'moderate',
+                        'bg-green-50 text-green-700 border-green-100': scan.severity_key.toLowerCase() === 'mild' || !scan.severity_key,
+                        'bg-gray-50 text-gray-700 border-gray-100': !['severe', 'moderate', 'mild'].includes(scan.severity_key.toLowerCase() || '')
                       }" class="inline-block px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-xs font-semibold border rounded-lg whitespace-nowrap">
                   {{ scan.severity_key || 'N/A' }}
                 </span>
