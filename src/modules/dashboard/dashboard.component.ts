@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
@@ -33,21 +33,21 @@ export class DashboardComponent implements OnInit {
 
   private cdr = inject(ChangeDetectorRef);
 
-  // State management
   isLoading = false;
   errorMessage = '';
 
-  // Statistics
+  selectedYear = signal<number>(new Date().getFullYear());
+  availableYears: number[] = [];
+  allScans: Scan[] = []; 
+
   stats = {
     blackPod: 0,
     mealybug: 0,
     podBorer: 0
   };
 
-  // Recent scans table data
   recentScans: Scan[] = [];
 
-  // Bar Chart - Disease counts by date
   public barChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
     datasets: [
@@ -64,7 +64,6 @@ export class DashboardComponent implements OnInit {
     plugins: { legend: { position: 'bottom' } }
   };
 
-  // Line Chart - Disease trends over time (from API data)
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [
@@ -118,20 +117,9 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService.getUsersScan().subscribe({
       next: (res) => {
-        // charts
-        this.processBarChartData(res.data);
-        this.processLineChartData(res.data);
-
-        // table
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        this.recentScans = res.data
-          .filter(scan => {
-            const createdAt = new Date(scan.scanned_at);
-            createdAt.setHours(0, 0, 0, 0);
-            return createdAt.getTime() === today.getTime();
-          });
+        this.allScans = res.data;
+        this.populateAvailableYears();
+        this.filterAndProcessData();
 
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -144,10 +132,56 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  /**
-   * Process API data to generate bar chart labels, datasets, and stats
-   * Groups data by date and counts by disease type
-   */
+  private populateAvailableYears(): void {
+    const yearsSet = new Set<number>();
+
+    this.allScans.forEach(scan => {
+      if (scan.scanned_at) {
+        yearsSet.add(new Date(scan.scanned_at).getFullYear());
+      }
+    });
+
+    const currentYear = new Date().getFullYear();
+    yearsSet.add(currentYear);
+
+    const minYear = yearsSet.size > 0 ? Math.min(...Array.from(yearsSet)) : currentYear;
+    const fullYearRange: number[] = [];
+    for (let y = currentYear; y >= minYear; y--) {
+      fullYearRange.push(y);
+    }
+
+    this.availableYears = fullYearRange;
+
+    if (this.availableYears.length > 0 && !this.availableYears.includes(this.selectedYear())) {
+      this.selectedYear.set(this.availableYears[0]);
+    }
+  }
+  onYearChange(year: number): void {
+    this.selectedYear.set(year);
+    this.filterAndProcessData();
+    this.cdr.markForCheck();
+  }
+  private filterAndProcessData(): void {
+    const year = this.selectedYear();
+    const filteredScans = this.allScans.filter(scan => {
+      if (!scan.scanned_at) return false;
+      const scanYear = new Date(scan.scanned_at).getFullYear();
+      return scanYear === year;
+    });
+
+    this.processBarChartData(filteredScans);
+    this.processLineChartData(filteredScans, year);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    this.recentScans = filteredScans
+      .filter(scan => {
+        const createdAt = new Date(scan.scanned_at);
+        createdAt.setHours(0, 0, 0, 0);
+        return createdAt.getTime() === today.getTime();
+      });
+  }
   private processBarChartData(scans: Scan[]): void {
     const dateGroups = this.groupScansByDate(scans);
     const sortedDates = Object.keys(dateGroups).sort(
@@ -205,16 +239,10 @@ export class DashboardComponent implements OnInit {
       `${year}-${String(i + 1).padStart(2, '0')}`
     );
   }
-
-  /**
-   * Process API data to generate line chart
-   * Groups data by month and counts healthy vs diseased plants
-   */
-  private processLineChartData(scans: Scan[]): void {
+  private processLineChartData(scans: Scan[], year: number): void {
 
     const monthGroups = this.groupScansByMonth(scans);
-    const currentYear = new Date().getFullYear();
-    const sortedMonths = this.getMonthsOfYear(currentYear);
+    const sortedMonths = this.getMonthsOfYear(year);
 
     this.lineChartData.labels = sortedMonths.map(month => this.formatMonth(month));
 
@@ -269,9 +297,6 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  /**
-   * Normalize disease key to standard format
-   */
   private normalizeDisease(diseaseKey: string | null | undefined): string {
     if (!diseaseKey) return 'healthy';
 
@@ -280,10 +305,6 @@ export class DashboardComponent implements OnInit {
       .replace(/_/g, ' ')
       .trim();
   }
-
-  /**
-   * Group scans by date
-   */
   private groupScansByDate(scans: Scan[]): { [date: string]: Scan[] } {
     const groups: { [date: string]: Scan[] } = {};
 
@@ -299,9 +320,6 @@ export class DashboardComponent implements OnInit {
     return groups;
   }
 
-  /**
-   * Group scans by month
-   */
   private groupScansByMonth(scans: Scan[]): { [month: string]: Scan[] } {
     const groups: { [month: string]: Scan[] } = {};
 
@@ -317,9 +335,6 @@ export class DashboardComponent implements OnInit {
     return groups;
   }
 
-  /**
-   * Format date for chart display
-   */
   private formatDate(dateStr: string): string {
     try {
       const date = new Date(dateStr + 'T00:00:00');
@@ -333,9 +348,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  /**
-   * Format month for chart display
-   */
   private formatMonth(monthStr: string): string {
     try {
       const date = new Date(monthStr + '-01T00:00:00');
@@ -348,9 +360,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  /**
-   * Navigate to heatmap with selected coordinates
-   */
   navigateToMap(coords?: string) {
     this.router.navigate(['/dashboard/heatmap'], { queryParams: { loc: coords } });
   }

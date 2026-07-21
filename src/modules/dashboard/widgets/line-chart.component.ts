@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, EventEmitter, Output, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
@@ -12,12 +12,20 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
 export class LineChartComponent implements OnChanges {
   // Receive the data from the parent component
   @Input({ required: true }) chartData!: ChartConfiguration<'line'>['data'];
-  @Output() yearSelected = new EventEmitter<string>();
+  @Input() availableYears: number[] = [];
+  @Input() selectedYear: number = new Date().getFullYear();
+  @Output() yearSelected = new EventEmitter<number>();
 
-    years: string[] = ['2026', '2025', '2024'];
-  selectedYear: string = '2026';
   isYearDropdownOpen: boolean = false;
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    // Close dropdown if clicking outside the year selector
+    if (this.isYearDropdownOpen && !target.closest('.year-selector-container')) {
+      this.isYearDropdownOpen = false;
+    }
+  }
 
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -59,20 +67,16 @@ export class LineChartComponent implements OnChanges {
       }
     }
   };
+
   ngOnChanges(changes: SimpleChanges): void {
-    // Chart data received
+    // Chart data received and will be re-rendered
   }
 
-   toggleYearDropdown(): void {
+  toggleYearDropdown(): void {
     this.isYearDropdownOpen = !this.isYearDropdownOpen;
   }
 
-  closeYearDropdown(): void {
-    this.isYearDropdownOpen = false;
-  }
-
-  selectYear(year: string): void {
-    this.selectedYear = year;
+  selectYear(year: number): void {
     this.isYearDropdownOpen = false;
     this.yearSelected.emit(year);
   }
