@@ -1,4 +1,4 @@
-<!-- <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6 px-2">
+<div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6 px-2">
   <div>
     <h1
       class="font-['DM_Sans',sans-serif] text-3xl md:text-4xl font-black text-slate-800 tracking-tight drop-shadow-sm">
@@ -19,16 +19,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 px-2">
 
       <div class="flex items-center gap-4">
-        <div class="relative flex-shrink-0">
-          <img [src]="profile.avatarUrl" [alt]="profile.name"
-            class="w-14 h-14 rounded-2xl object-cover shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)]" />
-          @if (profile.isPremium) {
-          <span
-            class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase tracking-[0.5px] text-white bg-[#3D683A] rounded-full px-2 py-[2px] shadow-sm whitespace-nowrap">
-            Premium
-          </span>
-          }
-        </div>
         <div>
           <p class="font-['DM_Sans',sans-serif] text-lg font-black text-slate-800 leading-tight">
             {{ profile.name }}
@@ -79,7 +69,7 @@
             <div>
               <label
                 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">Disease</label>
-              <select [(ngModel)]="filters.disease" (change)="onFilterChange()"
+              <select aria-label="wala ra" [(ngModel)]="filters.disease" (change)="onFilterChange()"
                 class="w-full bg-[#e2e8f0] rounded-xl px-3 py-2 text-[12.5px] font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] border-none">
                 <option value="">All diseases</option>
                 @for (d of diseaseOptions; track d) {
@@ -90,7 +80,7 @@
             <div>
               <label
                 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">Severity</label>
-              <select [(ngModel)]="filters.severity" (change)="onFilterChange()"
+              <select aria-label="wala ra" [(ngModel)]="filters.severity" (change)="onFilterChange()"
                 class="w-full bg-[#e2e8f0] rounded-xl px-3 py-2 text-[12.5px] font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] border-none">
                 <option value="">All severity</option>
                 @for (s of severityOptions; track s) {
@@ -248,4 +238,4 @@
 }
 </div>
 
-<app-scan-detail-modal [scan]="selectedScan" (closed)="closeDetail()" /> -->
+<app-scan-detail-modal [scan]="selectedScan" (closed)="closeDetail()" />

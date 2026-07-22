@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core'; //  Added Input, Output, and EventEmitter
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../app/core/services/auth.service';
+import { ConfirmationDialogComponent } from '../../app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 interface NavItem {
   link: string;
@@ -12,12 +14,18 @@ interface NavItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule, ConfirmationDialogComponent],
   templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent {
   @Input() isCollapsed = false;
   @Output() collapseChanged = new EventEmitter<boolean>();
+
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
+  showLogoutConfirm = false;
+  isLoggingOut = false;
 
   navItems: NavItem[] = [
     { link: '/dashboard', exact: true, label: 'Dashboard', icon: 'pi pi-th-large' },
@@ -30,6 +38,30 @@ export class SidebarComponent {
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
     this.collapseChanged.emit(this.isCollapsed);
+  }
+
+  openLogoutDialog(): void {
+    this.showLogoutConfirm = true;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
+
+  confirmLogout(): void {
+    this.isLoggingOut = true;
+    this.auth.logout().subscribe({
+      next: () => {
+        this.isLoggingOut = false;
+        this.showLogoutConfirm = false;
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.isLoggingOut = false;
+        this.showLogoutConfirm = false;
+        this.router.navigate(['/']);
+      },
+    });
   }
 
   get labelClass(): string {

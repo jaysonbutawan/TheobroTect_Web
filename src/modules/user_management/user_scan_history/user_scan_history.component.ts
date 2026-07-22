@@ -45,7 +45,7 @@ interface ScanFilters {
 @Component({
   selector: 'app-scan-history',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ScanHistoryProfileSkeletonComponent, PaginationComponent, ScanDetailModalComponent],
   templateUrl: './user_scan_history.component.html',
 })
 export class ScanHistoryComponent implements OnInit {
