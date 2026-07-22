@@ -26,153 +26,313 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════
-       Filter bar
-       ═══════════════════════════════════════════ -->
-  <div
-    class="bg-[#f8fafc] rounded-[2rem] shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)] p-5 sm:p-6"
-  >
-    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-4 sm:gap-6">
-      <!-- Address -->
-      <div class="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[170px]">
-        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Address</span
-        >
-        <select
-          aria-label="address"
-          [(ngModel)]="filters.address"
-          (change)="onFilterChange()"
-          class="w-full px-3.5 py-2.5 bg-[#e2e8f0] rounded-xl text-sm font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] border-none focus:ring-2 focus:ring-[#3D683A]/20 transition-all"
-        >
-          <option value="">All Addresses</option>
-          @for (b of barangayOptions; track b) {
-            <option [value]="b">{{ b }}</option>
-          }
-        </select>
-      </div>
 
-      <!-- Issue Category -->
-      <div class="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[170px]">
-        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Disease Category</span
-        >
-        <select
-          aria-label="category"
-          [(ngModel)]="filters.disease_key"
-          (change)="onFilterChange()"
-          class="w-full px-3.5 py-2.5 bg-[#e2e8f0] rounded-xl text-sm font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] border-none focus:ring-2 focus:ring-[#3D683A]/20 transition-all"
-        >
-          <option value="">All Diseases</option>
-          @for (c of categoryOptions; track c) {
-            <option [value]="c">{{ c }}</option>
-          }
-        </select>
-      </div>
+<!-- ═══════════════════════════════════════════
+     Filter Bar (Unified Custom Floating Dropdowns)
+     ═══════════════════════════════════════════ -->
+<div
+  class="bg-[#f8fafc] rounded-[2rem] shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)] p-4 sm:p-5 md:p-6"
+>
+  <div class="grid grid-cols-2 sm:flex sm:flex-row sm:flex-wrap sm:items-end gap-3 sm:gap-4 md:gap-6">
 
-      <!-- Severity Level -->
-      <div class="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[170px]">
-        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1"
-          >Severity Level</span
-        >
-        <select
-          aria-label="Severity"
-          [(ngModel)]="filters.severity_key"
-          (change)="onFilterChange()"
-          class="w-full px-3.5 py-2.5 bg-[#e2e8f0] rounded-xl text-sm font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] border-none focus:ring-2 focus:ring-[#3D683A]/20 transition-all"
-        >
-          <option value="">All Severity</option>
-          @for (sev of severityOptions; track sev) {
-            <option [value]="sev">{{ sev }}</option>
-          }
-        </select>
-      </div>
-
-<div class="relative">
-    <button
-      aria-label="Filter by period: {{ triggerLabel }}"
-      title="Filter by period: {{ triggerLabel }}"
-      class="flex items-center gap-[7px] px-[10px] sm:px-[14px] py-[9px] bg-white border border-slate-200 rounded-[10px] cursor-pointer text-[13px] font-medium text-slate-900 transition-all duration-150 whitespace-nowrap select-none leading-none hover:bg-slate-50 hover:border-slate-300"
-      [class.border-slate-900]="panelOpen"
-      [class.shadow-[0_0_0_3px_rgba(15,23,42,0.06)]]="panelOpen"
-      (click)="togglePanel()"
-    >
-      <svg class="w-[15px] h-[15px] text-slate-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-      <span class="hidden sm:inline text-slate-400 font-normal">Period:</span>
-      <span class="hidden sm:inline">{{ triggerLabel }}</span>
-      <svg class="hidden sm:block w-[13px] h-[13px] text-slate-400 transition-transform duration-200" [class.rotate-180]="panelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-
-    @if (panelOpen) {
-      <div class="hidden max-[480px]:block fixed inset-0 bg-slate-900/35 z-[199]" (click)="closePanel()"></div>
-      <div class="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white border border-slate-200 rounded-[14px] p-5 w-[300px] shadow-[0_8px_32px_rgba(15,23,42,0.10)] max-[480px]:fixed max-[480px]:top-auto max-[480px]:bottom-0 max-[480px]:left-0 max-[480px]:right-0 max-[480px]:w-full max-[480px]:rounded-t-[18px]">
-
-        <!-- Year Selector -->
-        <span class="block text-[10.5px] font-semibold tracking-[0.08em] uppercase text-slate-400 mb-2">Year</span>
-        <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-4">
-          <button class="text-slate-500 hover:text-slate-900 px-2 text-base font-bold disabled:opacity-30" (click)="prevYear()" [disabled]="pendingYear <= minYear">&#8249;</button>
-          <span class="text-[15px] font-semibold text-slate-900">{{ pendingYear }}</span>
-          <button class="text-slate-500 hover:text-slate-900 px-2 text-base font-bold disabled:opacity-30" (click)="nextYear()" [disabled]="pendingYear >= maxYear">&#8250;</button>
-        </div>
-
-        <div class="h-px bg-slate-100 mb-4"></div>
-
-        <!-- Month Grid -->
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[10.5px] font-semibold tracking-[0.08em] uppercase text-slate-400">Month (Optional)</span>
-          @if (pendingMonth !== null) {
-            <button class="text-[11px] text-slate-500 hover:text-slate-900 underline" (click)="selectMonth(null)">Clear month</button>
-          }
-        </div>
-        <div class="grid grid-cols-3 gap-[6px] mb-[18px]">
-          @for (month of months; track $index) {
-            <button
-              type="button"
-              class="py-[9px] px-1 bg-white border border-slate-200 rounded-lg text-[11.5px] font-semibold tracking-[0.03em] text-slate-600 hover:bg-slate-50 transition-colors"
-              [class.!bg-slate-900]="$index === pendingMonth"
-              [class.!border-slate-900]="$index === pendingMonth"
-              [class.!text-white]="$index === pendingMonth"
-              (click)="selectMonth($index)"
-            >{{ month.toUpperCase() }}</button>
-          }
-        </div>
-
-        <!-- Actions -->
-        <div class="flex gap-2">
-          <button class="flex-1 py-[10px] bg-slate-900 text-white rounded-lg text-[13px] font-semibold hover:bg-slate-800 transition-colors" (click)="applyFilter()">Apply</button>
-          <button class="px-[14px] py-[10px] bg-white text-slate-500 border border-slate-200 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors" (click)="closePanel()">Cancel</button>
-        </div>
-      </div>
-    }
-  </div>
-
-      <!-- Reset -->
+    <!-- 1. Address Dropdown -->
+    <div class="relative flex flex-col gap-1.5 min-w-0 sm:w-auto sm:min-w-[180px]">
+      <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Barangay</span>
       <button
         type="button"
-        (click)="resetFilters()"
-        class="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#f1f5f9] text-slate-600 rounded-xl text-xs font-black shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-[#3D683A] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95 w-full sm:w-auto"
+        class="w-full px-3 sm:px-3.5 py-2.5 bg-[#e2e8f0] rounded-xl text-xs sm:text-sm font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] focus:ring-2 focus:ring-[#3D683A]/20 transition-all cursor-pointer flex items-center justify-between gap-2"
+        (click)="toggleDropdown('address')"
       >
+        <span class="truncate">{{ filters.address || 'All Barangays' }}</span>
         <svg
-          class="w-4 h-4 text-[#3D683A]"
+          class="w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0"
+          [class.rotate-180]="activeDropdown === 'address'"
+          viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          viewBox="0 0 24 24"
           stroke-width="2"
         >
-          <polyline points="1 4 1 10 7 10" />
-          <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+          <polyline points="6 9 12 15 18 9" />
         </svg>
-        Reset
       </button>
+
+      @if (activeDropdown === 'address') {
+        <div class="hidden max-[480px]:block fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[199]" (click)="closeDropdowns()"></div>
+        <div class="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white border border-slate-100 rounded-2xl p-2 w-[calc(200%+0.75rem)] sm:w-full sm:min-w-[200px] max-h-[260px] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.12)] max-[480px]:fixed max-[480px]:top-auto max-[480px]:bottom-0 max-[480px]:left-0 max-[480px]:right-0 max-[480px]:w-full max-[480px]:rounded-t-[2rem] max-[480px]:max-h-[70vh]">
+          <button
+            type="button"
+            class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer"
+            [class.bg-[#3D683A]/10]="filters.address === ''"
+            [class.text-[#3D683A]]="filters.address === ''"
+            [class.text-slate-700]="filters.address !== ''"
+            class="hover:bg-slate-100"
+            (click)="selectAddress('')"
+          >
+            All Barangays
+            @if (filters.address === '') {
+              <svg class="w-4 h-4 text-[#3D683A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            }
+          </button>
+          @for (b of barangayOptions; track b) {
+            <button
+              type="button"
+              class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer hover:bg-slate-100"
+              [class.bg-[#3D683A]/10]="filters.address === b"
+              [class.text-[#3D683A]]="filters.address === b"
+              [class.text-slate-700]="filters.address !== b"
+              (click)="selectAddress(b)"
+            >
+              {{ b }}
+              @if (filters.address === b) {
+                <svg class="w-4 h-4 text-[#3D683A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              }
+            </button>
+          }
+        </div>
+      }
     </div>
+
+    <!-- 2. Disease Category Dropdown -->
+    <div class="relative flex flex-col gap-1.5 min-w-0 sm:w-auto sm:min-w-[180px]">
+      <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Disease Category</span>
+      <button
+        type="button"
+        class="w-full px-3 sm:px-3.5 py-2.5 bg-[#e2e8f0] rounded-xl text-xs sm:text-sm font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] focus:ring-2 focus:ring-[#3D683A]/20 transition-all cursor-pointer flex items-center justify-between gap-2"
+        (click)="toggleDropdown('category')"
+      >
+        <span class="truncate">{{ filters.disease_key || 'All Diseases' }}</span>
+        <svg
+          class="w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0"
+          [class.rotate-180]="activeDropdown === 'category'"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      @if (activeDropdown === 'category') {
+        <div class="hidden max-[480px]:block fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[199]" (click)="closeDropdowns()"></div>
+        <div class="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white border border-slate-100 rounded-2xl p-2 w-[calc(200%+0.75rem)] sm:w-full sm:min-w-[200px] max-h-[260px] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.12)] max-[480px]:fixed max-[480px]:top-auto max-[480px]:bottom-0 max-[480px]:left-0 max-[480px]:right-0 max-[480px]:w-full max-[480px]:rounded-t-[2rem] max-[480px]:max-h-[70vh]">
+          <button
+            type="button"
+            class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer hover:bg-slate-100"
+            [class.bg-[#3D683A]/10]="filters.disease_key === ''"
+            [class.text-[#3D683A]]="filters.disease_key === ''"
+            [class.text-slate-700]="filters.disease_key !== ''"
+            (click)="selectCategory('')"
+          >
+            All Diseases
+            @if (filters.disease_key === '') {
+              <svg class="w-4 h-4 text-[#3D683A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            }
+          </button>
+          @for (c of categoryOptions; track c) {
+            <button
+              type="button"
+              class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer hover:bg-slate-100"
+              [class.bg-[#3D683A]/10]="filters.disease_key === c"
+              [class.text-[#3D683A]]="filters.disease_key === c"
+              [class.text-slate-700]="filters.disease_key !== c"
+              (click)="selectCategory(c)"
+            >
+              {{ c }}
+              @if (filters.disease_key === c) {
+                <svg class="w-4 h-4 text-[#3D683A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- 3. Severity Level Dropdown -->
+    <div class="relative flex flex-col gap-1.5 min-w-0 sm:w-auto sm:min-w-[180px]">
+      <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Severity Level</span>
+      <button
+        type="button"
+        class="w-full px-3 sm:px-3.5 py-2.5 bg-[#e2e8f0] rounded-xl text-xs sm:text-sm font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] focus:ring-2 focus:ring-[#3D683A]/20 transition-all cursor-pointer flex items-center justify-between gap-2"
+        (click)="toggleDropdown('severity')"
+      >
+        <span class="truncate">{{ filters.severity_key || 'All Severity' }}</span>
+        <svg
+          class="w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0"
+          [class.rotate-180]="activeDropdown === 'severity'"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      @if (activeDropdown === 'severity') {
+        <div class="hidden max-[480px]:block fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[199]" (click)="closeDropdowns()"></div>
+        <div class="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white border border-slate-100 rounded-2xl p-2 w-[calc(200%+0.75rem)] sm:w-full sm:min-w-[200px] shadow-[0_10px_30px_rgba(0,0,0,0.12)] max-[480px]:fixed max-[480px]:top-auto max-[480px]:bottom-0 max-[480px]:left-0 max-[480px]:right-0 max-[480px]:w-full max-[480px]:rounded-t-[2rem]">
+          <button
+            type="button"
+            class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer hover:bg-slate-100"
+            [class.bg-[#3D683A]/10]="filters.severity_key === ''"
+            [class.text-[#3D683A]]="filters.severity_key === ''"
+            [class.text-slate-700]="filters.severity_key !== ''"
+            (click)="selectSeverity('')"
+          >
+            All Severity
+            @if (filters.severity_key === '') {
+              <svg class="w-4 h-4 text-[#3D683A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            }
+          </button>
+          @for (sev of severityOptions; track sev) {
+            <button
+              type="button"
+              class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer hover:bg-slate-100"
+              [class.bg-[#3D683A]/10]="filters.severity_key === sev"
+              [class.text-[#3D683A]]="filters.severity_key === sev"
+              [class.text-slate-700]="filters.severity_key !== sev"
+              (click)="selectSeverity(sev)"
+            >
+              {{ sev }}
+              @if (filters.severity_key === sev) {
+                <svg class="w-4 h-4 text-[#3D683A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- 4. Period Dropdown -->
+    <div class="relative flex flex-col gap-1.5 min-w-0 sm:w-auto sm:min-w-[180px]">
+      <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Period</span>
+      <button
+        type="button"
+        aria-label="Filter by period: {{ triggerLabel }}"
+        title="Filter by period: {{ triggerLabel }}"
+        class="w-full px-3 sm:px-3.5 py-2.5 bg-[#e2e8f0] rounded-xl text-xs sm:text-sm font-bold text-slate-700 outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.06),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] focus:ring-2 focus:ring-[#3D683A]/20 transition-all cursor-pointer flex items-center justify-between gap-2"
+        (click)="toggleDropdown('period')"
+      >
+        <div class="flex items-center gap-2 truncate min-w-0">
+          <svg class="w-4 h-4 text-[#3D683A] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span class="truncate">{{ triggerLabel }}</span>
+        </div>
+        <svg
+          class="w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0"
+          [class.rotate-180]="activeDropdown === 'period'"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      @if (activeDropdown === 'period') {
+        <div class="hidden max-[480px]:block fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[199]" (click)="closeDropdowns()"></div>
+        <div class="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white border border-slate-100 rounded-2xl p-5 w-[280px] sm:w-[300px] shadow-[0_10px_30px_rgba(0,0,0,0.12)] max-[480px]:fixed max-[480px]:top-auto max-[480px]:bottom-0 max-[480px]:left-0 max-[480px]:right-0 max-[480px]:w-full max-[480px]:rounded-t-[2rem]">
+          <!-- Year Selector -->
+          <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Year</span>
+          <div class="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 mb-4">
+            <button
+              type="button"
+              class="text-slate-500 hover:text-[#3D683A] px-2 text-base font-black disabled:opacity-30 transition-colors cursor-pointer"
+              (click)="prevYear()"
+              [disabled]="pendingYear <= minYear"
+            >
+              &#8249;
+            </button>
+            <span class="text-sm font-black text-slate-800">{{ pendingYear }}</span>
+            <button
+              type="button"
+              class="text-slate-500 hover:text-[#3D683A] px-2 text-base font-black disabled:opacity-30 transition-colors cursor-pointer"
+              (click)="nextYear()"
+              [disabled]="pendingYear >= maxYear"
+            >
+              &#8250;
+            </button>
+          </div>
+
+          <div class="h-px bg-slate-100 mb-4"></div>
+
+          <!-- Month Grid -->
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Month (Optional)</span>
+            @if (pendingMonth !== null) {
+              <button
+                type="button"
+                class="text-[11px] font-bold text-[#3D683A] hover:underline cursor-pointer"
+                (click)="selectMonth(null)"
+              >
+                Clear month
+              </button>
+            }
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 mb-5">
+            @for (month of months; track $index) {
+              <button
+                type="button"
+                class="py-2 px-1 bg-slate-50 border border-slate-200/70 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                [class.!bg-[#3D683A]]="$index === pendingMonth"
+                [class.!border-[#3D683A]]="$index === pendingMonth"
+                [class.!text-white]="$index === pendingMonth"
+                [class.!shadow-sm]="$index === pendingMonth"
+                (click)="selectMonth($index)"
+              >
+                {{ month.toUpperCase() }}
+              </button>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="flex-1 py-2.5 bg-gradient-to-r from-[#3D683A] to-[#2d4f2a] text-white rounded-xl text-xs font-black shadow-md hover:from-[#2d4f2a] hover:to-[#3D683A] transition-all cursor-pointer"
+              (click)="applyFilter()"
+            >
+              Apply
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+              (click)="closeDropdowns()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Reset Button -->
+    <button
+      type="button"
+      (click)="resetFilters()"
+      class="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-5 py-2.5 bg-[#f1f5f9] text-slate-600 rounded-xl text-xs font-black shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-[#3D683A] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95 w-full sm:w-auto"
+    >
+      <svg class="w-4 h-4 text-[#3D683A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <polyline points="1 4 1 10 7 10" />
+        <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+      </svg>
+      Reset
+    </button>
+
   </div>
+</div>
 
   <div
-    class="bg-[#f8fafc] rounded-[2.5rem] p-4 md:p-6 shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)]"
+    class="bg-[#f8fafc] rounded-[2rem] md:rounded-[2.5rem] p-3 sm:p-4 md:p-6 shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)]"
   >
-    <div class="flex items-center justify-between px-2 md:px-4 pb-5">
-      <h3 class="font-['DM_Sans',sans-serif] text-lg font-black text-slate-800">
+    <div class="flex items-center justify-between px-2 md:px-4 pb-4 md:pb-5">
+      <h3 class="font-['DM_Sans',sans-serif] text-base sm:text-lg font-black text-slate-800">
         Recent Field Reports
       </h3>
     </div>
@@ -182,78 +342,92 @@
       <div class="md:col-span-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
         Date &amp; Time
       </div>
-      <div class="md:col-span-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
-        Address
+      <div class="md:col-span-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
+        Barangay
       </div>
-      <div class="md:col-span-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+      <div class="md:col-span-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
         Category
       </div>
       <div
-        class="md:col-span-1 text-[11px] font-black uppercase tracking-widest text-slate-400 text-center"
+        class="md:col-span-3 text-[11px] font-black uppercase tracking-widest text-slate-400 text-center"
       >
         Severity
       </div>
     </div>
 
-    <div class="flex flex-col gap-4 md:gap-3">
+    <div class="flex flex-col gap-3 sm:gap-4 md:gap-3">
       @if (isLoading) {
         @for (i of [1, 2, 3, 4, 5]; track i) {
           <div
-            class="flex flex-col md:grid md:grid-cols-12 gap-4 p-5 md:px-6 md:py-4 bg-[#f1f5f9] rounded-3xl md:rounded-[1.5rem] shadow-[4px_4px_10px_rgba(0,0,0,0.03),inset_2px_2px_5px_rgba(255,255,255,1)] animate-pulse md:items-center"
+            class="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 sm:p-5 md:px-6 md:py-4 bg-[#f1f5f9] rounded-2xl sm:rounded-3xl md:rounded-[1.5rem] shadow-[4px_4px_10px_rgba(0,0,0,0.03),inset_2px_2px_5px_rgba(255,255,255,1)] animate-pulse md:items-center"
           >
-            <div class="md:col-span-3 space-y-2">
-              <div class="h-4 bg-slate-200/60 rounded-md w-2/3"></div>
+            <div class="flex items-center justify-between md:contents">
+              <div class="h-4 bg-slate-200/60 rounded-md w-2/5 md:w-2/3 md:col-span-3"></div>
+              <div class="w-16 h-6 bg-slate-200/60 rounded-full md:hidden"></div>
             </div>
-            <div class="md:col-span-2 h-4 bg-slate-200/60 rounded-md w-3/4 hidden md:block"></div>
-            <div class="md:col-span-2 h-4 bg-slate-200/60 rounded-md w-2/3 hidden md:block"></div>
-            <div class="md:col-span-1 hidden md:flex justify-center">
+            <div class="md:col-span-3 h-4 bg-slate-200/60 rounded-md w-3/4 hidden md:block"></div>
+            <div class="md:col-span-3 h-4 bg-slate-200/60 rounded-md w-2/3 hidden md:block"></div>
+            <div class="md:col-span-3 hidden md:flex justify-center">
               <div class="w-16 h-6 bg-slate-200/60 rounded-full"></div>
-            </div>
-            <div class="md:col-span-2 h-4 bg-slate-200/60 rounded-md w-1/2 hidden md:block"></div>
-            <div class="md:col-span-2 hidden md:flex justify-end">
-              <div class="w-24 h-8 bg-slate-200/60 rounded-lg"></div>
             </div>
           </div>
         }
       } @else {
         @for (report of pagedReports; track report.id) {
           <div
-            class="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 p-5 md:px-6 md:py-4 bg-[#f1f5f9] rounded-[2rem] md:rounded-[1.5rem] md:items-center shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[6px_6px_12px_rgba(0,0,0,0.06),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] hover:bg-[#f4f7f9]"
+            class="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 p-4 sm:p-5 md:px-6 md:py-4 bg-[#f1f5f9] rounded-2xl sm:rounded-[2rem] md:rounded-[1.5rem] md:items-center shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[6px_6px_12px_rgba(0,0,0,0.06),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] hover:bg-[#f4f7f9]"
           >
-            <!-- Date & Time -->
-            <div class="md:col-span-3">
+            <!-- Mobile header row: Date + Severity badge together (most scannable info first) -->
+            <div class="flex items-start justify-between md:hidden">
+              <div>
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-0.5">
+                  Date &amp; Time
+                </p>
+                <p class="text-sm font-black text-slate-800">
+                  {{ report.scanned_at | date: 'MMM d, y' }}
+                </p>
+              </div>
+              <span
+                [class]="getSeverityClass(report.severity_key)"
+                class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex-shrink-0"
+              >
+                {{ report.severity_key }}
+              </span>
+            </div>
+
+            <!-- Mobile detail grid: Barangay + Category -->
+            <div class="grid grid-cols-2 gap-3 md:hidden">
+              <div class="min-w-0">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-0.5">
+                  Barangay
+                </p>
+                <p class="text-sm font-bold text-[#3D683A] truncate">{{ report.user_address }}</p>
+              </div>
+              <div class="min-w-0">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-0.5">
+                  Category
+                </p>
+                <p class="text-sm font-bold text-slate-700 truncate">
+                  {{ formatDiseaseKey(report.disease_key) }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Desktop columns -->
+            <div class="hidden md:block md:col-span-3">
               <p class="text-sm font-black text-slate-800">
                 {{ report.scanned_at | date: 'MMM d, y' }}
               </p>
             </div>
-
-            <!-- Address -->
-            <div class="flex flex-col md:block md:col-span-2 mt-1 md:mt-0">
-              <span
-                class="md:hidden text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1"
-                >Address</span
-              >
-              <span class="text-sm font-bold text-[#3D683A]">{{ report.user_address }}</span>
+            <div class="hidden md:block md:col-span-3 min-w-0">
+              <span class="text-sm font-bold text-[#3D683A] truncate block">{{ report.user_address }}</span>
             </div>
-
-            <!-- Category -->
-            <div class="flex flex-col md:block md:col-span-2 mt-1 md:mt-0">
-              <span
-                class="md:hidden text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1"
-                >Category</span
-              >
-              <span class="text-sm font-bold text-slate-700">{{
+            <div class="hidden md:block md:col-span-3 min-w-0">
+              <span class="text-sm font-bold text-slate-700 truncate block">{{
                 formatDiseaseKey(report.disease_key)
               }}</span>
             </div>
-
-            <!-- Severity -->
-            <div
-              class="flex items-center justify-between md:col-span-1 md:justify-center mt-1 md:mt-0"
-            >
-              <span class="md:hidden text-[10px] font-black uppercase text-slate-400 tracking-wider"
-                >Severity</span
-              >
+            <div class="hidden md:flex md:col-span-3 justify-center">
               <span
                 [class]="getSeverityClass(report.severity_key)"
                 class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border"
@@ -264,13 +438,13 @@
           </div>
         } @empty {
           <div
-            class="py-20 flex flex-col items-center justify-center text-center bg-[#e2e8f0] rounded-[2rem] shadow-[inset_4px_4px_10px_rgba(0,0,0,0.06),inset_-4px_-4px_10px_rgba(255,255,255,0.7)] mx-2 my-4"
+            class="py-14 sm:py-20 flex flex-col items-center justify-center text-center bg-[#e2e8f0] rounded-[2rem] shadow-[inset_4px_4px_10px_rgba(0,0,0,0.06),inset_-4px_-4px_10px_rgba(255,255,255,0.7)] mx-1 sm:mx-2 my-4"
           >
             <div
-              class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-[#f1f5f9] shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_5px_rgba(255,255,255,1)] mb-5"
+              class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#f1f5f9] shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_5px_rgba(255,255,255,1)] mb-5"
             >
               <svg
-                class="w-9 h-9 text-slate-400"
+                class="w-8 h-8 sm:w-9 sm:h-9 text-slate-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -283,8 +457,8 @@
                 />
               </svg>
             </div>
-            <h3 class="text-lg font-black text-slate-800">No records found</h3>
-            <p class="text-sm font-medium text-slate-500 mt-2 max-w-sm">
+            <h3 class="text-base sm:text-lg font-black text-slate-800">No records found</h3>
+            <p class="text-sm font-medium text-slate-500 mt-2 max-w-sm px-4">
               No records match these filters. Try adjusting your search criteria.
             </p>
           </div>
@@ -309,9 +483,6 @@
   </div>
 
   @if (showReportDialog) {
-    <app-report-preview-dialog
-      [reports]="reportsForPDF"
-      (close)="closeReportDialog()"
-    />
+    <app-report-preview-dialog [reports]="reportsForPDF" (close)="closeReportDialog()" />
   }
 </div>

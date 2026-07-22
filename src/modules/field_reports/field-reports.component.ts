@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { PaginationComponent } from '../../app/shared/components/pagination/pagination.component';
 import { FieldReportsApiService } from '../../app/core/services/api/field-reports-api.service';
-import { FieldReport, ReportFilters, Severity, ReportStatus } from '../../app/shared/models';
+import { FieldReport, Severity, ReportStatus } from '../../app/shared/models';
 import { ReportPreviewDialogComponent } from './report-preview-dialog.component';
 
 @Component({
@@ -43,8 +43,8 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   categoryOptions: string[] = ['Black Pod Disease', 'Mealybug', 'Cacao Pod Borer'];
   severityOptions: Severity[] = ['Mild', 'Moderate', 'Severe'];
 
-  // Options for Year and Month filters
   yearOptions: number[] = [2026, 2025, 2024, 2023, 2022];
+
   monthOptions = [
     { value: '01', label: 'January' },
     { value: '02', label: 'February' },
@@ -60,7 +60,44 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     { value: '12', label: 'December' }
   ];
 
-  // ── Period Filter State ─────────────────────────────────────
+  activeDropdown: 'address' | 'category' | 'severity' | 'period' | null = null;
+
+  toggleDropdown(menu: 'address' | 'category' | 'severity' | 'period'): void {
+    if (this.activeDropdown === menu) {
+      this.activeDropdown = null;
+    } else {
+      this.activeDropdown = menu;
+      if (menu === 'period') {
+        this.pendingYear = this.filters.year ? parseInt(this.filters.year, 10) : this.currentYear;
+        this.pendingMonth = this.filters.month ? parseInt(this.filters.month, 10) - 1 : null;
+      }
+    }
+    this.cdr.markForCheck();
+  }
+
+  closeDropdowns(): void {
+    this.activeDropdown = null;
+    this.cdr.markForCheck();
+  }
+
+  selectAddress(val: string): void {
+    this.filters.address = val;
+    this.closeDropdowns();
+    this.onFilterChange();
+  }
+
+  selectCategory(val: string): void {
+    this.filters.disease_key = val;
+    this.closeDropdowns();
+    this.onFilterChange();
+  }
+
+  selectSeverity(val: Severity | ''): void {
+    this.filters.severity_key = val;
+    this.closeDropdowns();
+    this.onFilterChange();
+  }
+
   panelOpen = false;
   triggerLabel = 'All Time';
 
@@ -76,7 +113,6 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
-  // Updated filter state with year and month
   filters = {
     address: '',
     disease_key: '',
@@ -145,19 +181,16 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
       ? (this.pendingMonth + 1).toString().padStart(2, '0')
       : '';
 
-    // 2. Update the trigger label for the UI
     if (this.pendingMonth !== null) {
       this.triggerLabel = `${this.months[this.pendingMonth]} ${this.pendingYear}`;
     } else {
       this.triggerLabel = `${this.pendingYear}`;
     }
 
-    // 3. Close panel and trigger actual data filtering
     this.closePanel();
     this.onFilterChange();
   }
 
-  // ── Data loading ──────────────────────────────────────────
   loadReports(): void {
     this.isLoading = true;
     this.errorMsg = '';
