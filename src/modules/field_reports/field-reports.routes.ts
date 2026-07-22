@@ -11,4 +11,5 @@ export const FIELD_REPORTS_ROUTES: Routes = [
     loadComponent: () =>
       import('./field-report-detail.component').then((m) => m.FieldReportDetailComponent),
   },
+  
 ];
