@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://theobrotect.org/api/theobrotect',
+  apiUrl: 'NG_APP_API_URL',
 };

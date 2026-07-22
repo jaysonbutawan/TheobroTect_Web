@@ -60,10 +60,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "TheobroTect_Web:build:production"
+              "buildTarget": "TheobroTectWeb:build:production"
             },
             "development": {
-              "buildTarget": "TheobroTect_Web:build:development"
+              "buildTarget": "TheobroTectWeb:build:development"
             }
           },
           "defaultConfiguration": "development"
