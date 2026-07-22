@@ -3,7 +3,6 @@
   "buildCommand": "npm run build:prod",
   "outputDirectory": "dist/theobrotect/browser",
   "installCommand": "npm install",
-  "framework": "angular",
   "rewrites": [
     {
       "source": "/(.*)",
