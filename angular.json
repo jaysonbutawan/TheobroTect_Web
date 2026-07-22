@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "TheobroTect_Web": {
+    "TheobroTect": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -60,10 +60,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "TheobroTectWeb:build:production"
+              "buildTarget": "TheobroTect:build:production"
             },
             "development": {
-              "buildTarget": "TheobroTectWeb:build:development"
+              "buildTarget": "TheobroTect:build:development"
             }
           },
           "defaultConfiguration": "development"
