@@ -65,5 +65,10 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "~5.9.3",
     "vitest": "^4.0.18"
+  },
+    "engines": {
+    "node": "22.x"
   }
+
+
 }
