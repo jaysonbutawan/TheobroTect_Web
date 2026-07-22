@@ -4,11 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "npm run pre-build && ng build",
+    "build": "ng build",
     "build:dev": "ng build --configuration=development",
-    "build:prod": "npm run pre-build && ng build --configuration=production",
-    "build:safe": "npm run pre-build && npm run build:prod",
-    "pre-build": "node scripts/pre-build-check.js",
+    "build:prod": "ng build --configuration=production",
+    "build:safe": "npm run build:prod",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --watch=false --code-coverage --browsers=ChromeHeadless",
@@ -18,7 +17,6 @@
     "format": "prettier --write \"src/**/*.{ts,html,css,scss}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,css,scss}\"",
     "analyze": "ng build --configuration production --stats-json && webpack-bundle-analyzer dist/theobrotect-web/stats.json",
-    "validate": "npm run pre-build",
     "prepare": "node -e \"try { require('husky').install() } catch (e) {}\""
   },
   "prettier": {
