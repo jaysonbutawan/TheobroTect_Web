@@ -6,11 +6,12 @@ import { Subject, takeUntil } from 'rxjs';
 import { PaginationComponent } from '../../app/shared/components/pagination/pagination.component';
 import { FieldReportsApiService } from '../../app/core/services/api/field-reports-api.service';
 import { FieldReport, ReportFilters, Severity, ReportStatus } from '../../app/shared/models';
+import { ReportPreviewDialogComponent } from './report-preview-dialog.component';
 
 @Component({
   selector: 'app-field-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, ReportPreviewDialogComponent],
   templateUrl: './field-reports-list.component.html',
 })
 export class FieldReportsComponent implements OnInit, OnDestroy {
@@ -42,7 +43,47 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   categoryOptions: string[] = ['Black Pod Disease', 'Mealybug', 'Cacao Pod Borer'];
   severityOptions: Severity[] = ['Mild', 'Moderate', 'Severe'];
 
-  filters: ReportFilters = { address: '', disease_key: '', severity_key: '', date: '' };
+  // Options for Year and Month filters
+  yearOptions: number[] = [2026, 2025, 2024, 2023, 2022];
+  monthOptions = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' }
+  ];
+
+  // ── Period Filter State ─────────────────────────────────────
+  panelOpen = false;
+  triggerLabel = 'All Time';
+
+  currentYear = new Date().getFullYear();
+  minYear = 2020; // Adjust to your earliest data year
+  maxYear = this.currentYear;
+
+  pendingYear: number = this.currentYear;
+  pendingMonth: number | null = null;
+
+  months: string[] = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+
+  // Updated filter state with year and month
+  filters = {
+    address: '',
+    disease_key: '',
+    severity_key: '',
+    year: '',
+    month: ''
+  };
 
   allReports: FieldReport[] = [];
   filteredReports: FieldReport[] = [];
@@ -51,16 +92,71 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   pageSize = 5;
   currentPage = 1;
 
+  showReportDialog = false;
+
   ngOnInit(): void {
     this.cdr.markForCheck();
     this.loadReports();
-
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
+  // ── Period Filter Methods ───────────────────────────────────
+  togglePanel(): void {
+    this.panelOpen = !this.panelOpen;
+    if (this.panelOpen) {
+      // Initialize pending state to match currently applied filters
+      this.pendingYear = this.filters.year ? parseInt(this.filters.year, 10) : this.currentYear;
+      this.pendingMonth = this.filters.month ? parseInt(this.filters.month, 10) - 1 : null;
+    }
+    this.cdr.markForCheck();
+  }
+
+  closePanel(): void {
+    this.panelOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  prevYear(): void {
+    if (this.pendingYear > this.minYear) {
+      this.pendingYear--;
+      this.cdr.markForCheck();
+    }
+  }
+
+  nextYear(): void {
+    if (this.pendingYear < this.maxYear) {
+      this.pendingYear++;
+      this.cdr.markForCheck();
+    }
+  }
+
+  selectMonth(index: number | null): void {
+    this.pendingMonth = index;
+    this.cdr.markForCheck();
+  }
+
+  applyFilter(): void {
+    // 1. Update the actual filters
+    this.filters.year = this.pendingYear.toString();
+    this.filters.month = this.pendingMonth !== null
+      ? (this.pendingMonth + 1).toString().padStart(2, '0')
+      : '';
+
+    // 2. Update the trigger label for the UI
+    if (this.pendingMonth !== null) {
+      this.triggerLabel = `${this.months[this.pendingMonth]} ${this.pendingYear}`;
+    } else {
+      this.triggerLabel = `${this.pendingYear}`;
+    }
+
+    // 3. Close panel and trigger actual data filtering
+    this.closePanel();
+    this.onFilterChange();
+  }
+
   // ── Data loading ──────────────────────────────────────────
   loadReports(): void {
     this.isLoading = true;
@@ -71,28 +167,21 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.allReports = response.data || [];
-
-          // 1. Logs the raw object so you can expand it
-          console.log('Raw Field Reports Data:', this.allReports);
-
-          // 2. Logs it as a beautiful grid (field by field)
-          console.table(this.allReports);
-
           this.cdr.markForCheck();
           this.applyFilters();
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Failed to fetch reports:', error); // Log the error too!
+          console.error('Failed to fetch reports:', error);
           this.errorMsg = 'Could not load field reports. Please try again.';
           this.isLoading = false;
-          // Fallback to empty array
           this.allReports = [];
           this.cdr.markForCheck();
           this.applyFilters();
         }
       });
   }
+
   // ── Filtering ──────────────────────────────────────────────
   onFilterChange(): void {
     this.currentPage = 1;
@@ -101,7 +190,20 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
-    this.filters = { address: '', disease_key: '', severity_key: '', date: '' };
+    this.filters = {
+      address: '',
+      disease_key: '',
+      severity_key: '',
+      year: '',
+      month: ''
+    };
+
+    // Reset Date Popover UI
+    this.triggerLabel = 'All Time';
+    this.pendingYear = this.currentYear;
+    this.pendingMonth = null;
+    this.panelOpen = false;
+
     this.onFilterChange();
   }
 
@@ -113,9 +215,30 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
         r?.disease_key?.toLowerCase().includes(this.filters.disease_key.toLowerCase()) ||
         this.filters.disease_key.toLowerCase().includes(r?.disease_key?.toLowerCase() ?? '');
       const matchesSeverity = !this.filters.severity_key || r.severity_key === this.filters.severity_key;
-      // Date filtering intentionally omitted from mock data — wire up once timestamps are real ISO dates.
-      return matchesAddress && matchesCategory && matchesSeverity;
+
+      // Year & Optional Month Date Filtering logic
+      const matchesDate = (() => {
+        if (!this.filters.year && !this.filters.month) return true;
+
+        // Uses created_at or date timestamp field from the report
+        const reportDateRaw = r.scanned_at || (r as any).date;
+        if (!reportDateRaw) return true;
+
+        const reportDate = new Date(reportDateRaw);
+        if (isNaN(reportDate.getTime())) return true;
+
+        const reportYear = reportDate.getFullYear().toString();
+        const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
+
+        const matchesYear = !this.filters.year || reportYear === this.filters.year;
+        const matchesMonth = !this.filters.month || reportMonth === this.filters.month;
+
+        return matchesYear && matchesMonth;
+      })();
+
+      return matchesAddress && matchesCategory && matchesSeverity && matchesDate;
     });
+
     this.cdr.markForCheck();
     this.updatePagedReports();
   }
@@ -176,7 +299,6 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
 
   formatDiseaseKey(diseaseKey: string): string {
     if (!diseaseKey) return 'Unknown';
-    // Convert snake_case or kebab-case to Title Case
     return diseaseKey
       .replace(/_/g, ' ')
       .replace(/-/g, ' ')
@@ -187,7 +309,6 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
 
   formatStatus(status: ReportStatus | number | string): string {
     if (typeof status === 'number') {
-      // Map numeric status to string
       switch (status) {
         case 0: return 'Pending';
         case 1: return 'Under Review';
@@ -237,5 +358,17 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
       default:
         return 'bg-slate-500';
     }
+  }
+
+  openReportDialog(): void {
+    this.showReportDialog = true;
+  }
+
+  closeReportDialog(): void {
+    this.showReportDialog = false;
+  }
+
+  get reportsForPDF(): FieldReport[] {
+    return this.filteredReports.length > 0 ? this.filteredReports : this.allReports;
   }
 }
