@@ -20,6 +20,14 @@
             "outputPath": "dist/theobrotect",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "leaflet",
+              "leaflet.heat",
+              "html2canvas",
+              "raf",
+              "rgbcolor",
+              "core-js"
+            ],
             "assets": [
               {
                 "glob": "**/*",

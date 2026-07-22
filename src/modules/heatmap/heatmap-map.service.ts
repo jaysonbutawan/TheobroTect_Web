@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import * as L from 'leaflet';
-import 'leaflet.heat';
+import type * as LeafletType from 'leaflet'; // Import type with a distinct alias to avoid shadowing
 import { Scan } from '../../app/shared/models';
 
 @Injectable({ providedIn: 'root' })
 export class HeatmapMapService {
-  private map!: L.Map;
+  private map!: LeafletType.Map;
+  private L!: typeof LeafletType; // Cached Leaflet instance stored on the service
 
-  private readonly boundaryCoords: L.LatLngTuple[] = [
+  private readonly boundaryCoords: LeafletType.LatLngTuple[] = [
     [7.806560861082189, 125.63986102045375],
     [7.7956762095560865, 125.63196459707926],
     [7.794995909431882, 125.66320696782175],
@@ -40,25 +40,39 @@ export class HeatmapMapService {
 
   private resizeObserver?: ResizeObserver;
 
-  initMap(containerId: string): void {
-    const streetsAndBuildings = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+  /**
+   * Lazily loads Leaflet & leaflet.heat modules on-demand
+   */
+  private async getLeaflet(): Promise<typeof LeafletType> {
+    if (!this.L) {
+      const leafletModule = await import('leaflet');
+      this.L = (leafletModule as any).default || leafletModule;
+      await import('leaflet.heat');
+    }
+    return this.L;
+  }
+
+  async initMap(containerId: string): Promise<void> {
+    await this.getLeaflet();
+
+    const streetsAndBuildings = this.L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
       attribution: '&copy; Google Maps',
       maxZoom: 20
     });
 
-    const terrainView = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+    const terrainView = this.L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
       attribution: '&copy; Google Maps',
       maxZoom: 20
     });
 
-    const satelliteHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    const satelliteHybrid = this.L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
       attribution: '&copy; Google Maps',
       maxZoom: 20
     });
 
-    const mapBounds = L.latLngBounds(this.boundaryCoords).pad(0.15);
+    const mapBounds = this.L.latLngBounds(this.boundaryCoords).pad(0.15);
 
-    this.map = L.map(containerId, {
+    this.map = this.L.map(containerId, {
       center: [7.7512, 125.7231],
       zoom: 14,
       minZoom: 11,
@@ -69,12 +83,12 @@ export class HeatmapMapService {
     });
 
     const baseMaps = {
-      "Streets & Buildings": streetsAndBuildings,
-      "Detailed Terrain": terrainView,
-      "Satellite Hybrid": satelliteHybrid
+      'Streets & Buildings': streetsAndBuildings,
+      'Detailed Terrain': terrainView,
+      'Satellite Hybrid': satelliteHybrid
     };
 
-    L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
+    this.L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
 
     this.drawBoundary();
     this.observeResize(containerId);
@@ -100,10 +114,12 @@ export class HeatmapMapService {
     if (this.map) this.map.setView([7.7512, 125.7231], 12);
   }
 
-  clearScanLayers(): void {
+  async clearScanLayers(): Promise<void> {
     if (!this.map) return;
+    await this.getLeaflet();
+
     this.map.eachLayer((layer) => {
-      if (layer instanceof (L as any).HeatLayer || layer instanceof L.CircleMarker) {
+      if (layer instanceof (this.L as any).HeatLayer || layer instanceof this.L.CircleMarker) {
         if (!layer.getPopup()?.getContent()?.toString().includes('Target Area')) {
           this.map.removeLayer(layer);
         }
@@ -111,8 +127,10 @@ export class HeatmapMapService {
     });
   }
 
-  plotMarkers(scans: Scan[], onMarkerClick: (scan: Scan) => void): void {
-    this.clearScanLayers();
+  async plotMarkers(scans: Scan[], onMarkerClick: (scan: Scan) => void): Promise<void> {
+    await this.getLeaflet();
+    await this.clearScanLayers();
+
     const heatPoints: any[] = [];
     const validScans = scans.filter(s => s.location_lat && s.location_lng);
 
@@ -134,11 +152,13 @@ export class HeatmapMapService {
     this.renderHeatLayers(heatPoints);
   }
 
-  focusOnLocation(lat: number, lng: number): void {
+  async focusOnLocation(lat: number, lng: number): Promise<void> {
     if (!this.map) return;
+    await this.getLeaflet();
+
     this.map.flyTo([lat, lng], 16, { animate: true, duration: 2.0 });
 
-    const highlightIcon = L.divIcon({
+    const highlightIcon = this.L.divIcon({
       className: 'custom-div-icon',
       html: `<div class="relative flex items-center justify-center">
                <div class="absolute w-12 h-12 bg-green-500 rounded-full animate-ping opacity-20"></div>
@@ -148,7 +168,7 @@ export class HeatmapMapService {
       iconAnchor: [24, 24]
     });
 
-    L.marker([lat, lng], { icon: highlightIcon }).addTo(this.map)
+    this.L.marker([lat, lng], { icon: highlightIcon }).addTo(this.map)
       .bindPopup(`<b class="text-slate-800">Target Area</b>`).openPopup();
   }
 
@@ -158,7 +178,7 @@ export class HeatmapMapService {
       .map(p => [p[0], p[1], p[2]]);
 
     if (healthyPoints.length) {
-      (L as any).heatLayer(healthyPoints, {
+      (this.L as any).heatLayer(healthyPoints, {
         radius: 50, blur: 25, max: 1.0, minOpacity: 0.45,
         gradient: { 0.2: '#bbf7d0', 0.5: '#4ade80', 0.8: '#16a34a', 1.0: '#14532d' }
       }).addTo(this.map);
@@ -169,7 +189,7 @@ export class HeatmapMapService {
       .map(p => [p[0], p[1], p[2]]);
 
     if (mealybugPoints.length) {
-      (L as any).heatLayer(mealybugPoints, {
+      (this.L as any).heatLayer(mealybugPoints, {
         radius: 50, blur: 25, max: 1.0, minOpacity: 0.45,
         gradient: { 0.2: '#bfdbfe', 0.5: '#3b82f6', 0.8: '#1d4ed8', 1.0: '#1e3a8a' }
       }).addTo(this.map);
@@ -193,7 +213,7 @@ export class HeatmapMapService {
       });
 
     if (blackPodPoints.length) {
-      (L as any).heatLayer(blackPodPoints, {
+      (this.L as any).heatLayer(blackPodPoints, {
         radius: 50, blur: 25, max: 1.0, minOpacity: 0.40,
         gradient: {
           0.25: '#fca5a5',
@@ -208,7 +228,7 @@ export class HeatmapMapService {
       .map(p => [p[0], p[1], p[2]]);
 
     if (podBorerPoints.length) {
-      (L as any).heatLayer(podBorerPoints, {
+      (this.L as any).heatLayer(podBorerPoints, {
         radius: 50, blur: 25, max: 1.0, minOpacity: 0.45,
         gradient: { 0.2: '#FFFBA7', 0.5: '#FFEA6C', 0.8: '#eab308', 1.0: '#FFCC00' }
       }).addTo(this.map);
@@ -225,7 +245,7 @@ export class HeatmapMapService {
       .map(p => [p[0], p[1], p[2]]);
 
     if (otherPoints.length) {
-      (L as any).heatLayer(otherPoints, {
+      (this.L as any).heatLayer(otherPoints, {
         radius: 50, blur: 25, max: 1.0, minOpacity: 0.45,
         gradient: { 0.2: '#bfdbfe', 0.5: '#3b82f6', 0.8: '#1d4ed8', 1.0: '#1e3a8a' }
       }).addTo(this.map);
@@ -233,23 +253,23 @@ export class HeatmapMapService {
   }
 
   private addClickableMarker(lat: number, lng: number, scan: Scan, onClick: (scan: Scan) => void): void {
-    const ghostMarker = L.circleMarker([lat, lng], { radius: 20, stroke: false, fillColor: '#000', fillOpacity: 0 }).addTo(this.map);
+    const ghostMarker = this.L.circleMarker([lat, lng], { radius: 20, stroke: false, fillColor: '#000', fillOpacity: 0 }).addTo(this.map);
 
     ghostMarker.bindTooltip(`<div style="font-size:11px;font-weight:700;padding:2px 4px;white-space:nowrap;">${scan.user_name || 'Unknown'} &nbsp;·&nbsp; ${scan.disease_key || '—'}</div>`, { sticky: true, direction: 'top' });
     ghostMarker.on('click', () => onClick(scan));
-    ghostMarker.on('mouseover', (e) => (e.target as L.CircleMarker).setStyle({ fillOpacity: 0.08, fillColor: '#1e293b' }));
-    ghostMarker.on('mouseout', (e) => (e.target as L.CircleMarker).setStyle({ fillOpacity: 0 }));
+    ghostMarker.on('mouseover', (e) => (e.target as LeafletType.CircleMarker).setStyle({ fillOpacity: 0.08, fillColor: '#1e293b' }));
+    ghostMarker.on('mouseout', (e) => (e.target as LeafletType.CircleMarker).setStyle({ fillOpacity: 0 }));
   }
 
   private drawBoundary(): void {
-    L.polygon(this.boundaryCoords, {
+    this.L.polygon(this.boundaryCoords, {
       color: '#dc2626',
       weight: 5,
       fillColor: '#000',
       fillOpacity: 0.05,
       interactive: false
     }).addTo(this.map);
-    L.polygon(this.boundaryCoords, {
+    this.L.polygon(this.boundaryCoords, {
       color: '#ffffff',
       weight: 5,
       dashArray: '10, 15',
