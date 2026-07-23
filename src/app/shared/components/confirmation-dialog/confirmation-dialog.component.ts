@@ -7,14 +7,14 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     @if (isOpen) {
-     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto">
+     <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto">
 
-  <div class="relative w-full max-w-[90vw] xs:max-w-sm sm:max-w-[400px] max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-[24px] bg-[#f9f9f9] p-6 sm:p-8 shadow-2xl text-center">
+  <div class="relative w-full max-w-[calc(100vw-1.5rem)] sm:max-w-[400px] max-h-[85vh] overflow-y-auto rounded-2xl sm:rounded-[24px] bg-[#f9f9f9] p-5 sm:p-8 shadow-2xl text-center">
 
     <!-- Close Button -->
     <button
       (click)="onCancel()"
-      class="absolute right-3.5 top-3.5 sm:right-4 sm:top-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-200/60 text-gray-600 hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+      class="absolute right-3 top-3 sm:right-4 sm:top-4 flex h-9 w-9 items-center justify-center rounded-full bg-gray-200/60 text-gray-600 hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
       aria-label="Close dialog"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -24,26 +24,18 @@ import { CommonModule } from '@angular/common';
     </button>
 
     <!-- Content -->
-    <h2 class="mt-1 text-xl sm:text-[22px] font-extrabold text-gray-900 leading-snug">{{ title }}</h2>
-    <p class="mt-2.5 sm:mt-3 text-sm sm:text-[15px] leading-relaxed text-gray-600 px-1">
+    <h2 class="mt-1 text-lg sm:text-[22px] font-extrabold text-gray-900 leading-snug">{{ title }}</h2>
+    <p class="mt-2.5 sm:mt-3 text-[13px] sm:text-[15px] leading-relaxed text-gray-600 px-1">
       {{ message }}
     </p>
 
     <!-- Actions -->
-    <div class="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3">
-      <button
-        (click)="onCancel()"
-        [disabled]="isLoading"
-        class="w-full sm:flex-1 rounded-xl sm:rounded-[12px] border-[1.5px] border-gray-900 py-2.5 sm:py-3 text-sm sm:text-[15px] font-bold text-gray-900 hover:bg-gray-100 disabled:opacity-50 transition-colors"
-      >
-        {{ cancelText }}
-      </button>
-
+    <div class="mt-5 sm:mt-8 flex flex-col gap-2.5 sm:gap-3">
       <button
         (click)="onConfirm()"
         [disabled]="isLoading"
         [ngClass]="confirmButtonClass"
-        class="w-full sm:flex-1 rounded-xl sm:rounded-[12px] py-2.5 sm:py-3 text-sm sm:text-[15px] font-bold text-white hover:brightness-110 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+        class="w-full rounded-xl sm:rounded-[12px] py-3 sm:py-3 text-[15px] font-bold text-white hover:brightness-110 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-sm min-h-[48px]"
       >
         @if (isLoading) {
           <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -52,6 +44,14 @@ import { CommonModule } from '@angular/common';
           </svg>
         }
         {{ confirmText }}
+      </button>
+
+      <button
+        (click)="onCancel()"
+        [disabled]="isLoading"
+        class="w-full rounded-xl sm:rounded-[12px] border-[1.5px] border-gray-900 py-3 sm:py-3 text-[15px] font-bold text-gray-900 hover:bg-gray-100 disabled:opacity-50 transition-colors min-h-[48px]"
+      >
+        {{ cancelText }}
       </button>
     </div>
 
