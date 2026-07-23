@@ -9,7 +9,6 @@ import { ScanDetailModalComponent } from './modal/scan-detail-modal.component';
 import { ScansApiService } from '../../../app/core/services/api/scans-api.service';
 import { UsersApiService } from '../../../app/core/services/api/users-api.service';
 import { Scan as ApiScan } from '../../../app/shared/models/scan.model';
-import { User } from '../../../app/shared/models/user.model';
 import { ToastService } from '../../../app/shared/components/toast/toast.service';
 
 export type Severity = 'Mild' | 'Moderate' | 'Severe';

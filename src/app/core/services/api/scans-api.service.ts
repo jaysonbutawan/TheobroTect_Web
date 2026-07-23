@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BaseApiService } from './base-api.service';
 import { Scan, ScanResponse } from '../../../shared/models';
@@ -18,7 +19,8 @@ export class ScansApiService extends BaseApiService {
   }
 
   getUserScans(userId: number): Observable<ScanResponse> {
-    return this.get<ScanResponse>(`/${userId}`);
+    const params = new HttpParams().set('user_id', userId.toString());
+    return this.get<ScanResponse>('', params);
   }
 
   createScan(scan: Partial<Scan>): Observable<Scan> {
