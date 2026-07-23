@@ -1,6 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Scan, Severity } from './user_scan_history.component'; // Adjust import path
+import { Scan, ScanHistoryEntry } from './modal/scan-detail-modal.component';
+
+type Severity = 'Mild' | 'Moderate' | 'Severe';
 
 @Component({
   selector: 'app-scan-detail-widget',

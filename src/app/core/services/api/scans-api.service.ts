@@ -18,7 +18,7 @@ export class ScansApiService extends BaseApiService {
   }
 
   getUserScans(userId: number): Observable<ScanResponse> {
-    return this.get<ScanResponse>(`/user/${userId}`);
+    return this.get<ScanResponse>(`/${userId}`);
   }
 
   createScan(scan: Partial<Scan>): Observable<Scan> {

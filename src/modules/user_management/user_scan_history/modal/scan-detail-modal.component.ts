@@ -15,7 +15,7 @@ export interface Scan {
   confidence: number;
   scanned_at: string;
   location: string;
-  description: string;
+  description?: string;
   status?: string;
   actions?: string[];
   scores?: Record<string, number>;

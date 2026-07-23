@@ -1,39 +1,45 @@
-import { Component, OnInit, ChangeDetectorRef,inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { ScanHistoryProfileSkeletonComponent } from '../../../app/shared/skeletons/disease-guidance/scan-history-skeleton/scan-history-skeleton';
 import { PaginationComponent } from '../../../app/shared/components/pagination/pagination.component';
-import { ScanDetailModalComponent } from './modal/scan-detail-modal.component'; // adjust path to wherever you saved it
+import { ScanDetailModalComponent } from './modal/scan-detail-modal.component';
+import { ScansApiService } from '../../../app/core/services/api/scans-api.service';
+import { UsersApiService } from '../../../app/core/services/api/users-api.service';
+import { Scan as ApiScan } from '../../../app/shared/models/scan.model';
+import { User } from '../../../app/shared/models/user.model';
+import { ToastService } from '../../../app/shared/components/toast/toast.service';
 
 export type Severity = 'Mild' | 'Moderate' | 'Severe';
 export type ScanStatus = 'complete' | 'failed';
 
-export interface ScanHistoryEntry {
-  date: string;
+export interface LocalScan {
+  id: number;
   disease: string;
-  severity: Severity;
-}
-
-export interface Scan {
-  id: string;
-  disease: string;
+  disease_key: string;
   pod_id: string;
   severity: Severity;
+  severity_key: string;
   confidence: number;
   scanned_at: string;
   location: string;
-  description: string;
-  actions: string[];
-  history: ScanHistoryEntry[];
-  scores: Record<string, number>
   status: ScanStatus;
 }
 
 export interface FarmerProfile {
   name: string;
-  avatarUrl: string;
-  badgeLabel: string;
-  isPremium: boolean;
+  address: string;
+  totalScans: number;
+}
+
+export interface DiseaseSummary {
+  diseaseKey: string;
+  diseaseName: string;
+  count: number;
+  latestDate: string;
+  severities: string[];
 }
 
 interface ScanFilters {
@@ -48,124 +54,189 @@ interface ScanFilters {
   imports: [CommonModule, FormsModule, ScanHistoryProfileSkeletonComponent, PaginationComponent, ScanDetailModalComponent],
   templateUrl: './user_scan_history.component.html',
 })
-export class ScanHistoryComponent implements OnInit {
+export class ScanHistoryComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
-  view: 'list' | 'detail' = 'list';
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private scansApi = inject(ScansApiService);
+  private usersApi = inject(UsersApiService);
+  private toast = inject(ToastService);
+  private destroy$ = new Subject<void>();
 
+  view: 'list' | 'detail' = 'list';
   isLoading = true;
   errorMsg = '';
 
+  userId = 0;
+
   profile: FarmerProfile = {
-    name: 'Alex Rivers',
-    avatarUrl: 'https://i.pravatar.cc/80?img=12',
-    badgeLabel: 'Enterprise Account Verified',
-    isPremium: true,
+    name: '',
+    address: '',
+    totalScans: 0,
   };
 
   filters: ScanFilters = { search: '', disease: '', severity: '' };
   filterPanelOpen = false;
 
-  diseaseOptions: string[] = ['Cacao Pod Borer', 'Mealybug', 'Black Pod'];
+  diseaseOptions: string[] = [];
   severityOptions: Severity[] = ['Mild', 'Moderate', 'Severe'];
 
-  allScans: Scan[] = [];
-  filteredScans: Scan[] = [];
-  pagedScans: Scan[] = [];
+  allScans: LocalScan[] = [];
+  filteredScans: LocalScan[] = [];
+  pagedScans: LocalScan[] = [];
+  diseaseSummary: DiseaseSummary[] = [];
 
-  pageSize = 4;
+  pageSize = 10;
   currentPage = 1;
 
-  selectedScan: Scan | null = null;
+  selectedScan: LocalScan | null = null;
+
+  private readonly DISEASE_NAMES: Record<string, string> = {
+    'cacao_pod_borer': 'Cacao Pod Borer',
+    'mealybug': 'Mealybug',
+    'black_pod': 'Black Pod',
+    'cocoa_swollen_shoot_virus': 'Cocoa Swollen Shoot Virus',
+    'phytophthora': 'Phytophthora',
+    'capsid_bug': 'Capsid Bug',
+    'mirid': 'Mirid',
+  };
 
   ngOnInit(): void {
-    this.loadScans();
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.userId = +id;
+      this.loadUserData();
+    } else {
+      this.errorMsg = 'No user ID provided';
+      this.isLoading = false;
+    }
   }
 
-  // ── Data loading ──────────────────────────────────────────
-  loadScans(): void {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadUserData(): void {
     this.isLoading = true;
     this.errorMsg = '';
 
-    setTimeout(() => {
-      this.allScans = this.mockScans();
-      this.cdr.markForCheck();
-      this.applyFilters();
-      this.isLoading = false;
-      this.cdr.markForCheck();
-    }, 300);
+    this.usersApi.getUserById(this.userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (user) => {
+          if (user) {
+            this.profile = {
+              name: user.name,
+              address: user.address || 'N/A',
+              totalScans: user.total_scans ?? 0,
+            };
+            this.cdr.markForCheck();
+          }
+          this.loadScans();
+        },
+        error: () => {
+          this.loadScans();
+        },
+      });
   }
 
-  private mockScans(): Scan[] {
-    return [
-      {
-        id: '1',
-        disease: 'Cacao Pod Borer',
-        pod_id: 'POD-2310-1',
-        severity: 'Moderate',
-        confidence: 87.4,
-        scanned_at: '2023-10-24T14:30:00',
-        location: 'Sector A-12',
-        description: 'Larvae tunnel into the pod husk, feeding on the beans and disrupting normal pod development.',
-        actions: [
-          'Harvest and isolate affected pods immediately.',
-          'Apply approved biological control (e.g. Trichogramma wasps).',
-          'Improve canopy spacing to reduce humidity.',
-        ],
-        history: [
-          { date: '2023-10-10', disease: 'Cacao Pod Borer', severity: 'Mild' },
-        ],
-        scores: { 'Cacao Pod Borer': 87.4, 'Mealybug': 8.1, 'Black Pod': 4.5 },
-        status: 'complete',
-      },
-      {
-        id: '2',
-        disease: 'Mealybug',
-        pod_id: 'POD-2310-2',
-        severity: 'Severe',
-        confidence: 92.1,
-        scanned_at: '2023-10-22T09:15:00',
-        location: 'North Grove',
-        description: 'Sap-sucking insects that cluster on pods and stems, weakening the plant and promoting sooty mold.',
-        actions: [
-          'Prune and destroy heavily infested pods.',
-          'Introduce natural predators such as ladybird beetles.',
-          'Apply horticultural oil to affected areas.',
-        ],
-        history: [],
-        scores: { 'Mealybug': 92.1, 'Cacao Pod Borer': 5.2, 'Black Pod': 2.7 },
-        status: 'complete',
-      },
-      {
-        id: '3',
-        disease: 'Black Pod',
-        pod_id: 'POD-2310-3',
-        severity: 'Mild',
-        confidence: 76.8,
-        scanned_at: '2023-10-20T11:45:00',
-        location: 'East Ridge',
-        description: 'Fungal disease causing dark, water-soaked lesions that spread rapidly in humid conditions.',
-        actions: [],
-        history: [],
-        scores: { 'Black Pod': 76.8, 'Cacao Pod Borer': 14.0, 'Mealybug': 9.2 },
-        status: 'failed',
-      },
-      {
-        id: '4',
-        disease: 'Cacao Pod Borer',
-        pod_id: 'POD-2310-4',
-        severity: 'Mild',
-        confidence: 81.3,
-        scanned_at: '2023-10-18T16:20:00',
-        location: 'Sector B-04',
-        description: 'Larvae tunnel into the pod husk, feeding on the beans and disrupting normal pod development.',
-        actions: [
-          'Monitor weekly for spread to neighboring pods.',
-        ],
-        history: [],
-        scores: { 'Cacao Pod Borer': 81.3, 'Mealybug': 11.4, 'Black Pod': 7.3 },
-        status: 'complete',
-      },
-    ];
+  private loadScans(): void {
+    this.scansApi.getUserScans(this.userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.allScans = (res?.data ?? []).map(s => this.mapApiScan(s));
+          this.profile.totalScans = res?.count ?? this.allScans.length;
+          this.finishLoad();
+        },
+        error: () => {
+          this.errorMsg = 'Failed to load scan data';
+          this.toast.show('error', 'Load Failed', 'Could not load scan history.');
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private finishLoad(): void {
+    this.buildDiseaseOptions();
+    this.computeDiseaseSummary();
+    this.applyFilters();
+    this.isLoading = false;
+    this.cdr.markForCheck();
+  }
+
+  private mapApiScan(s: ApiScan): LocalScan {
+    return {
+      id: s.id,
+      disease: this.diseaseDisplayName(s.disease_key),
+      disease_key: s.disease_key,
+      pod_id: s.local_id,
+      severity: this.capitalizeSeverity(s.severity_key),
+      severity_key: s.severity_key,
+      confidence: s.confidence,
+      scanned_at: s.scanned_at,
+      location: s.location_label || s.user_address || 'N/A',
+      status: s.status === 1 ? 'complete' : 'failed',
+    };
+  }
+
+  diseaseDisplayName(key: string): string {
+    return this.DISEASE_NAMES[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  private capitalizeSeverity(key: string): Severity {
+    const lower = key?.toLowerCase();
+    if (lower === 'severe') return 'Severe';
+    if (lower === 'moderate') return 'Moderate';
+    return 'Mild';
+  }
+
+  private buildDiseaseOptions(): void {
+    const keys = [...new Set(this.allScans.map(s => s.disease))];
+    this.diseaseOptions = keys.sort();
+  }
+
+  private computeDiseaseSummary(): void {
+    const map = new Map<string, DiseaseSummary>();
+
+    for (const scan of this.allScans) {
+      const key = scan.disease;
+      if (!map.has(key)) {
+        map.set(key, {
+          diseaseKey: scan.disease_key,
+          diseaseName: scan.disease,
+          count: 0,
+          latestDate: scan.scanned_at,
+          severities: [],
+        });
+      }
+      const entry = map.get(key)!;
+      entry.count++;
+      entry.severities.push(scan.severity);
+      if (scan.scanned_at > entry.latestDate) {
+        entry.latestDate = scan.scanned_at;
+      }
+    }
+
+    this.diseaseSummary = [...map.values()].sort((a, b) => b.count - a.count);
+  }
+
+  getDominantSeverity(severities: string[]): string {
+    const counts = new Map<string, number>();
+    for (const s of severities) {
+      counts.set(s, (counts.get(s) || 0) + 1);
+    }
+    let max = 0;
+    let dominant = 'Mild';
+    for (const [sev, count] of counts) {
+      if (count > max) {
+        max = count;
+        dominant = sev;
+      }
+    }
+    return dominant;
   }
 
   // ── Filtering / search ────────────────────────────────────
@@ -224,31 +295,13 @@ export class ScanHistoryComponent implements OnInit {
     return Math.min(this.currentPage * this.pageSize, this.totalScans);
   }
 
-  get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-  }
-
   goToPage(p: number): void {
     this.currentPage = p;
     this.updatePagedScans();
   }
 
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage -= 1;
-      this.updatePagedScans();
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage += 1;
-      this.updatePagedScans();
-    }
-  }
-
   // ── Detail Modal Interactions ──────────────────────────────
-  viewScan(scan: Scan): void {
+  viewScan(scan: LocalScan): void {
     this.selectedScan = scan;
   }
 
@@ -256,13 +309,13 @@ export class ScanHistoryComponent implements OnInit {
     this.selectedScan = null;
   }
 
-  retryScan(scan: Scan): void {
-    scan.status = 'complete';
+  get sortedScores(): [string, number][] {
+    return [];
   }
 
-  get sortedScores(): [string, number][] {
-    if (!this.selectedScan) return [];
-    return Object.entries(this.selectedScan.scores).sort((a, b) => b[1] - a[1]);
+  // ── Navigation ─────────────────────────────────────────────
+  goBack(): void {
+    this.router.navigate(['/dashboard/user-management']);
   }
 
   // ── Export ─────────────────────────────────────────────────
@@ -283,23 +336,25 @@ export class ScanHistoryComponent implements OnInit {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'scan-history.csv';
+    a.download = `scan-history-${this.profile.name.replace(/\s+/g, '_')}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  // ── Formatters (Needed for the Table View) ─────────────────
+  // ── Formatters ─────────────────────────────────────────────
   formatDate(iso: string): string {
+    if (!iso) return 'N/A';
     const d = new Date(iso);
     return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
   }
 
   formatTime(iso: string): string {
+    if (!iso) return '';
     const d = new Date(iso);
     return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   }
 
   formatConf(value: number): string {
-    return value.toFixed(1);
+    return value?.toFixed(1) ?? '0';
   }
 }
