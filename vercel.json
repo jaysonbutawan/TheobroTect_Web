@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "npm run build:prod",
-  "outputDirectory": "dist/theobrotect/browser",
+  "outputDirectory": "dist/theobrotect",
   "installCommand": "npm install",
   "rewrites": [
     {
