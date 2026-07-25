@@ -4,8 +4,11 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { Scan } from '../../app/shared/models';
-import { FilterBarComponent } from './widgets/filter-bar.component';
-import { FilterState, DiseaseCounts, Observation } from './heatmap.models';
+
+// Import Types and the Normalizer from your FilterBar
+import { FilterBarComponent, FilterState, normalizeDisease } from './widgets/filter-bar.component';
+
+import { DiseaseCounts, Observation } from './heatmap.models';
 import { HeatmapLogicService } from './heatmap-logic.service';
 import { HeatmapMapService } from './heatmap-map.service';
 import { ToastService } from '../../app/shared/components/toast/toast.service';
@@ -21,6 +24,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   allScans: Scan[] = [];
+  filteredScans: Scan[] = []; // <-- Added this array to store active scans
   selectedScan: Scan | null = null;
 
   activeFilter: FilterState = { year: new Date().getFullYear(), month: new Date().getMonth(), disease: 'all' };
@@ -91,17 +95,33 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   applyFilters(): void {
-    const filteredData = this.logic.filterScans(this.allScans, this.activeFilter);
-    const validScans = filteredData.filter(s => s.location_lat && s.location_lng);
+    // 1. Manually filter the raw database data to match the UI filters exactly
+    this.filteredScans = this.allScans.filter((scan) => {
+      // Normalize what came from DB (scan.disease_key or scan.disease)
+      const scanDiseaseKey = normalizeDisease(scan.disease_key || (scan as any).disease);
+      const matchesDisease = this.activeFilter.disease === 'all' || scanDiseaseKey === this.activeFilter.disease;
+
+      const scanDate = new Date(scan.scanned_at);
+      const matchesYear = scanDate.getFullYear() === this.activeFilter.year;
+      const matchesMonth = this.activeFilter.month === null || scanDate.getMonth() === this.activeFilter.month;
+
+      return matchesDisease && matchesYear && matchesMonth;
+    });
+
+    // 2. Validate and pass the correct filtered items to map & counters
+    const validScans = this.filteredScans.filter(s => s.location_lat && s.location_lng);
     this.diseaseCounts = this.logic.getDiseaseCounts(validScans);
-    this.mapService.plotMarkers(filteredData, (scan: Scan) => {
+
+    this.mapService.plotMarkers(this.filteredScans, (scan: Scan) => {
       this.selectedScan = scan;
       this.cdr.markForCheck();
     });
   }
+
   getCoveragePercent(count: number): number {
     return this.logic.getCoveragePercent(count, this.diseaseCounts.total);
   }
+
   clearSelectedScan(): void {
     this.selectedScan = null;
     this.cdr.markForCheck();

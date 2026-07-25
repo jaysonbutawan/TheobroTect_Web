@@ -1,0 +1,152 @@
+<div class="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+  <div>
+    <h1 class="font-['Syne'] text-2xl font-bold text-slate-800 tracking-tight">Settings</h1>
+    <p class="text-slate-500 text-sm mt-1">Manage your account settings and preferences.</p>
+  </div>
+
+  <!-- Profile Section -->
+  <div class="bg-white rounded-2xl shadow-[inset_2px_2px_6px_#e8e8ec,inset_-2px_-2px_6px_#ffffff] border border-slate-100 p-6 sm:p-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+        <i class="pi pi-user text-green-700 text-lg"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-800">Profile</h2>
+        <p class="text-xs text-slate-400">Update your username and email address.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()">
+      <div class="space-y-4">
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 tracking-widest uppercase block mb-2 ml-1">Username</label>
+          <div class="relative group">
+            <i class="pi pi-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors"></i>
+            <input
+              type="text"
+              formControlName="name"
+              class="w-full border-none rounded-2xl px-4 py-3.5 text-[13px] bg-[#f5f5f7] shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:ring-2 focus:ring-green-600/30 outline-none pl-11 transition-all"
+              placeholder="Enter your username"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 tracking-widest uppercase block mb-2 ml-1">Email Address</label>
+          <div class="relative group">
+            <i class="pi pi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors"></i>
+            <input
+              type="email"
+              formControlName="email"
+              class="w-full border-none rounded-2xl px-4 py-3.5 text-[13px] bg-[#f5f5f7] shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:ring-2 focus:ring-green-600/30 outline-none pl-11 transition-all"
+              placeholder="you@example.com"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="mt-6 w-full bg-[#2C2C2A] text-white font-bold py-3.5 rounded-2xl text-[13px] flex items-center justify-center gap-2 transition-all shadow-[6px_6px_16px_#d1d1d5,-6px_-6px_16px_#ffffff] hover:shadow-[3px_3px_10px_#d1d1d5,-3px_-3px_10px_#ffffff] active:shadow-[inset_3px_3px_8px_#000000,inset_-3px_-3px_8px_#3a3a38] disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        @if (loading) {
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Saving...</span>
+        } @else {
+          <span>Save Changes</span>
+        }
+      </button>
+    </form>
+  </div>
+
+  <!-- Password Section -->
+  <div class="bg-white rounded-2xl shadow-[inset_2px_2px_6px_#e8e8ec,inset_-2px_-2px_6px_#ffffff] border border-slate-100 p-6 sm:p-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+        <i class="pi pi-lock text-green-700 text-lg"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-800">Change Password</h2>
+        <p class="text-xs text-slate-400">Ensure your account stays secure.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+      <div class="space-y-4">
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 tracking-widest uppercase block mb-2 ml-1">Current Password</label>
+          <div class="relative group">
+            <i class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors"></i>
+            <input
+              [type]="showCurrentPassword ? 'text' : 'password'"
+              formControlName="currentPassword"
+              class="w-full border-none rounded-2xl px-4 py-3.5 text-[13px] bg-[#f5f5f7] shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:ring-2 focus:ring-green-600/30 outline-none pl-11 pr-12 transition-all"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              (click)="showCurrentPassword = !showCurrentPassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-slate-300 hover:text-green-600 hover:shadow-[2px_2px_6px_#d1d1d5,-2px_-2px_6px_#ffffff] focus:outline-none transition-all z-10"
+            >
+              <i [className]="showCurrentPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 tracking-widest uppercase block mb-2 ml-1">New Password</label>
+          <div class="relative group">
+            <i class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors"></i>
+            <input
+              [type]="showNewPassword ? 'text' : 'password'"
+              formControlName="newPassword"
+              class="w-full border-none rounded-2xl px-4 py-3.5 text-[13px] bg-[#f5f5f7] shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:ring-2 focus:ring-green-600/30 outline-none pl-11 pr-12 transition-all"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              (click)="showNewPassword = !showNewPassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-slate-300 hover:text-green-600 hover:shadow-[2px_2px_6px_#d1d1d5,-2px_-2px_6px_#ffffff] focus:outline-none transition-all z-10"
+            >
+              <i [className]="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 tracking-widest uppercase block mb-2 ml-1">Confirm New Password</label>
+          <div class="relative group">
+            <i class="pi pi-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-green-600 transition-colors"></i>
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              class="w-full border-none rounded-2xl px-4 py-3.5 text-[13px] bg-[#f5f5f7] shadow-[inset_3px_3px_8px_#d1d1d5,inset_-3px_-3px_8px_#ffffff] focus:ring-2 focus:ring-green-600/30 outline-none pl-11 pr-12 transition-all"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              (click)="showConfirmPassword = !showConfirmPassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-slate-300 hover:text-green-600 hover:shadow-[2px_2px_6px_#d1d1d5,-2px_-2px_6px_#ffffff] focus:outline-none transition-all z-10"
+            >
+              <i [className]="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="mt-6 w-full bg-[#2C2C2A] text-white font-bold py-3.5 rounded-2xl text-[13px] flex items-center justify-center gap-2 transition-all shadow-[6px_6px_16px_#d1d1d5,-6px_-6px_16px_#ffffff] hover:shadow-[3px_3px_10px_#d1d1d5,-3px_-3px_10px_#ffffff] active:shadow-[inset_3px_3px_8px_#000000,inset_-3px_-3px_8px_#3a3a38] disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        @if (loading) {
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Updating...</span>
+        } @else {
+          <span>Change Password</span>
+        }
+      </button>
+    </form>
+  </div>
+</div>

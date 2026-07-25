@@ -16,4 +16,12 @@ export class AuthApiService extends BaseApiService {
   logout(): Observable<any> {
     return this.post('/logout', {});
   }
+
+  updateProfile(payload: { name: string; email: string }): Observable<any> {
+    return this.put('/profile', payload);
+  }
+
+  changePassword(payload: { currentPassword: string; newPassword: string }): Observable<any> {
+    return this.put('/password', payload);
+  }
 }

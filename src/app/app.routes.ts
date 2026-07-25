@@ -53,6 +53,13 @@ export const routes: Routes = [
             (m) => m.DISEASE_GUIDANCE_ROUTES
           ),
       },
+      {
+        path: 'settings',
+        loadChildren: () =>
+          import('../modules/settings/settings.routes').then(
+            (m) => m.SETTINGS_ROUTES
+          ),
+      },
     ],
   },
   { path: '**', component: NotFoundComponent },

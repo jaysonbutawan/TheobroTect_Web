@@ -2,6 +2,7 @@
   <app-sidebar
     [isCollapsed]="sideCollapsed"
     (collapseChanged)="sideCollapsed = $event"
+    (logoutRequested)="openLogoutDialog()"
     [style.width.px]="sideCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH"
     class="hidden md:flex h-screen fixed left-0 top-0 shrink-0 z-20 overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"
   >
@@ -58,7 +59,7 @@
           </svg>
         </button>
 
-        <app-sidebar [isCollapsed]="false" class="block w-full h-full" (click)="closeMenu()"></app-sidebar>
+        <app-sidebar [isCollapsed]="false" class="block w-full h-full" (logoutRequested)="openLogoutDialog()" (click)="closeMenu()"></app-sidebar>
       </div>
     </div>
   }
@@ -75,4 +76,16 @@
       </app-toast-notification>
     </div>
   }
+
+  <app-confirmation-dialog
+    [isOpen]="showLogoutConfirm"
+    [isLoading]="isLoggingOut"
+    title="Sign Out"
+    message="Are you sure you want to sign out? You will need to log in again to access your account."
+    cancelText="Cancel"
+    confirmText="Sign Out"
+    confirmButtonClass="bg-red-500 hover:bg-red-600"
+    (confirm)="confirmLogout()"
+    (cancel)="cancelLogout()"
+  />
 </div>

@@ -1,15 +1,50 @@
 import { Component, HostListener, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-export type DiseaseValue = 'all' | 'black pod' | 'cacao pod borer' | 'mealybug';
+
+export type DiseaseValue = 'all' | 'black_pod_disease' | 'cacao_pod_borer' | 'mealybug' | 'healthy';
+
 export interface DiseaseOption {
   value: DiseaseValue;
   label: string;
 }
+
 export interface FilterState {
   year: number;
   month: number | null;
   disease: DiseaseValue;
+}
+
+export function normalizeDisease(raw: string): DiseaseValue {
+  if (!raw) return 'all';
+
+  const clean = raw
+    .toLowerCase()
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (clean.includes('black pod')) {
+    return 'black_pod_disease';
+  }
+
+  if (
+    clean.includes('cacao pod borer') ||
+    clean.includes('pod borer') ||
+    clean.includes('cpb')
+  ) {
+    return 'cacao_pod_borer';
+  }
+
+  if (clean.includes('mealybug') || clean.includes('mealy bug')) {
+    return 'mealybug';
+  }
+
+  if (clean.includes('healthy')) {
+    return 'healthy';
+  }
+
+  return 'all';
 }
 
 const MONTHS = [
@@ -18,16 +53,15 @@ const MONTHS = [
 ] as const;
 
 const DISEASE_OPTIONS: DiseaseOption[] = [
-
   { value: 'all', label: 'All Diseases' },
-  { value: 'black pod', label: 'Black Pod' },
-  { value: 'cacao pod borer', label: 'Cacao Pod Borer' },
+  { value: 'black_pod_disease', label: 'Black Pod Disease' },
+  { value: 'cacao_pod_borer', label: 'Cacao Pod Borer' },
   { value: 'mealybug', label: 'Mealybug' },
+  { value: 'healthy', label: 'Healthy' }
 ];
 
 const MIN_YEAR = 2020;
 const MAX_YEAR = 2030;
-
 const now = new Date();
 
 const DEFAULT_FILTER: FilterState = {
@@ -35,6 +69,7 @@ const DEFAULT_FILTER: FilterState = {
   month: null,
   disease: 'all'
 };
+
 @Component({
   selector: 'app-filter-bar',
   standalone: true,
@@ -206,7 +241,6 @@ const DEFAULT_FILTER: FilterState = {
 
 </div>`
 })
-
 export class FilterBarComponent implements OnInit {
 
   @Output() filterChange = new EventEmitter<FilterState>();
@@ -229,6 +263,7 @@ export class FilterBarComponent implements OnInit {
   ngOnInit(): void {
     this.filterChange.emit(this.appliedFilter);
   }
+
   get triggerLabel(): string {
     if (this.appliedFilter.month !== null) {
       return `${MONTHS[this.appliedFilter.month]} ${this.appliedFilter.year}`;
@@ -248,7 +283,6 @@ export class FilterBarComponent implements OnInit {
       opt.label.toLowerCase().includes(query)
     );
   }
-
 
   togglePanel(): void {
     this.closeDiseasePanel();
@@ -278,7 +312,6 @@ export class FilterBarComponent implements OnInit {
     this.filterChange.emit(this.appliedFilter);
     this.closePanel();
   }
-
 
   toggleDiseasePanel(): void {
     this.closePanel();

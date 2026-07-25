@@ -7,11 +7,10 @@ import { UsersApiService } from '../../app/core/services/api/users-api.service';
 import { User, UsersResponse } from '../../app/shared/models';
 import { PaginationComponent } from '../../app/shared/components/pagination/pagination.component';
 import { ToastService } from '../../app/shared/components/toast/toast.service';
-
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, ConfirmationDialogComponent],
   templateUrl: './user_management.component.html',
 })
 export class UserManagementComponent implements OnInit, OnDestroy {
@@ -30,6 +29,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   errorMsg = '';
   pageSize = 10;
   currentPage = 1;
+
+  userToDelete: User | null = null;
+  isDeleting = false;
+  isConfirmDialogOpen = false;
+
 
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -118,19 +122,37 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   viewUser(user: User): void {
-  this.router.navigate(['/dashboard/users', user.id]);
-}
+    this.router.navigate(['/dashboard/users', user.id]);
+  }
 
   deleteUser(user: User): void {
-    if (!confirm(`Delete ${user.name}?`)) return;
-    this.users = this.users.filter(u => u.id !== user.id);
+    this.userToDelete = user;
+    this.isConfirmDialogOpen = true;
+  }
 
-    // If deleting the last item on the last page emptied it, step back a page.
+  // 2. Triggers when 'Delete' is clicked inside the dialog
+  confirmDelete(): void {
+    if (!this.userToDelete) return;
+
+    // Optional: If connecting to an API, you'd set this.isDeleting = true here
+    this.users = this.users.filter(u => u.id !== this.userToDelete!.id);
+
     this.applyFilters();
     if (this.currentPage > this.totalPages) {
       this.currentPage = this.totalPages;
       this.updatePagedUsers();
     }
+
+    // Close and reset
+    this.isConfirmDialogOpen = false;
+    this.userToDelete = null;
+    this.toastService.show('success', 'User Deleted', 'The user has been successfully removed.');
+  }
+
+  // 3. Triggers when 'Cancel' or the 'X' is clicked inside the dialog
+  cancelDelete(): void {
+    this.isConfirmDialogOpen = false;
+    this.userToDelete = null;
   }
 
 
@@ -140,4 +162,5 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       day: '2-digit', month: 'short', year: 'numeric'
     });
   }
-}
+}import { ConfirmationDialogComponent } from '../../app/shared/components/confirmation-dialog/confirmation-dialog.component';
+
