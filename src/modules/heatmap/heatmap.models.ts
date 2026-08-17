@@ -1,5 +1,3 @@
-import { Scan } from '../../app/shared/models';
-
 export interface DiseaseCounts {
   healthy: number;
   blackPod: number;

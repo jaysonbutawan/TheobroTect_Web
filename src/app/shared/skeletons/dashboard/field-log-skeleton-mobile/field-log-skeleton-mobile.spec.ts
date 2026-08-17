@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FieldLogSkeletonMobile } from './field-log-skeleton-mobile';
+import { FieldLogSkeletonMobileComponent } from './field-log-skeleton-mobile';
 
-describe('FieldLogSkeletonMobile', () => {
-  let component: FieldLogSkeletonMobile;
-  let fixture: ComponentFixture<FieldLogSkeletonMobile>;
+describe('FieldLogSkeletonMobileComponent', () => {
+  let component: FieldLogSkeletonMobileComponent;
+  let fixture: ComponentFixture<FieldLogSkeletonMobileComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FieldLogSkeletonMobile]
+      imports: [FieldLogSkeletonMobileComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(FieldLogSkeletonMobile);
+    fixture = TestBed.createComponent(FieldLogSkeletonMobileComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -71,7 +71,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
 
-        error: (err) => {
+        error: () => {
           this.errorMsg = 'Failed to load users';
           this.toastService.show('error', 'Load Failed', 'Could not load users from the server.');
           this.isLoading = false;

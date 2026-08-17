@@ -20,6 +20,8 @@ export class LoginComponent {
   private toastService = inject(ToastService);
 
   errorMessage = '';
+  successMessage = history.state?.passwordChanged ? 'Password updated successfully. Please sign in again.' : '';
+  authMessage = history.state?.authMessage ?? '';
   loading = false;
   showPassword = false;
 

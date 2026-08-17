@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -49,7 +49,7 @@ export abstract class BaseApiService {
   protected patch<T>(path: string = '', body: any): Observable<T> {
     const url = `${this.baseUrl}${path}`;
     this.logger.debug(`PATCH ${url}`, { body });
-    
+
     return this.http.patch<T>(url, body).pipe(
       tap(res => this.logger.debug(`PATCH ${url} - Success`, res)),
       catchError(err => this.handleError(err, 'PATCH', url))
@@ -67,15 +67,11 @@ export abstract class BaseApiService {
   }
 
   private handleError(error: HttpErrorResponse, method: string, url: string): Observable<never> {
-    let errorMessage = 'An error occurred';
-
     if (error.error instanceof ErrorEvent) {
       // Client-side error
-      errorMessage = `Client Error: ${error.error.message}`;
       this.logger.error(`${method} ${url} - Client Error`, error.error);
     } else {
       // Server-side error
-      errorMessage = `Server Error (${error.status}): ${error.message}`;
       this.logger.error(`${method} ${url} - Server Error`, {
         status: error.status,
         message: error.message,

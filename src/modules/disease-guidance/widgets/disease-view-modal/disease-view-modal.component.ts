@@ -96,7 +96,7 @@ export class DiseaseViewModalComponent implements OnChanges {
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: () => {
         this.isLoading = false;
         this.cdr.markForCheck();
       }

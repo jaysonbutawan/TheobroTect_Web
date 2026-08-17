@@ -12,9 +12,3 @@ export interface FieldReport {
   status: ReportStatus | number | string;
   location_label?: string;
 }
-export interface ReportFilters {
-  disease_key: string;
-  severity_key: Severity | '';
-  address: string;
-  date: string;
-}

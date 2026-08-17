@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DiseaseTableSkeleton } from './disease-table-skeleton';
+import { DiseaseTableSkeletonComponent } from './disease-table-skeleton';
 
-describe('DiseaseTableSkeleton', () => {
-  let component: DiseaseTableSkeleton;
-  let fixture: ComponentFixture<DiseaseTableSkeleton>;
+describe('DiseaseTableSkeletonComponent', () => {
+  let component: DiseaseTableSkeletonComponent;
+  let fixture: ComponentFixture<DiseaseTableSkeletonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DiseaseTableSkeleton]
+      imports: [DiseaseTableSkeletonComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DiseaseTableSkeleton);
+    fixture = TestBed.createComponent(DiseaseTableSkeletonComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

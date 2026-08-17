@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ScanHistorySkeleton } from './scan-history-skeleton';
+import { ScanHistoryProfileSkeletonComponent } from './scan-history-skeleton';
 
-describe('ScanHistorySkeleton', () => {
-  let component: ScanHistorySkeleton;
-  let fixture: ComponentFixture<ScanHistorySkeleton>;
+describe('ScanHistoryProfileSkeletonComponent', () => {
+  let component: ScanHistoryProfileSkeletonComponent;
+  let fixture: ComponentFixture<ScanHistoryProfileSkeletonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScanHistorySkeleton]
+      imports: [ScanHistoryProfileSkeletonComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ScanHistorySkeleton);
+    fixture = TestBed.createComponent(ScanHistoryProfileSkeletonComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

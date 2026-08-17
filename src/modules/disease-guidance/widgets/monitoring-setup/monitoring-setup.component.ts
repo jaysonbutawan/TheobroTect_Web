@@ -304,7 +304,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
     return key.charAt(0).toUpperCase() + key.slice(1);
   }
 
-  onEnInput(sourceControlName: string, targetControlName: string): void {
+  onEnInput(_sourceControlName: string, _targetControlName: string): void {
     /* your implementation */
   }
 }

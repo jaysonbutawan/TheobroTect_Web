@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ScanHistoryProfileSkeletonComponent } from '../../../app/shared/skeletons/disease-guidance/scan-history-skeleton/scan-history-skeleton';
-import { ChartComponent } from '../../../app/shared/components/chart/chart.component';
+import {
+  ChartComponent,
+  ChartDatum,
+} from '../../../app/shared/components/chart/chart.component';
 import { ScansApiService } from '../../../app/core/services/api/scans-api.service';
 import { Scan as ApiScan } from '../../../app/shared/models/scan.model';
+import { Severity } from '../../../app/shared/models/common.model';
 import { ToastService } from '../../../app/shared/components/toast/toast.service';
-
-export type Severity = 'Mild' | 'Moderate' | 'Severe';
 
 export interface LocalScan {
   id: number;
@@ -40,11 +42,6 @@ export interface DashboardKpis {
   severeCases: number;
   latestScanDate: string | null;
 }
-export interface ChartDatum {
-  name: string;
-  value: number;
-}
-
 @Component({
   selector: 'app-scan-history',
   standalone: true,

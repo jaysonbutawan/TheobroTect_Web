@@ -13,11 +13,6 @@ export class AuthService {
     return localStorage.getItem('access_token');
   }
 
-  getUser(): any {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
-  }
-
   isLoggedIn(): boolean {
     return !!this.getToken();
   }

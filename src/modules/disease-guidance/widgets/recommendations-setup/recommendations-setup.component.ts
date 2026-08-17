@@ -9,7 +9,7 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 import { TranslationService } from '../../services/translation.service';
@@ -173,7 +173,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         this.loadExistingRecommendations();
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: () => {
         this.displaySeverities = [];
         this.cdr.markForCheck();
       }

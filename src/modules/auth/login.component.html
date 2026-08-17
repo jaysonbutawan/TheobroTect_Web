@@ -57,6 +57,20 @@
         <p class="text-[#718096] text-[13px] mt-1">Welcome back! Enter your credentials below.</p>
       </div>
 
+      @if (successMessage) {
+        <div class="mb-6 flex items-center gap-3 bg-green-50 rounded-2xl p-4 text-[12px] font-semibold text-green-700 shadow-[inset_2px_2px_6px_#c9ddc7,inset_-2px_-2px_6px_#ffffff]" role="status">
+          <i class="pi pi-check-circle text-lg flex-shrink-0"></i>
+          <span>{{ successMessage }}</span>
+        </div>
+      }
+
+      @if (authMessage) {
+        <div class="mb-6 flex items-center gap-3 bg-amber-50 rounded-2xl p-4 text-[12px] font-semibold text-amber-700 shadow-[inset_2px_2px_6px_#e4d3aa,inset_-2px_-2px_6px_#ffffff]" role="status">
+          <i class="pi pi-info-circle text-lg flex-shrink-0"></i>
+          <span>{{ authMessage }}</span>
+        </div>
+      }
+
       @if (errorMessage) {
         <div class="mb-6 flex items-center gap-3 bg-red-50 rounded-2xl p-4 text-[12px] font-semibold text-red-600 shadow-[inset_2px_2px_6px_#e3bcbc,inset_-2px_-2px_6px_#ffffff] animate-in fade-in">
           <i class="pi pi-exclamation-circle text-lg flex-shrink-0"></i>

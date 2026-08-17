@@ -37,8 +37,6 @@ export class LoggerService {
     }
 
     const timestamp = new Date().toISOString();
-    const levelName = LogLevel[level];
-
     switch (level) {
       case LogLevel.Debug:
         console.debug(`[${timestamp}] [DEBUG] ${message}`, ...args);

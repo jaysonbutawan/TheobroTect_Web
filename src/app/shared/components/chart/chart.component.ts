@@ -1,7 +1,7 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartOptions, Plugin } from 'chart.js';
+import { ChartData, ChartOptions, Plugin } from 'chart.js';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 export interface ChartDatum {
@@ -72,7 +72,7 @@ export class ChartComponent implements OnChanges {
     },
   };
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(): void {
     this.chartType = this.type;
     this.buildChartData();
   }

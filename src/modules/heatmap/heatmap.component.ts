@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { Scan } from '../../app/shared/models';
@@ -16,7 +16,7 @@ import { ToastService } from '../../app/shared/components/toast/toast.service';
 @Component({
   selector: 'app-heatmap',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, FilterBarComponent],
+  imports: [CommonModule, FormsModule, FilterBarComponent],
   templateUrl: './heatmap.component.html',
   styleUrl: './heatmap.component.css'
 })
@@ -80,7 +80,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: () => {
         this.errorMessage = 'Failed to load scans data';
         this.toastService.show('error', 'Load Failed', 'Could not load heatmap data from the server.');
         this.isLoading = false;

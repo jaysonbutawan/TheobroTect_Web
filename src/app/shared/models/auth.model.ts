@@ -13,9 +13,20 @@ export interface LoginResponse {
   };
 }
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: string;
-  name?: string;
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+  new_password_confirmation: string;
+}
+
+export type ChangePasswordStatus =
+  | 'OK'
+  | 'INVALID_CURRENT_PASSWORD'
+  | 'USER_NOT_FOUND'
+  | 'NOT_ADMIN'
+  | 'ACCOUNT_DELETED';
+
+export interface ChangePasswordResponse {
+  status: ChangePasswordStatus;
+  message?: string;
 }
