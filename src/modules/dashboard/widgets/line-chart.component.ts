@@ -30,6 +30,10 @@ export class LineChartComponent implements OnChanges {
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     scales: {
       y: {
         beginAtZero: true,
@@ -37,24 +41,58 @@ export class LineChartComponent implements OnChanges {
           display: true,
           text: 'Number of Cases',
           font: {
-            size: 14,
-            weight: 'bold'
+            size: 13,
+            weight: 'bold',
+            family: 'DM Sans, sans-serif'
           },
-          padding: { bottom: 10 }
+          padding: { bottom: 12 },
+          color: '#475569'
         },
         grid: {
-          color: '#f3f4f6'
+          color: '#e2e8f0',
+          lineWidth: 1
         },
         border: {
           display: false
+        },
+        ticks: {
+          font: {
+            size: 11,
+            weight: 'bold',
+            family: 'DM Sans, sans-serif'
+          },
+          color: '#64748b',
+          padding: 8,
+          stepSize: 1,
+          precision: 0
         }
       },
       x: {
+        title: {
+          display: true,
+          text: 'Month',
+          font: {
+            size: 13,
+            weight: 'bold',
+            family: 'DM Sans, sans-serif'
+          },
+          padding: { top: 12 },
+          color: '#475569'
+        },
         grid: {
           display: false
         },
         border: {
           display: false
+        },
+        ticks: {
+          font: {
+            size: 11,
+            weight: 'bold',
+            family: 'DM Sans, sans-serif'
+          },
+          color: '#64748b',
+          padding: 8
         }
       }
     },
@@ -63,7 +101,39 @@ export class LineChartComponent implements OnChanges {
         display: false
       },
       tooltip: {
-        enabled: true
+        enabled: true,
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+        titleColor: '#ffffff',
+        bodyColor: '#e2e8f0',
+        borderColor: '#334155',
+        borderWidth: 1,
+        padding: 12,
+        boxPadding: 6,
+        usePointStyle: true,
+        titleFont: {
+          size: 13,
+          weight: 'bold',
+          family: 'DM Sans, sans-serif'
+        },
+        bodyFont: {
+          size: 12,
+          weight: 'bold',
+          family: 'DM Sans, sans-serif'
+        },
+        callbacks: {
+          title: (context) => {
+            return `${context[0].label || ''} ${this.selectedYear}`;
+          },
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y;
+            return ` ${label}: ${value} ${value === 1 ? 'case' : 'cases'}`;
+          },
+          footer: (context) => {
+            const total = context.reduce((sum, item) => sum + (item.parsed.y || 0), 0);
+            return `\nTotal: ${total} ${total === 1 ? 'case' : 'cases'}`;
+          }
+        }
       }
     }
   };

@@ -2,149 +2,83 @@
   @if (isLoading) {
     <app-stats-skeleton />
   } @else {
+    <!-- Disease Report Section -->
+    <div class="mb-8 sm:mb-10">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+            Disease Report
+          </h2>
+          <p class="text-xs sm:text-sm text-gray-500 mt-1">
+            Overview of cacao health status for {{ selectedYear() }}
+          </p>
+        </div>
+        <div
+          class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full border border-green-200"
+        >
+          <span
+            class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-green-500 rounded-full animate-pulse shadow-sm shadow-green-200"
+          ></span>
+          <span class="text-xs sm:text-sm font-bold text-green-700"
+            >{{ stats.totalScans }} Total Scans</span
+          >
+        </div>
+      </div>
+
+      <!-- Summary Cards Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Total Scans Card -->
+        <app-summary-stat-card [config]="summaryCards[0]" />
+
+        <!-- Healthy Pods Card -->
+        <app-summary-stat-card
+          [config]="summaryCards[1]"
+          [trend]="getTrendForMetric(stats.healthy, previousStats.healthy)"
+          [additionalInfo]="getPercentageInfo(stats.healthy)"
+        />
+
+        <!-- Diseased Pods Card -->
+        <app-summary-stat-card
+          [config]="summaryCards[2]"
+          [trend]="getTrendForMetric(stats.blackPod + stats.mealybug + stats.podBorer, previousStats.blackPod + previousStats.mealybug + previousStats.podBorer)"
+          [additionalInfo]="getPercentageInfo(stats.blackPod + stats.mealybug + stats.podBorer)"
+        />
+
+        <!-- Health Rate Card -->
+        <app-summary-stat-card
+          [config]="summaryCards[3]"
+          [trend]="getHealthRateTrend()"
+          [additionalInfo]="getHealthRateInfo()"
+        />
+      </div>
+    </div>
+
+    <!-- Disease Type Cards -->
     <div
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16 font-['DM_Sans',sans-serif]"
     >
-      <div
-        class="group relative h-[160px] sm:h-[180px] rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-lg shadow-emerald-950/5 border border-slate-200/40 bg-slate-900 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-950/10"
-      >
-        <div
-          class="absolute inset-0 bg-[url('assets/images/bp.png')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-        ></div>
-        <div
-          class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-transparent backdrop-blur-[1px]"
-        ></div>
-        <div class="absolute inset-0 p-5 sm:p-6 flex flex-col justify-between z-10">
-          <div class="flex items-center justify-between">
-            <div
-              class="w-9 h-9 sm:w-10 sm:h-10 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-xl flex items-center justify-center text-red-400 shadow-inner"
-            >
-              <svg
-                class="w-4.5 h-4.5 sm:w-5 sm:h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-            </div>
-            <span
-              class="px-2.5 sm:px-3 py-1 bg-red-600 text-white text-[9px] sm:text-[10px] font-black tracking-wider uppercase rounded-full shadow-md shadow-red-900/40"
-              >Severe Risk</span
-            >
-          </div>
-          <div>
-            <p
-              class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-[1.5px] mb-0.5"
-            >
-              Total Black Pod Cases
-            </p>
-            <p class="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
-              {{ stats.blackPod }}
-            </p>
-          </div>
-        </div>
-      </div>
+      <!-- Black Pod Card -->
+      <app-disease-card
+        [config]="diseaseCards[0]"
+        [trend]="getTrendForMetric(stats.blackPod, previousStats.blackPod)"
+      />
 
-      <div
-        class="group relative h-[160px] sm:h-[180px] rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-lg shadow-emerald-950/5 border border-slate-200/40 bg-slate-900 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/10"
-      >
-        <div
-          class="absolute inset-0 bg-[url('assets/images/mb.png')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-        ></div>
-        <div
-          class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-transparent backdrop-blur-[1px]"
-        ></div>
-        <div class="absolute inset-0 p-5 sm:p-6 flex flex-col justify-between z-10">
-          <div class="flex items-center justify-between">
-            <div
-              class="w-9 h-9 sm:w-10 sm:h-10 bg-blue-500/10 backdrop-blur-md border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 shadow-inner"
-            >
-              <svg
-                class="w-4.5 h-4.5 sm:w-5 sm:h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <span
-              class="px-2.5 sm:px-3 py-1 bg-blue-600 text-white text-[9px] sm:text-[10px] font-black tracking-wider uppercase rounded-full shadow-md shadow-blue-900/40"
-              >Active Log</span
-            >
-          </div>
-          <div>
-            <p
-              class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-[1.5px] mb-0.5"
-            >
-              Mealybug Population
-            </p>
-            <p class="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
-              {{ stats.mealybug }}
-            </p>
-          </div>
-        </div>
-      </div>
+      <!-- Mealybug Card -->
+      <app-disease-card
+        [config]="diseaseCards[1]"
+        [trend]="getTrendForMetric(stats.mealybug, previousStats.mealybug)"
+      />
 
-      <div
-        class="group relative h-[160px] sm:h-[180px] rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-lg shadow-emerald-950/5 border border-slate-200/40 bg-slate-900 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/10 sm:col-span-2 lg:col-span-1"
-      >
-        <div
-          class="absolute inset-0 bg-[url('assets/images/pb.png')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-        ></div>
-        <div
-          class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-transparent backdrop-blur-[1px]"
-        ></div>
-        <div class="absolute inset-0 p-5 sm:p-6 flex flex-col justify-between z-10">
-          <div class="flex items-center justify-between">
-            <div
-              class="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 shadow-inner"
-            >
-              <svg
-                class="w-4.5 h-4.5 sm:w-5 sm:h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
-            </div>
-            <span
-              class="px-2.5 sm:px-3 py-1 bg-emerald-600 text-white text-[9px] sm:text-[10px] font-black tracking-wider uppercase rounded-full shadow-md shadow-emerald-900/40"
-              >Stable</span
-            >
-          </div>
-          <div>
-            <p
-              class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-[1.5px] mb-0.5"
-            >
-              Pod Borer Density
-            </p>
-            <p class="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
-              {{ stats.podBorer }}
-            </p>
-          </div>
-        </div>
-      </div>
+      <!-- Pod Borer Card -->
+      <app-disease-card
+        [config]="diseaseCards[2]"
+        [trend]="getTrendForMetric(stats.podBorer, previousStats.podBorer)"
+      />
     </div>
   }
 
+  <!-- Line Chart Section -->
   <div class="mt-8 grid grid-cols-1 gap-6">
     @if (isLoading) {
       <app-chart-skeleton />
@@ -196,7 +130,6 @@
         @if (isLoading) {
           <app-field-log-skeleton-mobile class="md:hidden" />
           <app-field-log-skeleton-desktop class="hidden md:block" />
-
         } @else if (recentScans.length === 0) {
           <div class="py-16 flex flex-col items-center justify-center text-center">
             <div
@@ -209,7 +142,6 @@
               Field data will appear here as soon as your team starts logging new scans.
             </p>
           </div>
-
         } @else {
           <!-- Single responsive list: stacked cards on mobile, table-like grid rows from md up -->
           <div class="rounded-xl border border-gray-100 overflow-hidden">

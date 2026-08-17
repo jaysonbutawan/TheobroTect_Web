@@ -9,18 +9,39 @@ import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/das
 import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
 import { ChartSkeletonComponent } from '../../app/shared/skeletons/dashboard/chart-skeleton/chart-skeleton';
 import { LineChartComponent } from './widgets/line-chart.component';
+import { SummaryStatCardComponent, TrendIndicator } from './widgets/summary-stat-card.component';
+import { DiseaseCardComponent } from './widgets/disease-card.component';
+import { getInitialLineChartData } from './widgets/chart-config';
+import { generateSummaryCards, generateDiseaseCards } from './widgets/card-config';
+import {
+  DashboardStats,
+  createEmptyStats,
+  calculateStats,
+  calculatePercentageChange,
+  getTrendDirection,
+  groupScansByDate,
+  groupScansByMonth,
+  getMonthsOfYear,
+  formatDate,
+  formatMonth,
+  filterScansByYear,
+  getAvailableYears,
+  isDiseaseType,
+  isHealthy
+} from './widgets/dashboard-helpers';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    // BaseChartDirective,
     FieldLogSkeletonMobileComponent,
     FieldLogSkeletonDesktopComponent,
     StatsSkeletonComponent,
     ChartSkeletonComponent,
-    LineChartComponent
+    LineChartComponent,
+    SummaryStatCardComponent,
+    DiseaseCardComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -33,20 +54,31 @@ export class DashboardComponent implements OnInit {
 
   private cdr = inject(ChangeDetectorRef);
 
-  isLoading = false;
-  errorMessage = '';
-
   selectedYear = signal<number>(new Date().getFullYear());
   availableYears: number[] = [];
-  allScans: Scan[] = []; 
+  allScans: Scan[] = [];
 
-  stats = {
-    blackPod: 0,
-    mealybug: 0,
-    podBorer: 0
-  };
+  stats: DashboardStats = createEmptyStats();
+  previousStats: DashboardStats = createEmptyStats();
 
   recentScans: Scan[] = [];
+
+  // Card configurations - initialized after stats
+  get summaryCards() {
+    return generateSummaryCards(this.stats, this.selectedYear());
+  }
+
+  get diseaseCards() {
+    return generateDiseaseCards(this.stats);
+  }
+
+  // Expose Math and helper functions to template
+  Math = Math;
+  calculatePercentageChange = calculatePercentageChange;
+  getTrendDirection = getTrendDirection;
+
+  isLoading = false;
+  errorMessage = '';
 
   public barChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
@@ -64,47 +96,7 @@ export class DashboardComponent implements OnInit {
     plugins: { legend: { position: 'bottom' } }
   };
 
-  public lineChartData: ChartConfiguration<'line'>['data'] = {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        label: 'Healthy Cacao',
-        borderColor: '#1976D2', // Blue
-        tension: 0.4,
-        fill: false,
-        pointRadius: 0,
-        borderWidth: 2
-      },
-      {
-        data: [],
-        label: 'Black Pod (Severe)',
-        borderColor: '#D32F2F', // Red
-        tension: 0.4,
-        fill: false,
-        pointRadius: 0,
-        borderWidth: 2
-      },
-      {
-        data: [],
-        label: 'Mealybug (Mild)',
-        borderColor: '#FBC02D', // Yellow
-        tension: 0.4,
-        fill: false,
-        pointRadius: 0,
-        borderWidth: 2
-      },
-      {
-        data: [],
-        label: 'Pod Borer (Mild)',
-        borderColor: '#388E3C', // Green
-        tension: 0.4,
-        fill: false,
-        pointRadius: 0,
-        borderWidth: 2
-      }
-    ]
-  };
+  public lineChartData: ChartConfiguration<'line'>['data'] = getInitialLineChartData();
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -133,24 +125,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private populateAvailableYears(): void {
-    const yearsSet = new Set<number>();
-
-    this.allScans.forEach(scan => {
-      if (scan.scanned_at) {
-        yearsSet.add(new Date(scan.scanned_at).getFullYear());
-      }
-    });
-
-    const currentYear = new Date().getFullYear();
-    yearsSet.add(currentYear);
-
-    const minYear = yearsSet.size > 0 ? Math.min(...Array.from(yearsSet)) : currentYear;
-    const fullYearRange: number[] = [];
-    for (let y = currentYear; y >= minYear; y--) {
-      fullYearRange.push(y);
-    }
-
-    this.availableYears = fullYearRange;
+    this.availableYears = getAvailableYears(this.allScans);
 
     if (this.availableYears.length > 0 && !this.availableYears.includes(this.selectedYear())) {
       this.selectedYear.set(this.availableYears[0]);
@@ -163,63 +138,39 @@ export class DashboardComponent implements OnInit {
   }
   private filterAndProcessData(): void {
     const year = this.selectedYear();
-    const filteredScans = this.allScans.filter(scan => {
-      if (!scan.scanned_at) return false;
-      const scanYear = new Date(scan.scanned_at).getFullYear();
-      return scanYear === year;
-    });
+    const filteredScans = filterScansByYear(this.allScans, year);
+    const previousYearScans = filterScansByYear(this.allScans, year - 1);
 
     this.processBarChartData(filteredScans);
+    this.processPreviousYearStats(previousYearScans);
     this.processLineChartData(filteredScans, year);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    this.recentScans = filteredScans
-      .filter(scan => {
-        const createdAt = new Date(scan.scanned_at);
-        createdAt.setHours(0, 0, 0, 0);
-        return createdAt.getTime() === today.getTime();
-      });
+    this.recentScans = filteredScans.filter(scan => {
+      const createdAt = new Date(scan.scanned_at);
+      createdAt.setHours(0, 0, 0, 0);
+      return createdAt.getTime() === today.getTime();
+    });
   }
   private processBarChartData(scans: Scan[]): void {
-    const dateGroups = this.groupScansByDate(scans);
+    const dateGroups = groupScansByDate(scans);
     const sortedDates = Object.keys(dateGroups).sort(
       (a, b) => new Date(a).getTime() - new Date(b).getTime()
     );
 
-    this.barChartData.labels = sortedDates.map(date => this.formatDate(date));
+    this.barChartData.labels = sortedDates.map(date => formatDate(date));
 
     const blackPodCounts: number[] = [];
     const mealybugCounts: number[] = [];
     const podBorerCounts: number[] = [];
 
-    let totalBlackPod = 0;
-    let totalMealybug = 0;
-    let totalPodBorer = 0;
-
     sortedDates.forEach(date => {
       const scansForDate = dateGroups[date];
-
-      const blackPodCount = scansForDate.filter(s =>
-        this.normalizeDisease(s.disease_key).includes('black pod')
-      ).length;
-
-      const mealybugCount = scansForDate.filter(s =>
-        this.normalizeDisease(s.disease_key).includes('mealybug')
-      ).length;
-
-      const podBorerCount = scansForDate.filter(s =>
-        this.normalizeDisease(s.disease_key).includes('pod borer')
-      ).length;
-
-      blackPodCounts.push(blackPodCount);
-      mealybugCounts.push(mealybugCount);
-      podBorerCounts.push(podBorerCount);
-
-      totalBlackPod += blackPodCount;
-      totalMealybug += mealybugCount;
-      totalPodBorer += podBorerCount;
+      blackPodCounts.push(scansForDate.filter(s => isDiseaseType(s, 'black pod')).length);
+      mealybugCounts.push(scansForDate.filter(s => isDiseaseType(s, 'mealybug')).length);
+      podBorerCounts.push(scansForDate.filter(s => isDiseaseType(s, 'pod borer')).length);
     });
 
     if (this.barChartData.datasets) {
@@ -228,136 +179,92 @@ export class DashboardComponent implements OnInit {
       this.barChartData.datasets[2].data = podBorerCounts;
     }
 
-    this.stats = {
-      blackPod: totalBlackPod,
-      mealybug: totalMealybug,
-      podBorer: totalPodBorer
+    this.stats = calculateStats(scans);
+  }
+  private processPreviousYearStats(scans: Scan[]): void {
+    this.previousStats = calculateStats(scans);
+  }
+
+  /**
+   * Get trend indicator for a specific metric
+   */
+  getTrendForMetric(current: number, previous: number): TrendIndicator | undefined {
+    if (previous === 0 && current === 0) return undefined;
+
+    const change = calculatePercentageChange(current, previous);
+    return {
+      direction: getTrendDirection(current, previous),
+      value: `${Math.abs(change).toFixed(0)}%`
     };
   }
-  private getMonthsOfYear(year: number): string[] {
-    return Array.from({ length: 12 }, (_, i) =>
-      `${year}-${String(i + 1).padStart(2, '0')}`
-    );
+
+  /**
+   * Get trend for health rate percentage
+   */
+  getHealthRateTrend(): TrendIndicator | undefined {
+    const currentRate = this.stats.totalScans > 0
+      ? (this.stats.healthy / this.stats.totalScans) * 100
+      : 0;
+    const previousRate = this.previousStats.totalScans > 0
+      ? (this.previousStats.healthy / this.previousStats.totalScans) * 100
+      : 0;
+
+    if (this.previousStats.totalScans === 0) return undefined;
+
+    const direction = getTrendDirection(currentRate, previousRate);
+    return {
+      direction,
+      label: direction === 'up' ? 'Better' : direction === 'down' ? 'Lower' : 'Stable'
+    };
   }
+
+  /**
+   * Get additional info for health rate card
+   */
+  getHealthRateInfo(): string {
+    if (this.previousStats.totalScans === 0) {
+      return 'No previous data';
+    }
+    const prevRate = ((this.previousStats.healthy / this.previousStats.totalScans) * 100).toFixed(1);
+    return `vs ${prevRate}% last year`;
+  }
+
+  /**
+   * Get additional info for stat cards showing percentage of total
+   */
+  getPercentageInfo(value: number): string {
+    return this.stats.totalScans > 0
+      ? `${((value / this.stats.totalScans) * 100).toFixed(1)}% of total`
+      : '0% of total';
+  }
+
   private processLineChartData(scans: Scan[], year: number): void {
-
-    const monthGroups = this.groupScansByMonth(scans);
-    const sortedMonths = this.getMonthsOfYear(year);
-
-    this.lineChartData.labels = sortedMonths.map(month => this.formatMonth(month));
+    const monthGroups = groupScansByMonth(scans);
+    const sortedMonths = getMonthsOfYear(year);
 
     const healthyCounts: number[] = [];
-    const blackPodSevereCounts: number[] = [];
-    const mealybugMildCounts: number[] = [];
-    const podBorerMildCounts: number[] = [];
+    const blackPodCounts: number[] = [];
+    const mealybugCounts: number[] = [];
+    const podBorerCounts: number[] = [];
 
     sortedMonths.forEach(month => {
       const scansForMonth = monthGroups[month] ?? [];
-      if (!scansForMonth) {
-        healthyCounts.push(null as any);
-        blackPodSevereCounts.push(null as any);
-        mealybugMildCounts.push(null as any);
-        podBorerMildCounts.push(null as any);
-        return;
-      }
 
-      const healthyCount = scansForMonth.filter(s =>
-        !s.disease_key || this.normalizeDisease(s.disease_key).includes('healthy')
-      ).length;
-
-      const blackPodCount = scansForMonth.filter(s =>
-        this.normalizeDisease(s.disease_key).includes('black pod') &&
-        (s.severity_key?.toLowerCase().includes('mild') || s.severity_key?.toLowerCase().includes('moderate') || s.severity_key?.toLowerCase().includes('severe'))
-      ).length;
-
-      const mealybugCount = scansForMonth.filter(s =>
-        this.normalizeDisease(s.disease_key).includes('mealybug') &&
-        (s.severity_key?.toLowerCase().includes('mild') || s.severity_key?.toLowerCase().includes('moderate') || s.severity_key?.toLowerCase().includes('severe'))
-      ).length;
-
-      const podBorerCount = scansForMonth.filter(s =>
-        this.normalizeDisease(s.disease_key).includes('pod borer') &&
-        (s.severity_key?.toLowerCase().includes('mild') || s.severity_key?.toLowerCase().includes('moderate') || s.severity_key?.toLowerCase().includes('severe'))
-      ).length;
-
-      healthyCounts.push(healthyCount);
-      blackPodSevereCounts.push(blackPodCount);
-      mealybugMildCounts.push(mealybugCount);
-      podBorerMildCounts.push(podBorerCount);
+      healthyCounts.push(scansForMonth.filter(s => isHealthy(s)).length);
+      blackPodCounts.push(scansForMonth.filter(s => isDiseaseType(s, 'black pod')).length);
+      mealybugCounts.push(scansForMonth.filter(s => isDiseaseType(s, 'mealybug')).length);
+      podBorerCounts.push(scansForMonth.filter(s => isDiseaseType(s, 'pod borer')).length);
     });
 
     this.lineChartData = {
-      labels: sortedMonths.map(m => this.formatMonth(m)),
+      labels: sortedMonths.map(m => formatMonth(m)),
       datasets: [
         { ...this.lineChartData.datasets[0], data: healthyCounts },
-        { ...this.lineChartData.datasets[1], data: blackPodSevereCounts },
-        { ...this.lineChartData.datasets[2], data: mealybugMildCounts },
-        { ...this.lineChartData.datasets[3], data: podBorerMildCounts }
+        { ...this.lineChartData.datasets[1], data: blackPodCounts },
+        { ...this.lineChartData.datasets[2], data: mealybugCounts },
+        { ...this.lineChartData.datasets[3], data: podBorerCounts }
       ]
     };
-  }
-
-  private normalizeDisease(diseaseKey: string | null | undefined): string {
-    if (!diseaseKey) return 'healthy';
-
-    return diseaseKey
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .trim();
-  }
-  private groupScansByDate(scans: Scan[]): { [date: string]: Scan[] } {
-    const groups: { [date: string]: Scan[] } = {};
-
-    scans.forEach(scan => {
-      const dateStr = scan.scanned_at?.split(' ')[0] || new Date().toISOString().split('T')[0];
-
-      if (!groups[dateStr]) {
-        groups[dateStr] = [];
-      }
-      groups[dateStr].push(scan);
-    });
-
-    return groups;
-  }
-
-  private groupScansByMonth(scans: Scan[]): { [month: string]: Scan[] } {
-    const groups: { [month: string]: Scan[] } = {};
-
-    scans.forEach(scan => {
-      const monthStr = scan.scanned_at?.substring(0, 7) || new Date().toISOString().substring(0, 7);
-
-      if (!groups[monthStr]) {
-        groups[monthStr] = [];
-      }
-      groups[monthStr].push(scan);
-    });
-
-    return groups;
-  }
-
-  private formatDate(dateStr: string): string {
-    try {
-      const date = new Date(dateStr + 'T00:00:00');
-      const options: Intl.DateTimeFormatOptions = {
-        month: 'short',
-        day: 'numeric'
-      };
-      return date.toLocaleDateString('en-US', options);
-    } catch {
-      return dateStr;
-    }
-  }
-
-  private formatMonth(monthStr: string): string {
-    try {
-      const date = new Date(monthStr + '-01T00:00:00');
-      const options: Intl.DateTimeFormatOptions = {
-        month: 'short'
-      };
-      return date.toLocaleDateString('en-US', options);
-    } catch {
-      return monthStr;
-    }
   }
 
   navigateToMap(coords?: string) {
