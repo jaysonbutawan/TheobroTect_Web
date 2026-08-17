@@ -1,5 +1,11 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  FormsModule,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -15,7 +21,10 @@ import { DiseaseTableComponent } from './widgets/disease-table.component';
 
 import { GeneralInfoFormComponent } from './widgets/general-info-form/general-info-form.component';
 import { MonitoringSetupComponent } from './widgets/monitoring-setup/monitoring-setup.component';
-import { RecommendationsSetupComponent, SeverityData } from './widgets/recommendations-setup/recommendations-setup.component';
+import {
+  RecommendationsSetupComponent,
+  SeverityData,
+} from './widgets/recommendations-setup/recommendations-setup.component';
 
 export interface ChecklistItem {
   en: string;
@@ -35,7 +44,7 @@ export interface ChecklistItem {
     DiseaseTableComponent,
     GeneralInfoFormComponent,
     MonitoringSetupComponent,
-    RecommendationsSetupComponent
+    RecommendationsSetupComponent,
   ],
   templateUrl: './disease-guidance.component.html',
 })
@@ -73,13 +82,34 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     'cacao_pod_borer',
     'mealybug',
     'healthy',
-    'non_cacao'
+    'non_cacao',
   ];
 
   sevData: SeverityData = {
-    mild: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
-    moderate: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' },
-    severe: { actions: [], prevention: [], escalateEn: '', escalateTl: '', seekHelpEn: '', seekHelpTl: '' }
+    mild: {
+      actions: [],
+      prevention: [],
+      escalateEn: '',
+      escalateTl: '',
+      seekHelpEn: '',
+      seekHelpTl: '',
+    },
+    moderate: {
+      actions: [],
+      prevention: [],
+      escalateEn: '',
+      escalateTl: '',
+      seekHelpEn: '',
+      seekHelpTl: '',
+    },
+    severe: {
+      actions: [],
+      prevention: [],
+      escalateEn: '',
+      escalateTl: '',
+      seekHelpEn: '',
+      seekHelpTl: '',
+    },
   };
 
   ngOnInit(): void {
@@ -98,7 +128,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-
   get isDiseaseContextActive(): boolean {
     return !!this.currentEditId && !!this.selectedDiseaseKey;
   }
@@ -108,14 +137,14 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   }
 
   get filteredRecords(): DiseaseDto[] {
-    return this.existingRecords.filter(d => {
-      const matchesSearch = !this.searchQuery ||
+    return this.existingRecords.filter((d) => {
+      const matchesSearch =
+        !this.searchQuery ||
         d.display_name?.en?.toLowerCase().includes(this.searchQuery.toLowerCase());
       const matchesLocale = !this.filterLocale || d.locale === this.filterLocale;
       return matchesSearch && matchesLocale;
     });
   }
-
 
   setStep(step: number): void {
     if (step > 1 && !this.isDiseaseContextActive) {
@@ -144,7 +173,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         const translated = await this.translationService.translate(text);
         this.form.get(targetControlName)?.setValue(translated);
       } catch {
-        // Fallback catch block
       } finally {
         this.translating[targetControlName] = false;
         this.cdr.markForCheck();
@@ -173,7 +201,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   }
 
   onTableDeleteConfirmed(id: number): void {
-    this.existingRecords = this.existingRecords.filter(d => d.id !== id);
+    this.existingRecords = this.existingRecords.filter((d) => d.id !== id);
     this.cdr.markForCheck();
   }
 
@@ -189,7 +217,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         nameEn: disease.display_name?.en || '',
         nameTl: disease.display_name?.tl || '',
         descEn: disease.description?.en || '',
-        descTl: disease.description?.tl || ''
+        descTl: disease.description?.tl || '',
       });
     }
   }
@@ -203,7 +231,8 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.cdr.markForCheck();
 
-    this.diseaseService.getDisease()
+    this.diseaseService
+      .getDisease()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: any) => {
@@ -214,7 +243,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         error: () => {
           this.isLoading = false;
           this.cdr.markForCheck();
-        }
+        },
       });
   }
 
@@ -240,17 +269,18 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
       locale: 'en',
       display_name: {
         en: this.form.value.nameEn,
-        tl: this.form.value.nameTl
+        tl: this.form.value.nameTl,
       },
       description: {
         en: this.form.value.descEn,
-        tl: this.form.value.descTl
-      }
+        tl: this.form.value.descTl,
+      },
     };
 
-    const request$ = this.isEditMode && this.currentEditId
-      ? this.diseaseService.updateDisease(this.currentEditId, payload)
-      : this.diseaseService.createDisease(payload);
+    const request$ =
+      this.isEditMode && this.currentEditId
+        ? this.diseaseService.updateDisease(this.currentEditId, payload)
+        : this.diseaseService.createDisease(payload);
 
     request$.subscribe({
       next: (res: any) => {
@@ -262,8 +292,12 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         this.fetchExistingDiseases();
       },
       error: () => {
-        this.toastService.show('error', 'Error', 'Failed to save disease guidance. Please try again.');
-      }
+        this.toastService.show(
+          'error',
+          'Error',
+          'Failed to save disease guidance. Please try again.',
+        );
+      },
     });
   }
 

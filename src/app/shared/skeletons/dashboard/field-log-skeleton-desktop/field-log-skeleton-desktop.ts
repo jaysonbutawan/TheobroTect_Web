@@ -1,4 +1,3 @@
-// field-log-skeleton-desktop.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -12,11 +11,23 @@ import { CommonModule } from '@angular/common';
         <table class="w-full border-collapse">
           <thead class="bg-gray-50/50">
             <tr class="border-b border-gray-100">
-              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Farmer Details</th>
-              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Disease Type</th>
-              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Severity</th>
-              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Confidence</th>
-              <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
+              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Farmer Details
+              </th>
+              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Disease Type
+              </th>
+              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Severity
+              </th>
+              <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Confidence
+              </th>
+              <th
+                class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider"
+              >
+                Action
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -52,7 +63,7 @@ import { CommonModule } from '@angular/common';
         </table>
       </div>
     </div>
-  `
+  `,
 })
 export class FieldLogSkeletonDesktopComponent {
   items = [1, 2, 3, 4, 5];

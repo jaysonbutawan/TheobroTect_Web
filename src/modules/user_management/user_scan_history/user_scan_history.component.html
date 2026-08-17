@@ -58,21 +58,22 @@
           </div>
         </div>
 
-       <div class="bg-[#f8fafc] rounded-[1.5rem] p-5 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1)] w-full">
-  <div class="flex items-baseline justify-between mb-3">
-    <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">
-      Disease Occurrence Distribution
-    </p>
-    <p class="text-[11px] font-bold text-slate-400">
-      Total: <span class="text-[#3D683A] font-black">{{ totalDetections }}</span> detections
-    </p>
-  </div>
+        <div
+          class="bg-[#f8fafc] rounded-[1.5rem] p-5 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1)] w-full"
+        >
+          <div class="flex items-baseline justify-between mb-3">
+            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              Disease Occurrence Distribution
+            </p>
+            <p class="text-[11px] font-bold text-slate-400">
+              Total: <span class="text-[#3D683A] font-black">{{ totalDetections }}</span> detections
+            </p>
+          </div>
 
-  <!-- Responsive Wrapper -->
-  <div class="w-full h-64 sm:h-72 lg:h-80 relative">
-    <app-chart type="bar" [data]="diseaseChartData"></app-chart>
-  </div>
-</div>
+          <div class="w-full h-64 sm:h-72 lg:h-80 relative">
+            <app-chart type="bar" [data]="diseaseChartData"></app-chart>
+          </div>
+        </div>
 
         @if (diseaseSummary.length > 0) {
           <div class="mb-8 px-2">

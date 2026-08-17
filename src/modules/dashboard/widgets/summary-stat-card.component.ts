@@ -2,9 +2,6 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TrendDirection } from './dashboard-helpers';
 
-/**
- * Summary stat card configuration
- */
 export interface SummaryStatConfig {
   label: string;
   value: string | number;
@@ -17,9 +14,6 @@ export interface SummaryStatConfig {
   colSpan?: string;
 }
 
-/**
- * Trend indicator configuration
- */
 export interface TrendIndicator {
   direction: TrendDirection;
   value?: string;
@@ -35,14 +29,16 @@ export interface TrendIndicator {
       [ngClass]="config.colSpan || ''"
       [class]="config.gradient + ' rounded-2xl p-5 border shadow-sm hover:shadow-md transition-all'"
     >
-      <!-- Header -->
       <div class="flex items-start justify-between mb-3">
-        <!-- Icon -->
-        <div [class]="config.iconBg + ' w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md'">
+        <div
+          [class]="
+            config.iconBg +
+            ' w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md'
+          "
+        >
           <span class="material-symbols-rounded text-xl">{{ config.icon }}</span>
         </div>
 
-        <!-- Badge or Trend -->
         @if (config.badgeText) {
           <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             {{ config.badgeText }}
@@ -67,7 +63,6 @@ export interface TrendIndicator {
         }
       </div>
 
-      <!-- Content -->
       <div>
         <p [class]="'text-3xl font-black mb-1 ' + config.textColor">{{ config.value }}</p>
         <p [class]="'text-xs font-semibold ' + config.textColor">{{ config.subtitle }}</p>
@@ -79,22 +74,18 @@ export interface TrendIndicator {
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class SummaryStatCardComponent {
   @Input({ required: true }) config!: SummaryStatConfig;
   @Input() trend?: TrendIndicator;
   @Input() additionalInfo?: string;
 
-  /**
-   * Get trend color class based on direction and card type
-   */
   trendColorClass(direction: TrendDirection): string {
-    // For health-positive metrics (healthy, health rate)
     if (this.config.icon === 'favorite' || this.config.icon === 'speed') {
       return direction === 'up' ? 'text-emerald-700' : 'text-red-600';
     }
-    // For disease metrics (diseased pods)
+
     if (this.config.icon === 'warning') {
       return direction === 'up' ? 'text-red-700' : 'text-green-600';
     }

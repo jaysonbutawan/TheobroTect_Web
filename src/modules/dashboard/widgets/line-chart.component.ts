@@ -1,4 +1,12 @@
-import { Component, Input, OnChanges, SimpleChanges, EventEmitter, Output, HostListener } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  EventEmitter,
+  Output,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
@@ -7,10 +15,9 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
   selector: 'app-line-chart',
   standalone: true,
   imports: [CommonModule, BaseChartDirective],
-  templateUrl: './line-chart.component.html'
+  templateUrl: './line-chart.component.html',
 })
 export class LineChartComponent implements OnChanges {
-  // Receive the data from the parent component
   @Input({ required: true }) chartData!: ChartConfiguration<'line'>['data'];
   @Input() availableYears: number[] = [];
   @Input() selectedYear: number = new Date().getFullYear();
@@ -21,7 +28,7 @@ export class LineChartComponent implements OnChanges {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    // Close dropdown if clicking outside the year selector
+
     if (this.isYearDropdownOpen && !target.closest('.year-selector-container')) {
       this.isYearDropdownOpen = false;
     }
@@ -43,29 +50,29 @@ export class LineChartComponent implements OnChanges {
           font: {
             size: 13,
             weight: 'bold',
-            family: 'DM Sans, sans-serif'
+            family: 'DM Sans, sans-serif',
           },
           padding: { bottom: 12 },
-          color: '#475569'
+          color: '#475569',
         },
         grid: {
           color: '#e2e8f0',
-          lineWidth: 1
+          lineWidth: 1,
         },
         border: {
-          display: false
+          display: false,
         },
         ticks: {
           font: {
             size: 11,
             weight: 'bold',
-            family: 'DM Sans, sans-serif'
+            family: 'DM Sans, sans-serif',
           },
           color: '#64748b',
           padding: 8,
           stepSize: 1,
-          precision: 0
-        }
+          precision: 0,
+        },
       },
       x: {
         title: {
@@ -74,31 +81,31 @@ export class LineChartComponent implements OnChanges {
           font: {
             size: 13,
             weight: 'bold',
-            family: 'DM Sans, sans-serif'
+            family: 'DM Sans, sans-serif',
           },
           padding: { top: 12 },
-          color: '#475569'
+          color: '#475569',
         },
         grid: {
-          display: false
+          display: false,
         },
         border: {
-          display: false
+          display: false,
         },
         ticks: {
           font: {
             size: 11,
             weight: 'bold',
-            family: 'DM Sans, sans-serif'
+            family: 'DM Sans, sans-serif',
           },
           color: '#64748b',
-          padding: 8
-        }
-      }
+          padding: 8,
+        },
+      },
     },
     plugins: {
       legend: {
-        display: false
+        display: false,
       },
       tooltip: {
         enabled: true,
@@ -113,12 +120,12 @@ export class LineChartComponent implements OnChanges {
         titleFont: {
           size: 13,
           weight: 'bold',
-          family: 'DM Sans, sans-serif'
+          family: 'DM Sans, sans-serif',
         },
         bodyFont: {
           size: 12,
           weight: 'bold',
-          family: 'DM Sans, sans-serif'
+          family: 'DM Sans, sans-serif',
         },
         callbacks: {
           title: (context) => {
@@ -132,15 +139,13 @@ export class LineChartComponent implements OnChanges {
           footer: (context) => {
             const total = context.reduce((sum, item) => sum + (item.parsed.y || 0), 0);
             return `\nTotal: ${total} ${total === 1 ? 'case' : 'cases'}`;
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   };
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // Chart data received and will be re-rendered
-  }
+  ngOnChanges(changes: SimpleChanges): void {}
 
   toggleYearDropdown(): void {
     this.isYearDropdownOpen = !this.isYearDropdownOpen;

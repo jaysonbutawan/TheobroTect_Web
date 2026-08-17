@@ -17,8 +17,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private usersApi: UsersApiService,
-    private toastService: ToastService
-  ) { }
+    private toastService: ToastService,
+  ) {}
 
   users: User[] = [];
   filteredUsers: User[] = [];
@@ -33,7 +33,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   userToDelete: User | null = null;
   isDeleting = false;
   isConfirmDialogOpen = false;
-
 
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -61,7 +60,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
     this.cdr.markForCheck();
 
-    this.usersApi.getUsers()
+    this.usersApi
+      .getUsers()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: UsersResponse) => {
@@ -76,7 +76,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           this.toastService.show('error', 'Load Failed', 'Could not load users from the server.');
           this.isLoading = false;
           this.cdr.markForCheck();
-        }
+        },
       });
   }
 
@@ -87,11 +87,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     const term = this.search.trim().toLowerCase();
 
-    this.filteredUsers = this.users.filter(u => {
-      const matchSearch = !term
-        || u.name?.toLowerCase().includes(term)
-        || u.email?.toLowerCase().includes(term)
-        || u.address?.toLowerCase().includes(term);
+    this.filteredUsers = this.users.filter((u) => {
+      const matchSearch =
+        !term ||
+        u.name?.toLowerCase().includes(term) ||
+        u.email?.toLowerCase().includes(term) ||
+        u.address?.toLowerCase().includes(term);
       return matchSearch;
     });
 
@@ -130,12 +131,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.isConfirmDialogOpen = true;
   }
 
-  // 2. Triggers when 'Delete' is clicked inside the dialog
   confirmDelete(): void {
     if (!this.userToDelete) return;
 
-    // Optional: If connecting to an API, you'd set this.isDeleting = true here
-    this.users = this.users.filter(u => u.id !== this.userToDelete!.id);
+    this.users = this.users.filter((u) => u.id !== this.userToDelete!.id);
 
     this.applyFilters();
     if (this.currentPage > this.totalPages) {
@@ -143,24 +142,23 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       this.updatePagedUsers();
     }
 
-    // Close and reset
     this.isConfirmDialogOpen = false;
     this.userToDelete = null;
     this.toastService.show('success', 'User Deleted', 'The user has been successfully removed.');
   }
 
-  // 3. Triggers when 'Cancel' or the 'X' is clicked inside the dialog
   cancelDelete(): void {
     this.isConfirmDialogOpen = false;
     this.userToDelete = null;
   }
 
-
   formatDate(iso?: string): string {
     if (!iso) return 'N/A';
     return new Date(iso).toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric'
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
     });
   }
-}import { ConfirmationDialogComponent } from '../../app/shared/components/confirmation-dialog/confirmation-dialog.component';
-
+}
+import { ConfirmationDialogComponent } from '../../app/shared/components/confirmation-dialog/confirmation-dialog.component';

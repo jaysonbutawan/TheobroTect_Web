@@ -29,16 +29,14 @@ export interface OfficialSignatories {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FieldReportPdfService {
-
-
   aggregateReportData(reports: FieldReport[]): ReportSummary {
     const barangayMap = new Map<string, BarangayDiseaseCount>();
     const diseaseTypesSet = new Set<string>();
 
-    reports.forEach(report => {
+    reports.forEach((report) => {
       const barangay = report.user_address || 'Unknown';
       const disease = this.normalizeDiseaseKey(report.disease_key);
       const severity = report.severity_key?.toLowerCase() || 'mild';
@@ -49,7 +47,7 @@ export class FieldReportPdfService {
         barangayMap.set(barangay, {
           barangay,
           diseases: {},
-          totalCases: 0
+          totalCases: 0,
         });
       }
 
@@ -60,7 +58,7 @@ export class FieldReportPdfService {
           mild: 0,
           moderate: 0,
           severe: 0,
-          total: 0
+          total: 0,
         };
       }
 
@@ -75,21 +73,20 @@ export class FieldReportPdfService {
     });
 
     const barangayData = Array.from(barangayMap.values()).sort((a, b) =>
-      a.barangay.localeCompare(b.barangay)
+      a.barangay.localeCompare(b.barangay),
     );
 
     return {
       reportDate: new Date().toLocaleDateString('en-PH', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       }),
       totalReports: reports.length,
       barangayData,
-      diseaseTypes: Array.from(diseaseTypesSet).sort()
+      diseaseTypes: Array.from(diseaseTypesSet).sort(),
     };
   }
-
 
   generatePDF(summary: ReportSummary, signatories: OfficialSignatories): void {
     const doc = new jsPDF();
@@ -130,25 +127,21 @@ export class FieldReportPdfService {
       doc.setFillColor(61, 104, 58);
       doc.rect(14, yPosition - 5, pageWidth - 28, 8, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.text(
-        `${barangayData.barangay} (Total Cases: ${barangayData.totalCases})`,
-        16,
-        yPosition
-      );
+      doc.text(`${barangayData.barangay} (Total Cases: ${barangayData.totalCases})`, 16, yPosition);
       doc.setTextColor(0, 0, 0);
 
       yPosition += 10;
 
       const tableData: any[] = [];
 
-      Object.keys(barangayData.diseases).forEach(disease => {
+      Object.keys(barangayData.diseases).forEach((disease) => {
         const counts = barangayData.diseases[disease];
         tableData.push([
           disease,
           counts.mild.toString(),
           counts.moderate.toString(),
           counts.severe.toString(),
-          counts.total.toString()
+          counts.total.toString(),
         ]);
       });
 
@@ -161,22 +154,22 @@ export class FieldReportPdfService {
           fillColor: [241, 245, 249],
           textColor: [51, 65, 85],
           fontStyle: 'bold',
-          fontSize: 9
+          fontSize: 9,
         },
         bodyStyles: {
-          fontSize: 9
+          fontSize: 9,
         },
         columnStyles: {
           0: { cellWidth: 80 },
           1: { cellWidth: 20, halign: 'center' },
           2: { cellWidth: 25, halign: 'center' },
           3: { cellWidth: 20, halign: 'center' },
-          4: { cellWidth: 20, halign: 'center', fontStyle: 'bold' }
+          4: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
         },
         margin: { left: 14, right: 14 },
         didDrawPage: (data) => {
           yPosition = data.cursor?.y || yPosition;
-        }
+        },
       });
 
       yPosition = (doc as any).lastAutoTable.finalY + 8;
@@ -203,19 +196,25 @@ export class FieldReportPdfService {
     const rightSigX = pageWidth - 20 - sigWidth;
 
     doc.setFont('helvetica', 'bold');
-    doc.text(signatories.agricultureHeadName.toUpperCase(), leftSigX + sigWidth / 2, yPosition, { align: 'center' });
+    doc.text(signatories.agricultureHeadName.toUpperCase(), leftSigX + sigWidth / 2, yPosition, {
+      align: 'center',
+    });
     yPosition += 2;
     doc.line(leftSigX, yPosition, leftSigX + sigWidth, yPosition);
     yPosition += 5;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text('Head, Municipal Agriculture Office', leftSigX + sigWidth / 2, yPosition, { align: 'center' });
+    doc.text('Head, Municipal Agriculture Office', leftSigX + sigWidth / 2, yPosition, {
+      align: 'center',
+    });
 
     yPosition -= 7;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text(signatories.mayorName.toUpperCase(), rightSigX + sigWidth / 2, yPosition, { align: 'center' });
+    doc.text(signatories.mayorName.toUpperCase(), rightSigX + sigWidth / 2, yPosition, {
+      align: 'center',
+    });
     yPosition += 2;
     doc.line(rightSigX, yPosition, rightSigX + sigWidth, yPosition);
     yPosition += 5;
@@ -226,20 +225,13 @@ export class FieldReportPdfService {
     const footerY = pageHeight - 15;
     doc.setFontSize(8);
     doc.setTextColor(128, 128, 128);
-    doc.text(
-      'This is an official report generated by TheobroTect System',
-      pageWidth / 2,
-      footerY,
-      { align: 'center' }
-    );
-    doc.text(
-      `Generated on ${new Date().toLocaleString('en-PH')}`,
-      pageWidth / 2,
-      footerY + 4,
-      { align: 'center' }
-    );
+    doc.text('This is an official report generated by TheobroTect System', pageWidth / 2, footerY, {
+      align: 'center',
+    });
+    doc.text(`Generated on ${new Date().toLocaleString('en-PH')}`, pageWidth / 2, footerY + 4, {
+      align: 'center',
+    });
 
-    // Save PDF
     const fileName = `Field_Report_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
   }
@@ -247,31 +239,33 @@ export class FieldReportPdfService {
   private normalizeDiseaseKey(diseaseKey: string): string {
     if (!diseaseKey) return 'Unknown';
 
-    const normalizedKey = diseaseKey.toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/-/g, ' ')
-      .trim();
+    const normalizedKey = diseaseKey.toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ').trim();
 
-    if (normalizedKey.includes('cacao pod borer') ||
-        normalizedKey.includes('pod borer') ||
-        normalizedKey.includes('cpb')) {
+    if (
+      normalizedKey.includes('cacao pod borer') ||
+      normalizedKey.includes('pod borer') ||
+      normalizedKey.includes('cpb')
+    ) {
       return 'Cacao Pod Borer';
     }
 
-    if (normalizedKey.includes('black pod') ||
-        normalizedKey.includes('blackpod') ||
-        normalizedKey.includes('phytophthora')) {
+    if (
+      normalizedKey.includes('black pod') ||
+      normalizedKey.includes('blackpod') ||
+      normalizedKey.includes('phytophthora')
+    ) {
       return 'Black Pod Disease';
     }
 
-    if (normalizedKey.includes('mealybug') ||
-        normalizedKey.includes('mealy bug')) {
+    if (normalizedKey.includes('mealybug') || normalizedKey.includes('mealy bug')) {
       return 'Mealybug';
     }
 
-    if (normalizedKey.includes('healthy') ||
-        normalizedKey.includes('normal') ||
-        normalizedKey.includes('no disease')) {
+    if (
+      normalizedKey.includes('healthy') ||
+      normalizedKey.includes('normal') ||
+      normalizedKey.includes('no disease')
+    ) {
       return 'Healthy';
     }
 
@@ -284,7 +278,7 @@ export class FieldReportPdfService {
       .replace(/_/g, ' ')
       .replace(/-/g, ' ')
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 }

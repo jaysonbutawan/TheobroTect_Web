@@ -1,13 +1,15 @@
-<!-- <div
-  class="min-h-screen bg-[#f7f9f5] px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5 font-sans text-slate-900 select-none"
-> -->
-<div class="min-h-screen bg-[#f7f9f5] pt-0 pb-3 px-2 sm:px-3 lg:px-4 sm:pb-4 lg:pb-5 font-sans text-slate-900 select-none">
-
- <header class="max-w-7xl mx-auto flex flex-col items-center sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-2">
-  <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 leading-none text-center sm:text-left m-0 p-0">
-    Disease <span class="text-green-700">Distribution</span>
-  </h1>
-</header>
+<div
+  class="min-h-screen bg-[#f7f9f5] pt-0 pb-3 px-2 sm:px-3 lg:px-4 sm:pb-4 lg:pb-5 font-sans text-slate-900 select-none"
+>
+  <header
+    class="max-w-7xl mx-auto flex flex-col items-center sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-2"
+  >
+    <h1
+      class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 leading-none text-center sm:text-left m-0 p-0"
+    >
+      Disease <span class="text-green-700">Distribution</span>
+    </h1>
+  </header>
 
   <app-filter-bar (filterChange)="onFilterChange($event)"></app-filter-bar>
 
@@ -16,7 +18,9 @@
       class="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-[#dce8d0] shadow-sm"
     >
       @if (isLoading) {
-        <div class="absolute inset-0 z-[1001] rounded-2xl sm:rounded-3xl bg-slate-100 animate-pulse flex flex-col">
+        <div
+          class="absolute inset-0 z-[1001] rounded-2xl sm:rounded-3xl bg-slate-100 animate-pulse flex flex-col"
+        >
           <div class="flex justify-between p-3 sm:p-4">
             <div class="h-8 w-24 sm:h-9 sm:w-28 bg-slate-200 rounded-xl"></div>
             <div class="h-8 w-8 sm:h-9 sm:w-9 bg-slate-200 rounded-xl"></div>
@@ -178,7 +182,9 @@
     </div>
 
     @if (isLoading) {
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5 w-full animate-pulse">
+      <div
+        class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5 w-full animate-pulse"
+      >
         <div class="flex items-start justify-between mb-5 sm:mb-6">
           <div>
             <div class="h-3 w-20 sm:w-24 bg-slate-100 rounded mb-2"></div>
@@ -236,7 +242,9 @@
             <div class="flex items-center justify-between mb-2.5 sm:mb-3">
               <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-600 flex-shrink-0"></div>
-                <span class="text-xs sm:text-sm font-bold text-slate-800 truncate">Black Pod Rot</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 truncate"
+                  >Black Pod Rot</span
+                >
               </div>
               <span
                 class="text-[8px] sm:text-[9px] font-black px-1.5 sm:px-2 py-0.5 bg-red-50 text-red-600 rounded uppercase tracking-wide flex-shrink-0 ml-1"
@@ -249,7 +257,9 @@
                 [style.width.%]="getCoveragePercent(diseaseCounts.blackPod)"
               ></div>
             </div>
-            <div class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium">
+            <div
+              class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium"
+            >
               <span>{{ diseaseCounts.blackPod }} detections</span>
               <span>{{ getCoveragePercent(diseaseCounts.blackPod) }}%</span>
             </div>
@@ -258,7 +268,9 @@
           <div>
             <div class="flex items-center justify-between mb-2.5 sm:mb-3">
               <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500 flex-shrink-0"></div>
+                <div
+                  class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500 flex-shrink-0"
+                ></div>
                 <span class="text-xs sm:text-sm font-bold text-slate-800 truncate">Pod Borer</span>
               </div>
               <span
@@ -272,7 +284,9 @@
                 [style.width.%]="getCoveragePercent(diseaseCounts.podBorer)"
               ></div>
             </div>
-            <div class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium">
+            <div
+              class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium"
+            >
               <span>{{ diseaseCounts.podBorer }} detections</span>
               <span>{{ getCoveragePercent(diseaseCounts.podBorer) }}%</span>
             </div>
@@ -295,7 +309,9 @@
                 [style.width.%]="getCoveragePercent(diseaseCounts.mealybug)"
               ></div>
             </div>
-            <div class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium">
+            <div
+              class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium"
+            >
               <span>{{ diseaseCounts.mealybug }} detections</span>
               <span>{{ getCoveragePercent(diseaseCounts.mealybug) }}%</span>
             </div>
@@ -304,8 +320,12 @@
           <div>
             <div class="flex items-center justify-between mb-2.5 sm:mb-3">
               <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500 flex-shrink-0"></div>
-                <span class="text-xs sm:text-sm font-bold text-slate-800 truncate">Healthy Pods</span>
+                <div
+                  class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500 flex-shrink-0"
+                ></div>
+                <span class="text-xs sm:text-sm font-bold text-slate-800 truncate"
+                  >Healthy Pods</span
+                >
               </div>
               <span
                 class="text-[8px] sm:text-[9px] font-black px-1.5 sm:px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded uppercase tracking-wide flex-shrink-0 ml-1"
@@ -318,7 +338,9 @@
                 [style.width.%]="getCoveragePercent(diseaseCounts.healthy)"
               ></div>
             </div>
-            <div class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium">
+            <div
+              class="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-medium"
+            >
               <span>{{ diseaseCounts.healthy }} detections</span>
               <span>{{ getCoveragePercent(diseaseCounts.healthy) }}%</span>
             </div>
@@ -391,7 +413,8 @@
           </span>
         </div>
         <div class="flex items-center gap-2.5 sm:gap-3">
-          <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden sm:inline"
+          <span
+            class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden sm:inline"
             >Scan coverage</span
           >
           <div class="w-16 sm:w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">

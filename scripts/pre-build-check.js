@@ -1,15 +1,9 @@
 #!/usr/bin/env node
 
-/**
- * Pre-Build Validation Script
- * Runs comprehensive checks before building to ensure no errors
- */
-
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Colors for console output
 const colors = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
@@ -32,9 +26,6 @@ const log = {
 let hasErrors = false;
 let hasWarnings = false;
 
-/**
- * Execute command and return result
- */
 function exec(command, silent = false) {
   try {
     const output = execSync(command, {
@@ -47,16 +38,10 @@ function exec(command, silent = false) {
   }
 }
 
-/**
- * Check if file exists
- */
 function fileExists(filePath) {
   return fs.existsSync(path.resolve(filePath));
 }
 
-/**
- * Step 1: Validate Project Structure
- */
 function validateProjectStructure() {
   log.step('📁 Step 1: Validating Project Structure');
 
@@ -90,13 +75,9 @@ function validateProjectStructure() {
   return allFilesExist;
 }
 
-/**
- * Step 2: Check Dependencies
- */
 function checkDependencies() {
   log.step('📦 Step 2: Checking Dependencies');
 
-  // Check if node_modules exists
   if (!fileExists('node_modules')) {
     log.error('node_modules not found. Running npm install...');
     const result = exec('npm install');
@@ -109,7 +90,6 @@ function checkDependencies() {
     log.success('node_modules found');
   }
 
-  // Validate package-lock.json is in sync
   log.info('Validating package-lock.json...');
   const result = exec('npm ls --depth=0 2>&1', true);
 
@@ -119,13 +99,10 @@ function checkDependencies() {
   } else {
     log.warning('Some dependency issues detected. Run npm install to fix.');
     hasWarnings = true;
-    return true; // Continue even with warnings
+    return true;
   }
 }
 
-/**
- * Step 3: TypeScript Compilation Check
- */
 function checkTypeScript() {
   log.step('🔍 Step 3: TypeScript Compilation Check');
 
@@ -143,9 +120,6 @@ function checkTypeScript() {
   }
 }
 
-/**
- * Step 4: Linting Check
- */
 function checkLinting() {
   log.step('🧹 Step 4: Code Quality Check');
 
@@ -159,23 +133,19 @@ function checkLinting() {
     log.warning('Linting issues detected');
     log.info('Run "npm run lint:fix" to auto-fix issues');
     hasWarnings = true;
-    return true; // Continue with warnings
+    return true;
   }
 }
 
-/**
- * Step 5: Check for Common Issues
- */
 function checkCommonIssues() {
   log.step('🔎 Step 5: Checking for Common Issues');
 
   let issuesFound = false;
 
-  // Check for console.log statements
   log.info('Scanning for console.log statements...');
   const grepResult = exec(
     'grep -r "console\\.log\\|console\\.error\\|console\\.warn" src/modules --include="*.ts" --exclude-dir=node_modules 2>&1 || true',
-    true
+    true,
   );
 
   if (grepResult.output && grepResult.output.trim().length > 0) {
@@ -191,15 +161,17 @@ function checkCommonIssues() {
     log.success('No console statements in modules (production-ready)');
   }
 
-  // Check for TODO/FIXME comments
   log.info('Checking for TODO/FIXME comments...');
   const todoResult = exec(
     'grep -r "TODO\\|FIXME" src --include="*.ts" --exclude-dir=node_modules 2>&1 | head -5 || true',
-    true
+    true,
   );
 
   if (todoResult.output && todoResult.output.trim().length > 0) {
-    const todoLines = todoResult.output.trim().split('\n').filter((l) => l.trim());
+    const todoLines = todoResult.output
+      .trim()
+      .split('\n')
+      .filter((l) => l.trim());
     if (todoLines.length > 0) {
       log.info(`Found ${todoLines.length} TODO/FIXME comments`);
     }
@@ -208,9 +180,6 @@ function checkCommonIssues() {
   return true;
 }
 
-/**
- * Step 6: Test Build
- */
 function testBuild() {
   log.step('🏗️  Step 6: Test Build');
 
@@ -225,7 +194,6 @@ function testBuild() {
 
   log.success('Development build successful');
 
-  // Check if dist folder was created
   if (!fileExists('dist')) {
     log.error('Build completed but dist folder not found');
     hasErrors = true;
@@ -236,9 +204,6 @@ function testBuild() {
   return true;
 }
 
-/**
- * Step 7: Security Check
- */
 function securityCheck() {
   log.step('🔐 Step 7: Security Audit');
 
@@ -274,9 +239,6 @@ function securityCheck() {
   return true;
 }
 
-/**
- * Step 8: Summary
- */
 function printSummary() {
   console.log('\n' + '='.repeat(60));
   log.step('📊 Build Validation Summary');
@@ -297,9 +259,6 @@ function printSummary() {
   }
 }
 
-/**
- * Main execution
- */
 async function main() {
   console.log('\n' + '='.repeat(60));
   console.log(`${colors.cyan}${colors.bright}🚀 Pre-Build Validation${colors.reset}`);
@@ -308,7 +267,6 @@ async function main() {
 
   const startTime = Date.now();
 
-  // Run all checks
   const checks = [
     validateProjectStructure(),
     checkDependencies(),
@@ -332,7 +290,6 @@ async function main() {
   process.exit(0);
 }
 
-// Run the script
 main().catch((error) => {
   log.error('Unexpected error occurred:');
   console.error(error);

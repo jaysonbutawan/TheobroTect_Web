@@ -1,4 +1,3 @@
-// field-log-skeleton-mobile.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -33,7 +32,7 @@ import { CommonModule } from '@angular/common';
         </div>
       }
     </div>
-  `
+  `,
 })
 export class FieldLogSkeletonMobileComponent {
   items = [1, 2, 3];

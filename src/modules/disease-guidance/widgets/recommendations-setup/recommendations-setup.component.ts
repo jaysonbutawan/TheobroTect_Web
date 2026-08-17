@@ -6,7 +6,7 @@ import {
   OnInit,
   OnDestroy,
   SimpleChanges,
-  ChangeDetectorRef
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -38,10 +38,10 @@ type SeverityType = 'mild' | 'moderate' | 'severe';
   selector: 'app-recommendations-setup',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './recommendations-setup.component.html'
+  templateUrl: './recommendations-setup.component.html',
 })
 export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestroy {
-   @Input({ required: true }) form!: FormGroup;
+  @Input({ required: true }) form!: FormGroup;
   @Input({ required: true }) sevData!: SeverityData;
   @Input() diseaseId: number | null = null;
   @Input() diseaseKey: string = '';
@@ -63,36 +63,74 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
 
   private initialLoadDone = false;
 
-
-
   themeMap = {
-    mild: { bg: 'bg-emerald-50/30', border: 'border-emerald-100', text: 'text-emerald-700', dashBorder: 'border-emerald-300', btnHover: 'hover:bg-emerald-50', badgeBg: 'bg-blue-100', badgeText: 'text-blue-700' },
-    moderate: { bg: 'bg-amber-50/30', border: 'border-amber-100', text: 'text-amber-700', dashBorder: 'border-amber-300', btnHover: 'hover:bg-amber-50', badgeBg: 'bg-amber-100', badgeText: 'text-amber-700' },
-    severe: { bg: 'bg-red-50/30', border: 'border-red-100', text: 'text-red-700', dashBorder: 'border-red-300', btnHover: 'hover:bg-red-50', badgeBg: 'bg-purple-100', badgeText: 'text-purple-700' }
+    mild: {
+      bg: 'bg-emerald-50/30',
+      border: 'border-emerald-100',
+      text: 'text-emerald-700',
+      dashBorder: 'border-emerald-300',
+      btnHover: 'hover:bg-emerald-50',
+      badgeBg: 'bg-blue-100',
+      badgeText: 'text-blue-700',
+    },
+    moderate: {
+      bg: 'bg-amber-50/30',
+      border: 'border-amber-100',
+      text: 'text-amber-700',
+      dashBorder: 'border-amber-300',
+      btnHover: 'hover:bg-amber-50',
+      badgeBg: 'bg-amber-100',
+      badgeText: 'text-amber-700',
+    },
+    severe: {
+      bg: 'bg-red-50/30',
+      border: 'border-red-100',
+      text: 'text-red-700',
+      dashBorder: 'border-red-300',
+      btnHover: 'hover:bg-red-50',
+      badgeBg: 'bg-purple-100',
+      badgeText: 'text-purple-700',
+    },
   };
 
   severityConfig = {
     mild: {
-      label: 'Mild', description: 'Early or low-impact signs',
-      activeBg: 'bg-emerald-50/40', activeBorder: 'border-emerald-500', activeRing: 'ring-emerald-500/10',
-      activeShadow: 'shadow-emerald-100/20', activeText: 'text-emerald-700',
-      activeCheckBg: 'bg-emerald-500', activeCheckBorder: 'border-emerald-500', accentBar: 'bg-emerald-500'
+      label: 'Mild',
+      description: 'Early or low-impact signs',
+      activeBg: 'bg-emerald-50/40',
+      activeBorder: 'border-emerald-500',
+      activeRing: 'ring-emerald-500/10',
+      activeShadow: 'shadow-emerald-100/20',
+      activeText: 'text-emerald-700',
+      activeCheckBg: 'bg-emerald-500',
+      activeCheckBorder: 'border-emerald-500',
+      accentBar: 'bg-emerald-500',
     },
     moderate: {
-      label: 'Moderate', description: 'Spreading, structural threat',
-      activeBg: 'bg-amber-50/40', activeBorder: 'border-amber-500', activeRing: 'ring-amber-500/10',
-      activeShadow: 'shadow-amber-100/20', activeText: 'text-amber-700',
-      activeCheckBg: 'bg-amber-500', activeCheckBorder: 'border-amber-500', accentBar: 'bg-amber-500'
+      label: 'Moderate',
+      description: 'Spreading, structural threat',
+      activeBg: 'bg-amber-50/40',
+      activeBorder: 'border-amber-500',
+      activeRing: 'ring-amber-500/10',
+      activeShadow: 'shadow-amber-100/20',
+      activeText: 'text-amber-700',
+      activeCheckBg: 'bg-amber-500',
+      activeCheckBorder: 'border-amber-500',
+      accentBar: 'bg-amber-500',
     },
     severe: {
-      label: 'Severe', description: 'Critical, immediate action needed',
-      activeBg: 'bg-red-50/40', activeBorder: 'border-red-500', activeRing: 'ring-red-500/10',
-      activeShadow: 'shadow-red-100/20', activeText: 'text-red-700',
-      activeCheckBg: 'bg-red-500', activeCheckBorder: 'border-red-500', accentBar: 'bg-red-500'
-    }
+      label: 'Severe',
+      description: 'Critical, immediate action needed',
+      activeBg: 'bg-red-50/40',
+      activeBorder: 'border-red-500',
+      activeRing: 'ring-red-500/10',
+      activeShadow: 'shadow-red-100/20',
+      activeText: 'text-red-700',
+      activeCheckBg: 'bg-red-500',
+      activeCheckBorder: 'border-red-500',
+      accentBar: 'bg-red-500',
+    },
   };
-
-  // ─── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     if (this.diseaseId && this.diseaseKey) {
@@ -116,12 +154,10 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     const keyChanged = !!changes['diseaseKey'];
 
     if ((idChanged || keyChanged) && idReady && keyReady) {
-
       if (!this.initialLoadDone) {
         this.initialLoadDone = true;
         this.Severities();
       } else if (!changes['diseaseId']?.firstChange || !changes['diseaseKey']?.firstChange) {
-        // Re-load only when it is a genuine update (not the very first emission caught by ngOnInit)
         this.initialLoadDone = true;
         this.Severities();
       }
@@ -129,7 +165,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   }
 
   ngOnDestroy(): void {
-    Object.values(this.debounceTimers).forEach(timer => clearTimeout(timer));
+    Object.values(this.debounceTimers).forEach((timer) => clearTimeout(timer));
   }
 
   Severities(): void {
@@ -137,7 +173,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       this.displaySeverities = ['mild'];
       this.activeSev = 'mild';
 
-      // 🎨 OVERRIDE THE UI TEXT FOR HEALTHY STATE
       this.severityConfig.mild.label = 'Healthy / Normal';
       this.severityConfig.mild.description = 'Standard preventive care and maintenance';
 
@@ -146,7 +181,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       return;
     }
 
-    // 🌟 2. Reset the label back to "Mild" for actual diseases (in case the component is reused)
     this.severityConfig.mild.label = 'Mild';
     this.severityConfig.mild.description = 'Early or low-impact signs';
 
@@ -155,12 +189,12 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         this.existingSeverities = res?.data ?? res ?? [];
 
         this.diseaseSeverities = this.existingSeverities.filter(
-          (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
+          (sev: any) => Number(sev.disease_id) === Number(this.diseaseId),
         );
 
         const fetchedLevels = this.diseaseSeverities
           .map((sev: any) =>
-            (sev.severity_level || sev.severity || sev.level || sev.name || '').toLowerCase()
+            (sev.severity_level || sev.severity || sev.level || sev.name || '').toLowerCase(),
           )
           .filter((val: string) => ['mild', 'moderate', 'severe'].includes(val)) as SeverityType[];
 
@@ -176,7 +210,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       error: () => {
         this.displaySeverities = [];
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -186,7 +220,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     }
   }
 
-
   onSaveRecommendations(): void {
     if (!this.diseaseKey || !this.diseaseId) {
       return;
@@ -195,15 +228,12 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
     this.isSaving = true;
 
     this.saveRecommendationsForDisease(this.diseaseKey)
-      .catch(() => {
-        // Optional: show a user-friendly notification here
-      })
+      .catch(() => {})
       .finally(() => {
         this.isSaving = false;
         this.cdr.markForCheck();
       });
   }
-
 
   addBullet(list: ChecklistItem[]): void {
     list.push({ en: '', tl: '', translating: false });
@@ -231,7 +261,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         const translated = await this.translationService.translate(text);
         item[targetKey] = translated;
       } catch (error) {
-        // Translation failed silently
       } finally {
         item.translating = false;
         this.cdr.markForCheck();
@@ -259,7 +288,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         const translated = await this.translationService.translate(text);
         (this.sevData[severity][targetField] as string) = translated;
       } catch (error) {
-        // Translation failed silently
       } finally {
         this.translating[translatingKey] = false;
         this.cdr.markForCheck();
@@ -276,7 +304,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         recommendations.push({
           category_key: 'action_items',
           content: data.actions,
-          sort_order: 0
+          sort_order: 0,
         });
       }
 
@@ -284,7 +312,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         recommendations.push({
           category_key: 'prevention_items',
           content: data.prevention,
-          sort_order: 1
+          sort_order: 1,
         });
       }
 
@@ -293,9 +321,9 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           category_key: 'escalate_text',
           content: {
             en: data.escalateEn,
-            tl: data.escalateTl || ''
+            tl: data.escalateTl || '',
           },
-          sort_order: 2
+          sort_order: 2,
         });
       }
 
@@ -304,9 +332,9 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           category_key: 'seek_help_text',
           content: {
             en: data.seekHelpEn,
-            tl: data.seekHelpTl || ''
+            tl: data.seekHelpTl || '',
           },
-          sort_order: 3
+          sort_order: 3,
         });
       }
 
@@ -314,12 +342,20 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         await firstValueFrom(
           this.recommendationService.saveRecommendations({
             disease_key: 'healthy',
-            recommendations
-          })
+            recommendations,
+          }),
         );
-        this.toastService.show('success', 'Saved Successfully', 'Healthy recommendations have been saved.');
+        this.toastService.show(
+          'success',
+          'Saved Successfully',
+          'Healthy recommendations have been saved.',
+        );
       } catch {
-        this.toastService.show('error', 'Error Occurred', 'Unable to save healthy recommendations.');
+        this.toastService.show(
+          'error',
+          'Error Occurred',
+          'Unable to save healthy recommendations.',
+        );
       }
       return;
     }
@@ -330,13 +366,8 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
 
     const severityIdMap: Record<string, number> = {};
 
-    this.diseaseSeverities.forEach(sev => {
-      const level = (
-        sev.severity_level ||
-        sev.severity ||
-        sev.level ||
-        ''
-      ).toLowerCase().trim();
+    this.diseaseSeverities.forEach((sev) => {
+      const level = (sev.severity_level || sev.severity || sev.level || '').toLowerCase().trim();
 
       severityIdMap[level] = sev.id;
     });
@@ -354,7 +385,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           recommendations.push({
             category_key: 'action_items',
             content: data.actions,
-            sort_order: 0
+            sort_order: 0,
           });
         }
 
@@ -362,7 +393,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
           recommendations.push({
             category_key: 'prevention_items',
             content: data.prevention,
-            sort_order: 1
+            sort_order: 1,
           });
         }
 
@@ -371,9 +402,9 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
             category_key: 'escalate_text',
             content: {
               en: data.escalateEn,
-              tl: data.escalateTl || ''
+              tl: data.escalateTl || '',
             },
-            sort_order: 2
+            sort_order: 2,
           });
         }
 
@@ -382,9 +413,9 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
             category_key: 'seek_help_text',
             content: {
               en: data.seekHelpEn,
-              tl: data.seekHelpTl || ''
+              tl: data.seekHelpTl || '',
             },
-            sort_order: 3
+            sort_order: 3,
           });
         }
 
@@ -393,15 +424,21 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         await firstValueFrom(
           this.recommendationService.saveRecommendations({
             disease_severity_id: severityId,
-            recommendations
-          })
+            recommendations,
+          }),
         );
       }
-      this.toastService.show('success', 'Saved Successfully', 'Your changes have been saved successfully.');
-
+      this.toastService.show(
+        'success',
+        'Saved Successfully',
+        'Your changes have been saved successfully.',
+      );
     } catch {
-      this.toastService.show('error', 'Error Occurred', 'Connection error. Unable to save recommendations.');
-
+      this.toastService.show(
+        'error',
+        'Error Occurred',
+        'Connection error. Unable to save recommendations.',
+      );
     }
   }
 
@@ -414,7 +451,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       const response: any = await firstValueFrom(
         this.diseaseKey === 'healthy'
           ? this.recommendationService.getRecommendationsByDiseaseKey('healthy')
-          : this.recommendationService.getRecommendations(this.diseaseId!)
+          : this.recommendationService.getRecommendations(this.diseaseId!),
       );
 
       const diseaseRecommendations: any[] = response?.data ?? response ?? [];
@@ -430,8 +467,7 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         }
       });
 
-      // Clear existing data in UI
-      this.displaySeverities.forEach(level => {
+      this.displaySeverities.forEach((level) => {
         if (this.sevData[level]) {
           this.sevData[level].actions = [];
           this.sevData[level].prevention = [];
@@ -458,20 +494,16 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
         if (typeof parsedContent === 'string') {
           try {
             parsedContent = JSON.parse(parsedContent);
-          } catch { }
+          } catch {}
         }
 
         switch (rec.category_key) {
           case 'action_items':
-            this.sevData[level].actions = Array.isArray(parsedContent)
-              ? parsedContent
-              : [];
+            this.sevData[level].actions = Array.isArray(parsedContent) ? parsedContent : [];
             break;
 
           case 'prevention_items':
-            this.sevData[level].prevention = Array.isArray(parsedContent)
-              ? parsedContent
-              : [];
+            this.sevData[level].prevention = Array.isArray(parsedContent) ? parsedContent : [];
             break;
 
           case 'escalate_text':
@@ -487,8 +519,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
       });
 
       this.cdr.markForCheck();
-    } catch {
-      // Optional: leave empty or handle silently
-    }
+    } catch {}
   }
 }

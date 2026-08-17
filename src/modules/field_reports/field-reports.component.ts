@@ -37,7 +37,7 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     'Sabangan',
     'San Miguel',
     'Santo Niño',
-    'Poblacion'
+    'Poblacion',
   ];
 
   categoryOptions: string[] = ['Black Pod Disease', 'Mealybug', 'Cacao Pod Borer'];
@@ -57,7 +57,7 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     { value: '09', label: 'September' },
     { value: '10', label: 'October' },
     { value: '11', label: 'November' },
-    { value: '12', label: 'December' }
+    { value: '12', label: 'December' },
   ];
 
   activeDropdown: 'address' | 'category' | 'severity' | 'period' | null = null;
@@ -102,15 +102,25 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   triggerLabel = 'All Time';
 
   currentYear = new Date().getFullYear();
-  minYear = 2020; // Adjust to your earliest data year
+  minYear = 2020;
   maxYear = this.currentYear;
 
   pendingYear: number = this.currentYear;
   pendingMonth: number | null = null;
 
   months: string[] = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   filters = {
@@ -118,7 +128,7 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     disease_key: '',
     severity_key: '',
     year: '',
-    month: ''
+    month: '',
   };
 
   allReports: FieldReport[] = [];
@@ -139,11 +149,10 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  // ── Period Filter Methods ───────────────────────────────────
+
   togglePanel(): void {
     this.panelOpen = !this.panelOpen;
     if (this.panelOpen) {
-      // Initialize pending state to match currently applied filters
       this.pendingYear = this.filters.year ? parseInt(this.filters.year, 10) : this.currentYear;
       this.pendingMonth = this.filters.month ? parseInt(this.filters.month, 10) - 1 : null;
     }
@@ -175,11 +184,9 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   }
 
   applyFilter(): void {
-    // 1. Update the actual filters
     this.filters.year = this.pendingYear.toString();
-    this.filters.month = this.pendingMonth !== null
-      ? (this.pendingMonth + 1).toString().padStart(2, '0')
-      : '';
+    this.filters.month =
+      this.pendingMonth !== null ? (this.pendingMonth + 1).toString().padStart(2, '0') : '';
 
     if (this.pendingMonth !== null) {
       this.triggerLabel = `${this.months[this.pendingMonth]} ${this.pendingYear}`;
@@ -195,7 +202,8 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMsg = '';
 
-    this.reportsApi.getReports()
+    this.reportsApi
+      .getReports()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -211,11 +219,10 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
           this.allReports = [];
           this.cdr.markForCheck();
           this.applyFilters();
-        }
+        },
       });
   }
 
-  // ── Filtering ──────────────────────────────────────────────
   onFilterChange(): void {
     this.currentPage = 1;
     this.cdr.markForCheck();
@@ -228,10 +235,9 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
       disease_key: '',
       severity_key: '',
       year: '',
-      month: ''
+      month: '',
     };
 
-    // Reset Date Popover UI
     this.triggerLabel = 'All Time';
     this.pendingYear = this.currentYear;
     this.pendingMonth = null;
@@ -247,13 +253,12 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
         !this.filters?.disease_key ||
         r?.disease_key?.toLowerCase().includes(this.filters.disease_key.toLowerCase()) ||
         this.filters.disease_key.toLowerCase().includes(r?.disease_key?.toLowerCase() ?? '');
-      const matchesSeverity = !this.filters.severity_key || r.severity_key === this.filters.severity_key;
+      const matchesSeverity =
+        !this.filters.severity_key || r.severity_key === this.filters.severity_key;
 
-      // Year & Optional Month Date Filtering logic
       const matchesDate = (() => {
         if (!this.filters.year && !this.filters.month) return true;
 
-        // Uses created_at or date timestamp field from the report
         const reportDateRaw = r.scanned_at || (r as any).date;
         if (!reportDateRaw) return true;
 
@@ -276,7 +281,6 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     this.updatePagedReports();
   }
 
-  // ── Pagination ─────────────────────────────────────────────
   private updatePagedReports(): void {
     const start = (this.currentPage - 1) * this.pageSize;
     this.pagedReports = this.filteredReports.slice(start, start + this.pageSize);
@@ -304,12 +308,12 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // ── Sync ───────────────────────────────────────────────────
   syncData(): void {
     if (this.isSyncing) return;
     this.isSyncing = true;
 
-    this.reportsApi.getReports()
+    this.reportsApi
+      .getReports()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -322,7 +326,7 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
           this.errorMsg = 'Sync failed.';
           this.isSyncing = false;
           this.cdr.markForCheck();
-        }
+        },
       });
   }
 
@@ -336,17 +340,21 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
       .replace(/_/g, ' ')
       .replace(/-/g, ' ')
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 
   formatStatus(status: ReportStatus | number | string): string {
     if (typeof status === 'number') {
       switch (status) {
-        case 0: return 'Pending';
-        case 1: return 'Under Review';
-        case 2: return 'Resolved';
-        default: return 'Unknown';
+        case 0:
+          return 'Pending';
+        case 1:
+          return 'Under Review';
+        case 2:
+          return 'Resolved';
+        default:
+          return 'Unknown';
       }
     }
     return status as string;

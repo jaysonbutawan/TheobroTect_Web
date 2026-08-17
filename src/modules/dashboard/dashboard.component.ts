@@ -27,7 +27,7 @@ import {
   filterScansByYear,
   getAvailableYears,
   isDiseaseType,
-  isHealthy
+  isHealthy,
 } from './widgets/dashboard-helpers';
 
 @Component({
@@ -41,16 +41,16 @@ import {
     ChartSkeletonComponent,
     LineChartComponent,
     SummaryStatCardComponent,
-    DiseaseCardComponent
+    DiseaseCardComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
   constructor(
     private router: Router,
-    private dashboardService: DashboardService
-  ) { }
+    private dashboardService: DashboardService,
+  ) {}
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -63,7 +63,6 @@ export class DashboardComponent implements OnInit {
 
   recentScans: Scan[] = [];
 
-  // Card configurations - initialized after stats
   get summaryCards() {
     return generateSummaryCards(this.stats, this.selectedYear());
   }
@@ -72,7 +71,6 @@ export class DashboardComponent implements OnInit {
     return generateDiseaseCards(this.stats);
   }
 
-  // Expose Math and helper functions to template
   Math = Math;
   calculatePercentageChange = calculatePercentageChange;
   getTrendDirection = getTrendDirection;
@@ -85,15 +83,15 @@ export class DashboardComponent implements OnInit {
     datasets: [
       { data: [], label: 'Black Pod Disease', backgroundColor: '#166534' },
       { data: [], label: 'Mealybug', backgroundColor: '#15803d' },
-      { data: [], label: 'Pod Borer', backgroundColor: '#22c55e' }
-    ]
+      { data: [], label: 'Pod Borer', backgroundColor: '#22c55e' },
+    ],
   };
 
   public barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     scales: { x: { stacked: true }, y: { stacked: true } },
-    plugins: { legend: { position: 'bottom' } }
+    plugins: { legend: { position: 'bottom' } },
   };
 
   public lineChartData: ChartConfiguration<'line'>['data'] = getInitialLineChartData();
@@ -120,7 +118,7 @@ export class DashboardComponent implements OnInit {
         this.errorMessage = 'Failed to load data';
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -148,7 +146,7 @@ export class DashboardComponent implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    this.recentScans = filteredScans.filter(scan => {
+    this.recentScans = filteredScans.filter((scan) => {
       const createdAt = new Date(scan.scanned_at);
       createdAt.setHours(0, 0, 0, 0);
       return createdAt.getTime() === today.getTime();
@@ -157,20 +155,20 @@ export class DashboardComponent implements OnInit {
   private processBarChartData(scans: Scan[]): void {
     const dateGroups = groupScansByDate(scans);
     const sortedDates = Object.keys(dateGroups).sort(
-      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
     );
 
-    this.barChartData.labels = sortedDates.map(date => formatDate(date));
+    this.barChartData.labels = sortedDates.map((date) => formatDate(date));
 
     const blackPodCounts: number[] = [];
     const mealybugCounts: number[] = [];
     const podBorerCounts: number[] = [];
 
-    sortedDates.forEach(date => {
+    sortedDates.forEach((date) => {
       const scansForDate = dateGroups[date];
-      blackPodCounts.push(scansForDate.filter(s => isDiseaseType(s, 'black pod')).length);
-      mealybugCounts.push(scansForDate.filter(s => isDiseaseType(s, 'mealybug')).length);
-      podBorerCounts.push(scansForDate.filter(s => isDiseaseType(s, 'pod borer')).length);
+      blackPodCounts.push(scansForDate.filter((s) => isDiseaseType(s, 'black pod')).length);
+      mealybugCounts.push(scansForDate.filter((s) => isDiseaseType(s, 'mealybug')).length);
+      podBorerCounts.push(scansForDate.filter((s) => isDiseaseType(s, 'pod borer')).length);
     });
 
     if (this.barChartData.datasets) {
@@ -185,53 +183,43 @@ export class DashboardComponent implements OnInit {
     this.previousStats = calculateStats(scans);
   }
 
-  /**
-   * Get trend indicator for a specific metric
-   */
   getTrendForMetric(current: number, previous: number): TrendIndicator | undefined {
     if (previous === 0 && current === 0) return undefined;
 
     const change = calculatePercentageChange(current, previous);
     return {
       direction: getTrendDirection(current, previous),
-      value: `${Math.abs(change).toFixed(0)}%`
+      value: `${Math.abs(change).toFixed(0)}%`,
     };
   }
 
-  /**
-   * Get trend for health rate percentage
-   */
   getHealthRateTrend(): TrendIndicator | undefined {
-    const currentRate = this.stats.totalScans > 0
-      ? (this.stats.healthy / this.stats.totalScans) * 100
-      : 0;
-    const previousRate = this.previousStats.totalScans > 0
-      ? (this.previousStats.healthy / this.previousStats.totalScans) * 100
-      : 0;
+    const currentRate =
+      this.stats.totalScans > 0 ? (this.stats.healthy / this.stats.totalScans) * 100 : 0;
+    const previousRate =
+      this.previousStats.totalScans > 0
+        ? (this.previousStats.healthy / this.previousStats.totalScans) * 100
+        : 0;
 
     if (this.previousStats.totalScans === 0) return undefined;
 
     const direction = getTrendDirection(currentRate, previousRate);
     return {
       direction,
-      label: direction === 'up' ? 'Better' : direction === 'down' ? 'Lower' : 'Stable'
+      label: direction === 'up' ? 'Better' : direction === 'down' ? 'Lower' : 'Stable',
     };
   }
 
-  /**
-   * Get additional info for health rate card
-   */
   getHealthRateInfo(): string {
     if (this.previousStats.totalScans === 0) {
       return 'No previous data';
     }
-    const prevRate = ((this.previousStats.healthy / this.previousStats.totalScans) * 100).toFixed(1);
+    const prevRate = ((this.previousStats.healthy / this.previousStats.totalScans) * 100).toFixed(
+      1,
+    );
     return `vs ${prevRate}% last year`;
   }
 
-  /**
-   * Get additional info for stat cards showing percentage of total
-   */
   getPercentageInfo(value: number): string {
     return this.stats.totalScans > 0
       ? `${((value / this.stats.totalScans) * 100).toFixed(1)}% of total`
@@ -247,23 +235,23 @@ export class DashboardComponent implements OnInit {
     const mealybugCounts: number[] = [];
     const podBorerCounts: number[] = [];
 
-    sortedMonths.forEach(month => {
+    sortedMonths.forEach((month) => {
       const scansForMonth = monthGroups[month] ?? [];
 
-      healthyCounts.push(scansForMonth.filter(s => isHealthy(s)).length);
-      blackPodCounts.push(scansForMonth.filter(s => isDiseaseType(s, 'black pod')).length);
-      mealybugCounts.push(scansForMonth.filter(s => isDiseaseType(s, 'mealybug')).length);
-      podBorerCounts.push(scansForMonth.filter(s => isDiseaseType(s, 'pod borer')).length);
+      healthyCounts.push(scansForMonth.filter((s) => isHealthy(s)).length);
+      blackPodCounts.push(scansForMonth.filter((s) => isDiseaseType(s, 'black pod')).length);
+      mealybugCounts.push(scansForMonth.filter((s) => isDiseaseType(s, 'mealybug')).length);
+      podBorerCounts.push(scansForMonth.filter((s) => isDiseaseType(s, 'pod borer')).length);
     });
 
     this.lineChartData = {
-      labels: sortedMonths.map(m => formatMonth(m)),
+      labels: sortedMonths.map((m) => formatMonth(m)),
       datasets: [
         { ...this.lineChartData.datasets[0], data: healthyCounts },
         { ...this.lineChartData.datasets[1], data: blackPodCounts },
         { ...this.lineChartData.datasets[2], data: mealybugCounts },
-        { ...this.lineChartData.datasets[3], data: podBorerCounts }
-      ]
+        { ...this.lineChartData.datasets[3], data: podBorerCounts },
+      ],
     };
   }
 

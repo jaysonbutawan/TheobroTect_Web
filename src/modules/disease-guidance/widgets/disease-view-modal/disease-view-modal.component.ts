@@ -7,7 +7,7 @@ import {
   SimpleChanges,
   inject,
   ChangeDetectorRef,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
@@ -40,11 +40,8 @@ export class DiseaseViewModalComponent implements OnChanges {
   monitoringPlans: MonitoringPlanDto[] = [];
   recommendations: RecommendationDto[] = [];
 
-  // BUG FIX: Expose Array.isArray to the template — Angular templates cannot call
-  // global functions directly, so it must be a class method.
   readonly isArray = Array.isArray;
 
-  // BUG FIX: Type-safe cast helpers used in the template to avoid unsafe `any` access
   asArray(content: any): { en: string; tl: string }[] {
     return Array.isArray(content) ? content : [];
   }
@@ -75,23 +72,26 @@ export class DiseaseViewModalComponent implements OnChanges {
     forkJoin({
       monitoring: this.monitoringService.getMonitoringPlans().pipe(
         take(1),
-        catchError(() => of({ data: [] as MonitoringPlanDto[] }))
+        catchError(() => of({ data: [] as MonitoringPlanDto[] })),
       ),
       recommendations: this.recommendationService.getRecommendations(this.disease.id).pipe(
         take(1),
-        catchError(() => of([] as RecommendationDto[]))
-      )
+        catchError(() => of([] as RecommendationDto[])),
+      ),
     }).subscribe({
       next: ({ monitoring, recommendations }) => {
         const allPlans: any[] = (monitoring as any)?.data ?? monitoring ?? [];
 
-        this.monitoringPlans = allPlans.filter(p => {
-          return p.disease_key?.toString().toLowerCase() === this.disease!.disease_key?.toString().toLowerCase();
+        this.monitoringPlans = allPlans.filter((p) => {
+          return (
+            p.disease_key?.toString().toLowerCase() ===
+            this.disease!.disease_key?.toString().toLowerCase()
+          );
         });
 
         this.recommendations = Array.isArray(recommendations)
           ? recommendations
-          : (recommendations as any)?.data ?? [];
+          : ((recommendations as any)?.data ?? []);
 
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -99,36 +99,36 @@ export class DiseaseViewModalComponent implements OnChanges {
       error: () => {
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
-get groupedMonitoringPlans(): { severity: string; items: MonitoringPlanDto[] }[] {
-  const groups: Record<string, MonitoringPlanDto[]> = {};
+  get groupedMonitoringPlans(): { severity: string; items: MonitoringPlanDto[] }[] {
+    const groups: Record<string, MonitoringPlanDto[]> = {};
 
-  for (const plan of this.monitoringPlans) {
-    const key = (plan.severity?.severity_level || 'general').toLowerCase();
+    for (const plan of this.monitoringPlans) {
+      const key = (plan.severity?.severity_level || 'general').toLowerCase();
 
-    if (!groups[key]) {
-      groups[key] = [];
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+
+      groups[key].push(plan);
     }
 
-    groups[key].push(plan);
+    const standardOrder = ['mild', 'moderate', 'severe', 'general'];
+
+    const availableKeys = Object.keys(groups);
+    const extraKeys = availableKeys.filter((k) => !standardOrder.includes(k));
+
+    const finalOrder = [...standardOrder, ...extraKeys];
+
+    const result = finalOrder
+      .filter((k) => groups[k]?.length > 0)
+      .map((k) => ({ severity: k, items: groups[k] }));
+
+    return result;
   }
-
-  const standardOrder = ['mild', 'moderate', 'severe', 'general'];
-
-  const availableKeys = Object.keys(groups);
-  const extraKeys = availableKeys.filter(k => !standardOrder.includes(k));
-
-  const finalOrder = [...standardOrder, ...extraKeys];
-
-  const result = finalOrder
-    .filter(k => groups[k]?.length > 0)
-    .map(k => ({ severity: k, items: groups[k] }));
-
-  return result;
-}
 
   get groupedRecommendations(): { severity: string; items: RecommendationDto[] }[] {
     const groups: Record<string, RecommendationDto[]> = {};
@@ -141,12 +141,12 @@ get groupedMonitoringPlans(): { severity: string; items: MonitoringPlanDto[] }[]
 
     const standardOrder = ['mild', 'moderate', 'severe', 'general'];
     const availableKeys = Object.keys(groups);
-    const extraKeys = availableKeys.filter(k => !standardOrder.includes(k));
+    const extraKeys = availableKeys.filter((k) => !standardOrder.includes(k));
     const finalOrder = [...standardOrder, ...extraKeys];
 
     return finalOrder
-      .filter(k => groups[k]?.length > 0)
-      .map(k => ({ severity: k, items: groups[k] }));
+      .filter((k) => groups[k]?.length > 0)
+      .map((k) => ({ severity: k, items: groups[k] }));
   }
 
   formatHour(hour: number): string {

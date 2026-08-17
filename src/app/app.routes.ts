@@ -9,56 +9,50 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: LayoutComponent,
-    canActivate: [authGuard], // Protected route
+    canActivate: [authGuard],
     children: [
       {
         path: '',
         loadChildren: () =>
-          import('../modules/dashboard/dashboard.routes').then(
-            (m) => m.DASHBOARD_ROUTES
-          ),
+          import('../modules/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
       {
         path: 'user-management',
         loadChildren: () =>
           import('../modules/user_management/user-management.routes').then(
-            (m) => m.USER_MANAGEMENT_ROUTES
+            (m) => m.USER_MANAGEMENT_ROUTES,
           ),
       },
       {
         path: 'heatmap',
         loadChildren: () =>
-          import('../modules/heatmap/heatmap.routes').then(
-            (m) => m.HEATMAP_ROUTES
-          ),
+          import('../modules/heatmap/heatmap.routes').then((m) => m.HEATMAP_ROUTES),
       },
       {
         path: 'field-reports',
         loadChildren: () =>
           import('../modules/field_reports/field-reports.routes').then(
-            (m) => m.FIELD_REPORTS_ROUTES
+            (m) => m.FIELD_REPORTS_ROUTES,
           ),
       },
       {
         path: 'users',
         loadChildren: () =>
           import('../modules/user_management/user_scan_history/user-scan-history.routes').then(
-            (m) => m.USER_SCAN_HISTORY_ROUTES
+            (m) => m.USER_SCAN_HISTORY_ROUTES,
           ),
       },
       {
         path: 'guide',
         loadChildren: () =>
           import('../modules/disease-guidance/disease-guidance.routes').then(
-            (m) => m.DISEASE_GUIDANCE_ROUTES
+            (m) => m.DISEASE_GUIDANCE_ROUTES,
           ),
       },
       {
         path: 'settings',
         loadChildren: () =>
-          import('../modules/settings/settings.routes').then(
-            (m) => m.SETTINGS_ROUTES
-          ),
+          import('../modules/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
       },
     ],
   },

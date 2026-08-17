@@ -1,8 +1,11 @@
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-5">
-  <!-- Search Box -->
-  <div class="lg:col-span-8 bg-white rounded-[1.5rem] p-3 sm:p-4 shadow-sm border border-slate-100 flex items-center select-none">
+  <div
+    class="lg:col-span-8 bg-white rounded-[1.5rem] p-3 sm:p-4 shadow-sm border border-slate-100 flex items-center select-none"
+  >
     <div class="relative group w-full">
-      <span class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 transition-colors text-[22px] z-10">
+      <span
+        class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 transition-colors text-[22px] z-10"
+      >
         search
       </span>
       <input
@@ -15,18 +18,22 @@
     </div>
   </div>
 
-  <!-- Stats Tile -->
-  <div class="lg:col-span-4 bg-white rounded-[1.5rem] p-4 sm:p-5 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center select-none">
+  <div
+    class="lg:col-span-4 bg-white rounded-[1.5rem] p-4 sm:p-5 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center select-none"
+  >
     <span class="text-3xl font-bold text-green-600 leading-none">{{ totalUsers }}</span>
-    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 mt-1.5">Total Users</span>
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 mt-1.5"
+      >Total Users</span
+    >
   </div>
 </div>
 
-<!-- Main Data Table -->
-<div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 select-none overflow-hidden">
-
-  <!-- Table Header -->
-  <div class="hidden md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+<div
+  class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 select-none overflow-hidden"
+>
+  <div
+    class="hidden md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 bg-slate-50/50"
+  >
     <div class="md:col-span-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
       User
     </div>
@@ -36,19 +43,24 @@
     <div class="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
       Barangay
     </div>
-    <div class="md:col-span-1 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">
+    <div
+      class="md:col-span-1 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center"
+    >
       Scans
     </div>
-    <div class="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">
+    <div
+      class="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center"
+    >
       Actions
     </div>
   </div>
 
-  <!-- Table Body -->
   <div class="flex flex-col">
     @if (isLoading) {
       @for (i of [1, 2, 3, 4, 5]; track i) {
-        <div class="flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-b-0 animate-pulse md:items-center">
+        <div
+          class="flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-b-0 animate-pulse md:items-center"
+        >
           <div class="flex items-center gap-4 md:col-span-4">
             <div class="w-10 h-10 rounded-full bg-slate-200 shrink-0"></div>
             <div class="space-y-2 w-full max-w-[150px]">
@@ -69,17 +81,20 @@
       }
     } @else {
       @for (user of pagedUsers; track user.id) {
-        <!-- ROW (Clickable) -->
         <div
           (click)="viewUser(user)"
           class="group cursor-pointer flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-b-0 md:items-center hover:bg-slate-50 transition-colors duration-200"
         >
           <div class="flex items-center gap-4 md:col-span-4">
-            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-700 text-sm shrink-0">
+            <div
+              class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-700 text-sm shrink-0"
+            >
               {{ user.name ? user.name.charAt(0).toUpperCase() : '?' }}
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-bold text-slate-800 truncate group-hover:text-green-600 transition-colors">
+              <p
+                class="text-sm font-bold text-slate-800 truncate group-hover:text-green-600 transition-colors"
+              >
                 {{ user.name }}
               </p>
               <p class="text-[13px] text-slate-500 mt-0.5">
@@ -89,23 +104,37 @@
           </div>
 
           <div class="flex flex-col md:block md:col-span-3">
-            <span class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-1">Email Address</span>
+            <span
+              class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-1"
+              >Email Address</span
+            >
             <span class="text-sm text-slate-600 truncate block">{{ user.email }}</span>
           </div>
 
           <div class="flex flex-col md:block md:col-span-2">
-            <span class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-1">Location</span>
+            <span
+              class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-1"
+              >Location</span
+            >
             <div class="flex items-center gap-1.5 text-sm text-slate-600">
-              <span class="material-symbols-rounded text-[16px] text-slate-400 md:hidden">location_on</span>
+              <span class="material-symbols-rounded text-[16px] text-slate-400 md:hidden"
+                >location_on</span
+              >
               <span class="truncate">{{ user.address }}</span>
             </div>
           </div>
 
-          <div class="flex items-center justify-between md:contents pt-3 md:pt-0 mt-2 md:mt-0 border-t border-slate-100 md:border-none">
-
+          <div
+            class="flex items-center justify-between md:contents pt-3 md:pt-0 mt-2 md:mt-0 border-t border-slate-100 md:border-none"
+          >
             <div class="flex items-center gap-2 md:col-span-1 md:justify-center">
-              <span class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider">Scans</span>
-              <span class="inline-flex items-center justify-center min-w-[2.5rem] h-7 px-2.5 bg-slate-100 rounded-full text-xs font-bold text-slate-700 group-hover:bg-green-100 group-hover:text-green-700 transition-colors">
+              <span
+                class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider"
+                >Scans</span
+              >
+              <span
+                class="inline-flex items-center justify-center min-w-[2.5rem] h-7 px-2.5 bg-slate-100 rounded-full text-xs font-bold text-slate-700 group-hover:bg-green-100 group-hover:text-green-700 transition-colors"
+              >
                 {{ user.total_scans }}
               </span>
             </div>
@@ -126,12 +155,13 @@
                 <span class="material-symbols-rounded text-[20px]">delete</span>
               </button>
             </div>
-
           </div>
         </div>
       } @empty {
         <div class="py-20 flex flex-col items-center justify-center text-center">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4"
+          >
             <span class="material-symbols-rounded text-3xl text-slate-400">group_off</span>
           </div>
           <h3 class="text-base font-bold text-slate-800">No users found</h3>
@@ -159,11 +189,14 @@
   }
 </div>
 
-<!-- Custom Confirmation Dialog -->
 <app-confirmation-dialog
   [isOpen]="isConfirmDialogOpen"
   title="Delete User"
-  [message]="'Are you sure you want to delete ' + (userToDelete?.name || 'this user') + '? This action cannot be undone.'"
+  [message]="
+    'Are you sure you want to delete ' +
+    (userToDelete?.name || 'this user') +
+    '? This action cannot be undone.'
+  "
   cancelText="Cancel"
   confirmText="Delete"
   confirmButtonClass="bg-red-500 hover:bg-red-600"

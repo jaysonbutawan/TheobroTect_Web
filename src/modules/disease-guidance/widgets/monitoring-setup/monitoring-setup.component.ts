@@ -1,6 +1,11 @@
 import {
-  Component, Input, inject, SimpleChanges,
-  OnChanges, ChangeDetectorRef, OnInit
+  Component,
+  Input,
+  inject,
+  SimpleChanges,
+  OnChanges,
+  ChangeDetectorRef,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
@@ -66,7 +71,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       next: (res: any) => {
         this.existingSeverities = res?.data ?? res ?? [];
         const diseaseSeverities = this.existingSeverities.filter(
-          (sev: any) => Number(sev.disease_id) === Number(this.diseaseId)
+          (sev: any) => Number(sev.disease_id) === Number(this.diseaseId),
         );
 
         if (this.showSeverity) {
@@ -78,8 +83,8 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-         this.toastService.show('error', 'Load Failed', 'Failed to load data.');
-      }
+        this.toastService.show('error', 'Load Failed', 'Failed to load data.');
+      },
     });
   }
 
@@ -93,20 +98,20 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
         const plans = res?.data ?? res ?? [];
 
         if (!this.showSeverity) {
-          this.currentMonitoringPlan = plans.find(
-            (plan: any) => plan.disease_key === this.diseaseKey
-          ) || null;
+          this.currentMonitoringPlan =
+            plans.find((plan: any) => plan.disease_key === this.diseaseKey) || null;
         } else {
           const matchingSeverity = this.existingSeverities.find(
             (sev: any) =>
               Number(sev.disease_id) === Number(this.diseaseId) &&
-              sev.severity_level?.toLowerCase() === this.activeSev.toLowerCase()
+              sev.severity_level?.toLowerCase() === this.activeSev.toLowerCase(),
           );
 
           if (matchingSeverity) {
-            this.currentMonitoringPlan = plans.find(
-              (plan: any) => Number(plan.disease_severity_id) === Number(matchingSeverity.id)
-            ) || null;
+            this.currentMonitoringPlan =
+              plans.find(
+                (plan: any) => Number(plan.disease_severity_id) === Number(matchingSeverity.id),
+              ) || null;
           } else {
             this.currentMonitoringPlan = null;
           }
@@ -114,32 +119,40 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
 
         if (this.currentMonitoringPlan) {
           const hour = this.currentMonitoringPlan.preferred_time_hour;
-          const formattedTime = (hour !== null && hour !== undefined)
-            ? `${hour.toString().padStart(2, '0')}:00`
-            : '';
+          const formattedTime =
+            hour !== null && hour !== undefined ? `${hour.toString().padStart(2, '0')}:00` : '';
 
           this.form.patchValue({
             rescanDays: this.currentMonitoringPlan.rescan_after_days,
             preferredTime: formattedTime,
             guidanceEn: this.currentMonitoringPlan.message?.en ?? '',
-            guidanceTl: this.currentMonitoringPlan.message?.tl ?? ''
+            guidanceTl: this.currentMonitoringPlan.message?.tl ?? '',
           });
         } else {
-          this.form.patchValue({ rescanDays: '', preferredTime: '', guidanceEn: '', guidanceTl: '' });
+          this.form.patchValue({
+            rescanDays: '',
+            preferredTime: '',
+            guidanceEn: '',
+            guidanceTl: '',
+          });
         }
 
         this.cdr.markForCheck();
       },
       error: () => {
         this.toastService.show('error', 'Load Failed', 'Failed to load monitoring plans.');
-      }
+      },
     });
   }
 
   saveMonitoringPlan(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.toastService.show('warning', 'Validation Error', 'Please check the form for errors before saving.');
+      this.toastService.show(
+        'warning',
+        'Validation Error',
+        'Please check the form for errors before saving.',
+      );
       return;
     }
 
@@ -155,11 +168,15 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       const matchingSeverity = this.existingSeverities.find(
         (sev: any) =>
           Number(sev.disease_id) === Number(this.diseaseId) &&
-          sev.severity_level?.toLowerCase() === this.activeSev.toLowerCase()
+          sev.severity_level?.toLowerCase() === this.activeSev.toLowerCase(),
       );
 
       if (!matchingSeverity) {
-        this.toastService.show('error', 'Severity Not Found', 'Target severity data does not exist for this disease.');
+        this.toastService.show(
+          'error',
+          'Severity Not Found',
+          'Target severity data does not exist for this disease.',
+        );
         return;
       }
       severityId = matchingSeverity.id;
@@ -175,9 +192,8 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       disease_key: this.showSeverity ? null : this.diseaseKey,
       disease_severity_id: this.showSeverity ? severityId : null,
       rescan_after_days: (() => {
-        const rawValue = formValue.rescanDays !== undefined
-          ? formValue.rescanDays
-          : formValue.rescan_after_days;
+        const rawValue =
+          formValue.rescanDays !== undefined ? formValue.rescanDays : formValue.rescan_after_days;
 
         const parsed = parseInt(rawValue, 10);
         return isNaN(parsed) ? 0 : parsed;
@@ -186,30 +202,50 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
       preferred_time_hour: hourInteger,
 
       message: {
-        en: (formValue.guidanceEn !== undefined ? formValue.guidanceEn : formValue.guidance_en) || '',
-        tl: (formValue.guidanceTl !== undefined ? formValue.guidanceTl : formValue.guidance_tl) || ''
+        en:
+          (formValue.guidanceEn !== undefined ? formValue.guidanceEn : formValue.guidance_en) || '',
+        tl:
+          (formValue.guidanceTl !== undefined ? formValue.guidanceTl : formValue.guidance_tl) || '',
       },
     };
 
     if (this.currentMonitoringPlan?.id) {
-      this.monitoringService.updateMonitoringPlan(this.currentMonitoringPlan.id, payload).subscribe({
-        next: () => {
-          this.toastService.show('success', 'Updated Successfully', 'The monitoring plan has been updated.');
-          this.loadMonitoringPlan();
-        },
-        error: () => {
-          this.toastService.show('error', 'Update Failed', 'An error occurred while updating the monitoring plan.');
-        }
-      });
+      this.monitoringService
+        .updateMonitoringPlan(this.currentMonitoringPlan.id, payload)
+        .subscribe({
+          next: () => {
+            this.toastService.show(
+              'success',
+              'Updated Successfully',
+              'The monitoring plan has been updated.',
+            );
+            this.loadMonitoringPlan();
+          },
+          error: () => {
+            this.toastService.show(
+              'error',
+              'Update Failed',
+              'An error occurred while updating the monitoring plan.',
+            );
+          },
+        });
     } else {
       this.monitoringService.createMonitoringPlan(payload).subscribe({
         next: () => {
-          this.toastService.show('success', 'Created Successfully', 'A new monitoring plan has been created.');
+          this.toastService.show(
+            'success',
+            'Created Successfully',
+            'A new monitoring plan has been created.',
+          );
           this.loadMonitoringPlan();
         },
         error: () => {
-          this.toastService.show('error', 'Creation Failed', 'An error occurred while creating the monitoring plan.');
-        }
+          this.toastService.show(
+            'error',
+            'Creation Failed',
+            'An error occurred while creating the monitoring plan.',
+          );
+        },
       });
     }
   }
@@ -223,23 +259,31 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
     const planIdToDelete = this.currentMonitoringPlan.id;
     this.monitoringService.deleteMonitoringPlan(planIdToDelete).subscribe({
       next: () => {
-        this.toastService.show('success', 'Deleted Successfully', 'The monitoring plan has been deleted.');
+        this.toastService.show(
+          'success',
+          'Deleted Successfully',
+          'The monitoring plan has been deleted.',
+        );
         this.currentMonitoringPlan = null;
         this.form.patchValue({ rescanDays: '', preferredTime: '', guidanceEn: '', guidanceTl: '' });
         this.cdr.markForCheck();
       },
       error: () => {
         this.toastService.show('error', 'Delete Failed', 'Failed to delete monitoring plan.');
-      }
+      },
     });
   }
 
   private autoCreateMissingSeverities(diseaseSeverities: any[]): void {
-    const requiredSeverities: Array<'mild' | 'moderate' | 'severe'> = ['mild', 'moderate', 'severe'];
+    const requiredSeverities: Array<'mild' | 'moderate' | 'severe'> = [
+      'mild',
+      'moderate',
+      'severe',
+    ];
 
-    requiredSeverities.forEach(level => {
+    requiredSeverities.forEach((level) => {
       const exists = diseaseSeverities.some(
-        (sev: any) => sev.severity_level?.toLowerCase() === level.toLowerCase()
+        (sev: any) => sev.severity_level?.toLowerCase() === level.toLowerCase(),
       );
 
       if (!exists) {
@@ -248,7 +292,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
 
         const payload: CreateDiseaseSeverityDto = {
           disease_id: diseaseId,
-          severity_level: level
+          severity_level: level,
         };
 
         this.severityService.createSeverity(payload).subscribe({
@@ -257,7 +301,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
             this.loadMonitoringPlan();
             this.cdr.markForCheck();
           },
-          error: () => {}
+          error: () => {},
         });
       } else {
         this.loadMonitoringPlan();
@@ -277,13 +321,14 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
     }
 
     const matchExists = this.existingSeverities.some(
-      (sev: any) => Number(sev.disease_id) === Number(this.diseaseId) && sev.severity_level === level
+      (sev: any) =>
+        Number(sev.disease_id) === Number(this.diseaseId) && sev.severity_level === level,
     );
 
     if (!matchExists) {
       const payload = {
         disease_id: this.diseaseId,
-        severity_level: level
+        severity_level: level,
       };
 
       this.severityService.createSeverity(payload).subscribe({
@@ -293,7 +338,7 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
           this.loadMonitoringPlan();
           this.cdr.markForCheck();
         },
-        error: () => {}
+        error: () => {},
       });
     } else {
       this.loadMonitoringPlan();
@@ -304,7 +349,5 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
     return key.charAt(0).toUpperCase() + key.slice(1);
   }
 
-  onEnInput(_sourceControlName: string, _targetControlName: string): void {
-    /* your implementation */
-  }
+  onEnInput(_sourceControlName: string, _targetControlName: string): void {}
 }
