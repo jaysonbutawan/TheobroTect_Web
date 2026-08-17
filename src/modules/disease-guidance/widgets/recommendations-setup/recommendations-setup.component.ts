@@ -12,7 +12,6 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
-import { TranslationService } from '../../services/translation.service';
 import { ChecklistItem } from '../../diease-guidance.component';
 import { DiseaseSeverityService } from '../../services/disease-severity.service';
 import { RecommendationSetupService } from '../../services/recommendations-setup.service';
@@ -55,7 +54,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
   isSaving: boolean = false;
 
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
-  private translationService = inject(TranslationService);
   private severityService = inject(DiseaseSeverityService);
   private recommendationService = inject(RecommendationSetupService);
   private toastService = inject(ToastService);
@@ -258,8 +256,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
 
     this.debounceTimers[timerKey] = setTimeout(async () => {
       try {
-        const translated = await this.translationService.translate(text);
-        item[targetKey] = translated;
       } catch (error) {
       } finally {
         item.translating = false;
@@ -285,8 +281,6 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
 
     this.debounceTimers[translatingKey] = setTimeout(async () => {
       try {
-        const translated = await this.translationService.translate(text);
-        (this.sevData[severity][targetField] as string) = translated;
       } catch (error) {
       } finally {
         this.translating[translatingKey] = false;

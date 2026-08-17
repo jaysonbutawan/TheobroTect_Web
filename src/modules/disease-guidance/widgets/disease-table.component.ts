@@ -24,7 +24,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
           <button
             type="button"
             (click)="isFilterDropdownOpen = !isFilterDropdownOpen"
-            class="w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-xl bg-[#f1f5f9] text-slate-700 shadow-[3px_3px_6px_rgba(0,0,0,0.04),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-[#3D683A] transition-all font-bold"
+            class="w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-lg bg-white text-slate-700 border border-gray-200 shadow-sm hover:text-green-600 hover:border-green-200 transition-all font-bold"
           >
             <span class="truncate">{{
               filterLocale ? formatLabel(filterLocale) : 'All Disease Types'
@@ -47,7 +47,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
 
           @if (isFilterDropdownOpen) {
             <div
-              class="absolute z-50 w-full mt-2 bg-[#f8fafc] rounded-xl shadow-[10px_10px_20px_rgba(0,0,0,0.08),inset_2px_2px_5px_rgba(255,255,255,1)] overflow-hidden flex flex-col left-0 origin-top animate-in fade-in slide-in-from-top-2 duration-200"
+              class="absolute z-50 w-full mt-2 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col left-0 origin-top animate-in fade-in slide-in-from-top-2 duration-200"
             >
               <ul class="max-h-64 overflow-y-auto p-1.5 space-y-0.5 custom-scrollbar">
                 <li>
@@ -57,14 +57,14 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                     class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-left"
                     [ngClass]="
                       !filterLocale
-                        ? 'bg-[#e2e8f0] text-slate-900 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]'
-                        : 'text-slate-600 hover:bg-[#e2e8f0]/60 hover:text-slate-900'
+                        ? 'bg-green-50 text-green-600'
+                        : 'text-slate-600 hover:bg-gray-50 hover:text-slate-900'
                     "
                   >
                     <span class="truncate">All Disease Types</span>
                     @if (!filterLocale) {
                       <svg
-                        class="w-4 h-4 text-[#3D683A] shrink-0"
+                        class="w-4 h-4 text-green-600 shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -86,14 +86,14 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                       class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-left"
                       [ngClass]="
                         filterLocale === key
-                          ? 'bg-[#e2e8f0] text-slate-900 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]'
-                          : 'text-slate-600 hover:bg-[#e2e8f0]/60 hover:text-slate-900'
+                          ? 'bg-green-50 text-green-600'
+                          : 'text-slate-600 hover:bg-gray-50 hover:text-slate-900'
                       "
                     >
                       <span class="truncate">{{ formatLabel(key) }}</span>
                       @if (filterLocale === key) {
                         <svg
-                          class="w-4 h-4 text-[#3D683A] shrink-0"
+                          class="w-4 h-4 text-green-600 shrink-0"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -115,9 +115,9 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
     </div>
 
     <div
-      class="bg-[#f8fafc] rounded-[2.5rem] p-4 md:p-6 shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)] select-none"
+      class="bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm select-none"
     >
-      <div class="hidden md:grid md:grid-cols-12 gap-4 px-6 pb-4 border-b border-slate-200/50 mb-4">
+      <div class="hidden md:grid md:grid-cols-12 gap-4 px-6 pb-4 border-b border-gray-200 mb-4">
         <div class="md:col-span-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
           Disease Name
         </div>
@@ -137,7 +137,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
       <div class="flex flex-col gap-4 md:gap-3">
         @for (disease of pagedRecords; track disease.id) {
           <div
-            class="group flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 p-5 md:px-6 md:py-4 bg-[#f1f5f9] rounded-[2rem] md:rounded-[1.5rem] md:items-center shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[6px_6px_12px_rgba(0,0,0,0.06),inset_2px_2px_5px_rgba(255,255,255,1),inset_-2px_-2px_5px_rgba(0,0,0,0.02)] hover:bg-[#f4f7f9]"
+            class="group flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 p-5 md:px-6 md:py-4 bg-white rounded-lg md:items-center border border-gray-200 transition-all duration-300 hover:border-green-200 hover:shadow-sm"
           >
             <div class="md:col-span-4">
               <p class="text-base md:text-sm font-black text-slate-800">
@@ -154,7 +154,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 >Disease Key</span
               >
               <span
-                class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wide uppercase bg-[#e2e8f0] text-slate-600 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]"
+                class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wide uppercase bg-gray-100 text-slate-600 border border-gray-200"
               >
                 {{ disease.disease_key }}
               </span>
@@ -178,7 +178,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
             </div>
 
             <div
-              class="flex items-center justify-between md:col-span-3 md:justify-end gap-2 mt-4 md:mt-0 pt-4 md:pt-0 border-t border-slate-200/50 md:border-none"
+              class="flex items-center justify-between md:col-span-3 md:justify-end gap-2 mt-4 md:mt-0 pt-4 md:pt-0 border-t border-gray-200 md:border-none"
             >
               <span class="md:hidden text-[10px] font-black uppercase text-slate-400 tracking-wider"
                 >Actions</span
@@ -187,7 +187,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 <button
                   type="button"
                   (click)="onTableViewDisease(disease)"
-                  class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-blue-600 hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95"
+                  class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 bg-white border border-gray-200 shadow-sm hover:text-blue-600 hover:border-blue-200 transition-all"
                   title="View details"
                 >
                   <svg
@@ -208,7 +208,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 <button
                   type="button"
                   (click)="onTableEditDisease(disease)"
-                  class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-[#3D683A] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95"
+                  class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 bg-white border border-gray-200 shadow-sm hover:text-green-600 hover:border-green-200 transition-all"
                   title="Edit disease"
                 >
                   <svg
@@ -231,7 +231,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 <button
                   type="button"
                   (click)="onTableDeleteDisease(disease)"
-                  class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 bg-[#f1f5f9] shadow-[3px_3px_6px_rgba(0,0,0,0.05),inset_1px_1px_2px_rgba(255,255,255,1)] hover:text-red-500 hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all active:scale-95"
+                  class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 bg-white border border-gray-200 shadow-sm hover:text-red-500 hover:border-red-200 transition-all"
                   title="Delete disease"
                 >
                   <svg
@@ -258,10 +258,10 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
 
         @if (filteredRecords.length === 0) {
           <div
-            class="py-20 flex flex-col items-center justify-center text-center bg-[#e2e8f0] rounded-[2rem] shadow-[inset_4px_4px_10px_rgba(0,0,0,0.06),inset_-4px_-4px_10px_rgba(255,255,255,0.7)] mx-2 my-4"
+            class="py-20 flex flex-col items-center justify-center text-center bg-gray-50 rounded-lg border border-gray-200 mx-2 my-4"
           >
             <div
-              class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-[#f1f5f9] shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_5px_rgba(255,255,255,1)] mb-5"
+              class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white border border-gray-200 shadow-sm mb-5"
             >
               <svg
                 class="w-9 h-9 text-slate-400"

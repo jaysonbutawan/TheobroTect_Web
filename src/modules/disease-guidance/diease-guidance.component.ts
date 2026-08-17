@@ -12,7 +12,6 @@ import { takeUntil } from 'rxjs/operators';
 
 import { DiseaseGuideService } from './services/disease-guidance.service';
 import { DiseaseDto } from './disease-guidance.dto';
-import { TranslationService } from './services/translation.service';
 import { ToastService } from '../../app/shared/components/toast/toast.service';
 
 import { DiseaseViewModalComponent } from './widgets/disease-view-modal/disease-view-modal.component';
@@ -74,7 +73,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private diseaseService = inject(DiseaseGuideService);
-  private translationService = inject(TranslationService);
   private toastService = inject(ToastService);
 
   diseaseKeys: string[] = [
@@ -170,8 +168,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.translating[targetControlName] = true;
     this.debounceTimers[targetControlName] = setTimeout(async () => {
       try {
-        const translated = await this.translationService.translate(text);
-        this.form.get(targetControlName)?.setValue(translated);
       } catch {
       } finally {
         this.translating[targetControlName] = false;

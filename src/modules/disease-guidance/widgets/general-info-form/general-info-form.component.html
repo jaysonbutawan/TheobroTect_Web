@@ -1,14 +1,14 @@
 <div [formGroup]="form" class="space-y-6 sm:space-y-8">
-  <div class="rounded-3xl bg-[#eef3ec] shadow-[8px_8px_20px_#d3ddd3,-8px_-8px_20px_#ffffff]">
-    <div class="flex items-center gap-3 border-b border-black/5 px-4 sm:px-6 py-5">
+  <div class="rounded-xl bg-white border border-gray-200 shadow-md">
+    <div class="flex items-center gap-3 border-b border-gray-200 px-4 sm:px-6 py-5">
       <span
-        class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[#eef3ec] text-xs font-bold text-emerald-700 shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff]"
+        class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-green-600 text-sm font-bold text-white"
       >
         01
       </span>
       <div class="min-w-0">
-        <h2 class="text-base font-semibold text-slate-800">General Information</h2>
-        <p class="text-sm text-slate-500">Basic identity of the disease for the app.</p>
+        <h2 class="text-lg font-semibold text-slate-800">General Information</h2>
+        <p class="text-sm text-slate-600">Basic identity of the disease for the app.</p>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
       <div class="flex flex-col gap-2">
         <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
           <span
-            class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff]"
+            class="rounded-md bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700"
             >EN</span
           >
           Disease Name <span class="text-red-500">*</span>
@@ -26,7 +26,7 @@
           formControlName="nameEn"
           placeholder="e.g. Black Pod Disease"
           (input)="nameInput.emit()"
-          class="w-full rounded-xl border-none bg-[#eef3ec] px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
         />
       </div>
 
@@ -34,21 +34,21 @@
         <div class="flex items-center justify-between gap-2">
           <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
             <span
-              class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-amber-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff]"
+              class="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700"
               >TL</span
             >
             Pangalan sa Filipino <span class="text-red-500">*</span>
           </label>
 
           @if (translating['nameTl']) {
-            <span class="flex flex-shrink-0 items-center gap-1.5 text-xs text-slate-500">
+            <span class="flex flex-shrink-0 items-center gap-1.5 text-xs text-slate-600">
               <span
-                class="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-600"
+                class="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-green-600"
               ></span>
               Nagsasalin...
             </span>
           } @else if (form.get('nameTl')?.value) {
-            <span class="flex-shrink-0 text-xs text-slate-500"> Auto-translated </span>
+            <span class="flex-shrink-0 text-xs text-slate-600"> Auto-translated </span>
           }
         </div>
         <input
@@ -56,14 +56,14 @@
           formControlName="nameTl"
           placeholder="Awtomatikong isasalin..."
           [class.opacity-60]="translating['nameTl']"
-          class="w-full rounded-xl border-none bg-[#e6ede5] px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#ccd6cc,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
         />
       </div>
 
       <div class="col-span-1 flex flex-col gap-2 md:col-span-2">
         <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
           <span
-            class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff]"
+            class="rounded-md bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700"
             >EN</span
           >
           Description <span class="text-red-500">*</span>
@@ -73,7 +73,7 @@
           rows="3"
           placeholder="Brief overview of the disease, how it spreads, what conditions worsen it..."
           (input)="descriptionInput.emit()"
-          class="w-full resize-none rounded-xl border-none bg-[#eef3ec] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
         ></textarea>
       </div>
 
@@ -81,21 +81,21 @@
         <div class="flex items-center justify-between gap-2">
           <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
             <span
-              class="rounded-md bg-[#eef3ec] px-1.5 py-0.5 text-[10px] font-bold text-amber-700 shadow-[inset_1px_1px_3px_#d3ddd3,inset_-1px_-1px_3px_#ffffff]"
+              class="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700"
               >TL</span
             >
             Paglalarawan sa Filipino <span class="text-red-500">*</span>
           </label>
 
           @if (translating['descTl']) {
-            <span class="flex flex-shrink-0 items-center gap-1.5 text-xs text-slate-500">
+            <span class="flex flex-shrink-0 items-center gap-1.5 text-xs text-slate-600">
               <span
-                class="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-600"
+                class="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-green-600"
               ></span>
               Nagsasalin...
             </span>
           } @else if (form.get('descTl')?.value) {
-            <span class="flex-shrink-0 text-xs text-slate-500"> Auto-translated </span>
+            <span class="flex-shrink-0 text-xs text-slate-600"> Auto-translated </span>
           }
         </div>
         <textarea
@@ -103,7 +103,7 @@
           rows="3"
           placeholder="Awtomatikong isasalin..."
           [class.opacity-60]="translating['descTl']"
-          class="w-full resize-none rounded-xl border-none bg-[#e6ede5] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 shadow-[inset_3px_3px_8px_#ccd6cc,inset_-3px_-3px_8px_#ffffff] transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          class="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
         ></textarea>
       </div>
 
