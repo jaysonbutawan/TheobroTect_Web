@@ -1,11 +1,11 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-general-info-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './general-info-form.component.html',
 })
 export class GeneralInfoFormComponent {
@@ -13,12 +13,10 @@ export class GeneralInfoFormComponent {
   @Input() translating: Record<string, boolean> = {};
   @Input() diseaseKeys: string[] = [];
   @Input() selectedLabel = '';
-  @Input() isSaveDisabled = false;
 
   @Output() nameInput = new EventEmitter<void>();
   @Output() descriptionInput = new EventEmitter<void>();
   @Output() labelChange = new EventEmitter<string>();
-  @Output() save = new EventEmitter<void>();
 
   isDropdownOpen = false;
 

@@ -1,68 +1,113 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  NgZone,
-  ChangeDetectorRef,
-  OnDestroy,
-  inject,
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiseaseDto } from '../disease-guidance.dto';
 import { PaginationComponent } from '../../../app/shared/components/pagination/pagination.component';
+import { ConfirmationDialogComponent } from '../../../app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-disease-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, ConfirmationDialogComponent],
   template: `
-    <div class="flex items-center justify-between mb-6 gap-3 flex-wrap select-none">
-      <div class="flex items-center gap-3 flex-wrap w-full sm:w-auto">
-        <div class="relative w-full sm:w-56 shrink-0">
-          <button
-            type="button"
-            (click)="isFilterDropdownOpen = !isFilterDropdownOpen"
-            class="w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-lg bg-white text-slate-700 border border-gray-200 shadow-sm hover:text-green-600 hover:border-green-200 transition-all font-bold"
-          >
-            <span class="truncate">{{
-              filterLocale ? formatLabel(filterLocale) : 'All Disease Types'
-            }}</span>
-            <svg
-              class="transition-transform duration-300 shrink-0 ml-2 text-slate-400"
-              [class.-rotate-180]="isFilterDropdownOpen"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </button>
+    <div class="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
+      <div class="relative w-full sm:max-w-sm">
+        <svg
+          class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          type="search"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="currentPage = 1"
+          placeholder="Search diseases"
+          aria-label="Search diseases"
+          class="min-h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3.5 text-base text-gray-900 placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600/20 sm:text-sm"
+        />
+      </div>
 
-          @if (isFilterDropdownOpen) {
-            <div
-              class="absolute z-50 w-full mt-2 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col left-0 origin-top animate-in fade-in slide-in-from-top-2 duration-200"
-            >
-              <ul class="max-h-64 overflow-y-auto p-1.5 space-y-0.5 custom-scrollbar">
+      <div class="relative w-full sm:w-60 sm:flex-shrink-0">
+        <button
+          type="button"
+          (click)="isFilterDropdownOpen = !isFilterDropdownOpen"
+          class="flex min-h-11 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-green-600 hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
+          [attr.aria-expanded]="isFilterDropdownOpen"
+          aria-haspopup="listbox"
+        >
+          <span class="truncate">{{
+            filterLocale ? formatLabel(filterLocale) : 'All Disease Types'
+          }}</span>
+          <svg
+            class="transition-transform duration-300 shrink-0 ml-2 text-slate-400"
+            [class.-rotate-180]="isFilterDropdownOpen"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+
+        @if (isFilterDropdownOpen) {
+          <div
+            class="absolute right-0 z-50 mt-2 flex w-full origin-top flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
+            role="listbox"
+          >
+            <ul class="max-h-64 overflow-y-auto p-1.5 space-y-0.5 custom-scrollbar">
+              <li>
+                <button
+                  type="button"
+                  (click)="onFilterSelect('')"
+                  class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-left"
+                  [ngClass]="
+                    !filterLocale
+                      ? 'bg-green-50 text-green-600'
+                      : 'text-slate-600 hover:bg-gray-50 hover:text-slate-900'
+                  "
+                >
+                  <span class="truncate">All Disease Types</span>
+                  @if (!filterLocale) {
+                    <svg
+                      class="w-4 h-4 text-green-600 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  }
+                </button>
+              </li>
+
+              @for (key of diseaseKeys; track key) {
                 <li>
                   <button
                     type="button"
-                    (click)="onFilterSelect('')"
+                    (click)="onFilterSelect(key)"
                     class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-left"
                     [ngClass]="
-                      !filterLocale
+                      filterLocale === key
                         ? 'bg-green-50 text-green-600'
                         : 'text-slate-600 hover:bg-gray-50 hover:text-slate-900'
                     "
                   >
-                    <span class="truncate">All Disease Types</span>
-                    @if (!filterLocale) {
+                    <span class="truncate">{{ formatLabel(key) }}</span>
+                    @if (filterLocale === key) {
                       <svg
                         class="w-4 h-4 text-green-600 shrink-0"
                         fill="none"
@@ -77,46 +122,14 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                     }
                   </button>
                 </li>
-
-                @for (key of diseaseKeys; track key) {
-                  <li>
-                    <button
-                      type="button"
-                      (click)="onFilterSelect(key)"
-                      class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-left"
-                      [ngClass]="
-                        filterLocale === key
-                          ? 'bg-green-50 text-green-600'
-                          : 'text-slate-600 hover:bg-gray-50 hover:text-slate-900'
-                      "
-                    >
-                      <span class="truncate">{{ formatLabel(key) }}</span>
-                      @if (filterLocale === key) {
-                        <svg
-                          class="w-4 h-4 text-green-600 shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          stroke-width="2.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M20 6 9 17l-5-5" />
-                        </svg>
-                      }
-                    </button>
-                  </li>
-                }
-              </ul>
-            </div>
-          }
-        </div>
+              }
+            </ul>
+          </div>
+        }
       </div>
     </div>
 
-    <div
-      class="bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm select-none"
-    >
+    <div class="rounded-xl border border-gray-200 bg-white p-3 sm:p-4 md:p-6">
       <div class="hidden md:grid md:grid-cols-12 gap-4 px-6 pb-4 border-b border-gray-200 mb-4">
         <div class="md:col-span-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
           Disease Name
@@ -187,7 +200,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 <button
                   type="button"
                   (click)="onTableViewDisease(disease)"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 bg-white border border-gray-200 shadow-sm hover:text-blue-600 hover:border-blue-200 transition-all"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-500 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                   title="View details"
                 >
                   <svg
@@ -208,7 +221,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 <button
                   type="button"
                   (click)="onTableEditDisease(disease)"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 bg-white border border-gray-200 shadow-sm hover:text-green-600 hover:border-green-200 transition-all"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-500 transition-colors hover:border-green-300 hover:bg-green-50 hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
                   title="Edit disease"
                 >
                   <svg
@@ -231,7 +244,7 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
                 <button
                   type="button"
                   (click)="onTableDeleteDisease(disease)"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 bg-white border border-gray-200 shadow-sm hover:text-red-500 hover:border-red-200 transition-all"
+                  class="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 bg-white text-slate-500 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                   title="Delete disease"
                 >
                   <svg
@@ -299,9 +312,24 @@ import { PaginationComponent } from '../../../app/shared/components/pagination/p
         </div>
       }
     </div>
+
+    <app-confirmation-dialog
+      [isOpen]="pendingDeleteDisease !== null"
+      title="Delete Disease Guidance"
+      [message]="
+        'Are you sure you want to delete ' +
+        (pendingDeleteDisease?.display_name?.en || 'this disease') +
+        '? This action cannot be undone.'
+      "
+      cancelText="Cancel"
+      confirmText="Delete"
+      confirmButtonClass="bg-red-600 hover:bg-red-700"
+      (confirm)="confirmDelete()"
+      (cancel)="cancelDelete()"
+    />
   `,
 })
-export class DiseaseTableComponent implements OnDestroy {
+export class DiseaseTableComponent {
   @Input() existingRecords: DiseaseDto[] = [];
   @Input() diseaseKeys: string[] = [];
   @Input() pageSize = 10;
@@ -315,19 +343,7 @@ export class DiseaseTableComponent implements OnDestroy {
   currentPage = 1;
 
   pendingDeleteDisease: DiseaseDto | null = null;
-  deleteToastVisible = false;
-  deleteCountdown = 5;
   isFilterDropdownOpen = false;
-
-  private deleteTimer: any = null;
-  private deleteCountTimer: any = null;
-
-  private ngZone = inject(NgZone);
-  private cdr = inject(ChangeDetectorRef);
-
-  ngOnDestroy(): void {
-    this.clearTimers();
-  }
 
   get filteredRecords(): DiseaseDto[] {
     return this.existingRecords.filter((disease) => {
@@ -384,57 +400,23 @@ export class DiseaseTableComponent implements OnDestroy {
   }
 
   onTableDeleteDisease(disease: DiseaseDto): void {
-    if (this.pendingDeleteDisease) {
-      this.confirmDelete();
-    }
-
     this.pendingDeleteDisease = disease;
-    this.deleteToastVisible = true;
-    this.deleteCountdown = 5;
-
-    this.ngZone.runOutsideAngular(() => {
-      this.deleteCountTimer = setInterval(() => {
-        this.ngZone.run(() => {
-          this.deleteCountdown--;
-          this.cdr.markForCheck();
-          if (this.deleteCountdown <= 0) clearInterval(this.deleteCountTimer);
-        });
-      }, 1000);
-
-      this.deleteTimer = setTimeout(() => {
-        this.ngZone.run(() => {
-          this.confirmDelete();
-          this.cdr.markForCheck();
-        });
-      }, 5000);
-    });
   }
 
-  undoDelete(): void {
-    this.clearTimers();
+  cancelDelete(): void {
     this.pendingDeleteDisease = null;
-    this.deleteToastVisible = false;
-    this.deleteCountdown = 5;
   }
 
   confirmDelete(): void {
-    this.clearTimers();
     if (!this.pendingDeleteDisease) return;
 
     this.deleteConfirmed.emit(this.pendingDeleteDisease.id);
     this.pendingDeleteDisease = null;
-    this.deleteToastVisible = false;
-    this.deleteCountdown = 5;
   }
 
   public onFilterSelect(key: string): void {
     this.filterLocale = key;
     this.isFilterDropdownOpen = false;
     this.currentPage = 1;
-  }
-
-  private clearTimers(): void {
-    clearTimeout(this.deleteTimer);
-    clearInterval(this.deleteCountTimer);
   }
 }

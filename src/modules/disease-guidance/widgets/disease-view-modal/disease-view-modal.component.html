@@ -1,543 +1,336 @@
 @if (isOpen && disease) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 select-none"
+    class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-0 sm:items-center sm:p-6"
     (click)="onBackdropClick($event)"
+    role="presentation"
   >
-    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
-
-    <div
-      class="relative z-10 w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] flex flex-col bg-[#eef3ec] rounded-2xl sm:rounded-3xl shadow-[16px_16px_40px_rgba(163,177,163,0.55),-16px_-16px_40px_rgba(255,255,255,0.9)] overflow-hidden"
+    <section
+      class="flex max-h-[96dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-xl"
       (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="disease-view-title"
     >
-      <div
-        class="flex items-start justify-between gap-3 px-4 sm:px-7 pt-5 sm:pt-7 pb-5 border-b border-black/5"
-      >
-        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div
-            class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#eef3ec] shadow-[3px_3px_8px_#d3ddd3,-3px_-3px_8px_#ffffff] flex items-center justify-center flex-shrink-0"
+      <header class="flex items-start gap-3 border-b border-gray-200 px-4 py-4 sm:px-6">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold uppercase tracking-wide text-green-700">
+            Disease guidance
+          </p>
+          <h2
+            id="disease-view-title"
+            class="mt-1 truncate text-lg font-bold text-gray-950 sm:text-xl"
           >
-            <svg
-              class="w-5 h-5 text-emerald-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
-          <div class="min-w-0">
-            <h2 class="text-base sm:text-lg font-bold text-slate-800 leading-tight truncate">
-              {{ disease.display_name.en || 'Disease Details' }}
-            </h2>
-            <p class="text-sm text-slate-400 mt-0.5 font-medium truncate">
-              {{ disease.display_name.tl || '—' }}
-            </p>
-          </div>
+            {{ disease.display_name.en || 'Unnamed disease' }}
+          </h2>
+          <p class="mt-0.5 truncate text-sm text-gray-500">{{ disease.display_name.tl || '—' }}</p>
         </div>
-      </div>
 
-      <div
-        class="flex gap-2 px-4 sm:px-7 pt-4 pb-4 border-b border-black/5 flex-shrink-0 overflow-x-auto custom-scrollbar"
+        <button
+          type="button"
+          (click)="close()"
+          class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
+          aria-label="Close disease details"
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <nav
+        class="flex flex-shrink-0 overflow-x-auto border-b border-gray-200 px-2 sm:px-6"
+        aria-label="Disease details sections"
       >
         <button
           type="button"
           (click)="activeTab = 'general'"
-          class="flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap"
+          class="min-h-12 whitespace-nowrap border-b-2 px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-600 sm:px-4"
           [ngClass]="
             activeTab === 'general'
-              ? 'text-white bg-emerald-500 shadow-[3px_3px_8px_#c3cfc3,-3px_-3px_8px_#ffffff]'
-              : 'text-slate-500 hover:bg-[#e6ede5]'
+              ? 'border-green-700 text-green-800'
+              : 'border-transparent text-gray-500 hover:text-gray-900'
           "
+          [attr.aria-current]="activeTab === 'general' ? 'page' : null"
         >
-          <span class="flex items-center gap-1.5">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-            </svg>
-            General Info
-          </span>
+          General
         </button>
         <button
           type="button"
           (click)="activeTab = 'monitoring'"
-          class="flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap"
+          class="min-h-12 whitespace-nowrap border-b-2 px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-600 sm:px-4"
           [ngClass]="
             activeTab === 'monitoring'
-              ? 'text-white bg-emerald-500 shadow-[3px_3px_8px_#c3cfc3,-3px_-3px_8px_#ffffff]'
-              : 'text-slate-500 hover:bg-[#e6ede5]'
+              ? 'border-green-700 text-green-800'
+              : 'border-transparent text-gray-500 hover:text-gray-900'
           "
+          [attr.aria-current]="activeTab === 'monitoring' ? 'page' : null"
         >
-          <span class="flex items-center gap-1.5">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-            </svg>
-            Monitoring
-          </span>
+          Monitoring
+          <span class="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{{
+            monitoringPlans.length
+          }}</span>
         </button>
         <button
           type="button"
           (click)="activeTab = 'recommendations'"
-          class="flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap"
+          class="min-h-12 whitespace-nowrap border-b-2 px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-600 sm:px-4"
           [ngClass]="
             activeTab === 'recommendations'
-              ? 'text-white bg-emerald-500 shadow-[3px_3px_8px_#c3cfc3,-3px_-3px_8px_#ffffff]'
-              : 'text-slate-500 hover:bg-[#e6ede5]'
+              ? 'border-green-700 text-green-800'
+              : 'border-transparent text-gray-500 hover:text-gray-900'
           "
+          [attr.aria-current]="activeTab === 'recommendations' ? 'page' : null"
         >
-          <span class="flex items-center gap-1.5">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-            Recommendations
-          </span>
+          Recommendations
+          <span class="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{{
+            recommendations.length
+          }}</span>
         </button>
-      </div>
+      </nav>
 
-      <div class="flex-1 overflow-y-auto px-4 sm:px-7 py-6 custom-scrollbar">
+      <div class="min-h-0 flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
         @if (isLoading) {
-          <div class="flex flex-col items-center justify-center py-16 gap-3">
-            <div
-              class="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"
-            ></div>
-            <p class="text-sm text-slate-400 font-medium">Loading details...</p>
+          <div class="space-y-4" aria-label="Loading disease details">
+            <div class="h-24 animate-pulse rounded-lg bg-gray-200"></div>
+            <div class="h-36 animate-pulse rounded-lg bg-gray-200"></div>
           </div>
-        }
-
-        @if (!isLoading) {
-          @if (activeTab === 'general') {
-            <div class="space-y-5">
-              <div class="flex items-center gap-2 flex-wrap">
+        } @else if (activeTab === 'general') {
+          <div class="space-y-4">
+            <section class="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
+              <div class="flex flex-wrap items-center gap-2">
                 <span
-                  class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wide uppercase bg-[#eef3ec] text-slate-600 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]"
+                  class="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700"
+                  >{{ disease.disease_key }}</span
                 >
-                  {{ disease.disease_key }}
-                </span>
-                <span
-                  class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)]"
-                  [ngClass]="{
-                    'bg-blue-50 text-blue-700': disease.locale === 'en',
-                    'bg-amber-50 text-amber-700': disease.locale === 'tl',
-                    'bg-[#eef3ec] text-slate-600': !disease.locale,
-                  }"
-                >
-                  {{ disease.locale || 'en' | uppercase }}
-                </span>
-                <span class="text-xs font-mono text-slate-400">#{{ disease.id }}</span>
                 @if (disease.created_at) {
-                  <span class="ml-auto text-xs text-slate-400">
-                    Added {{ disease.created_at | date: 'MMM dd, yyyy' }}
-                  </span>
+                  <span class="text-xs text-gray-500"
+                    >Created {{ disease.created_at | date: 'MMM d, y' }}</span
+                  >
                 }
               </div>
+            </section>
 
-              <div
-                class="rounded-2xl bg-[#eef3ec] p-5 space-y-4 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff]"
-              >
-                <div class="flex items-center gap-2 mb-1">
-                  <span
-                    class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px] font-bold"
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <section class="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
+                <div class="mb-3 flex items-center gap-2">
+                  <span class="rounded bg-green-50 px-1.5 py-0.5 text-xs font-bold text-green-800"
                     >EN</span
                   >
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wide"
-                    >Disease Name</span
-                  >
+                  <h3 class="text-sm font-semibold text-gray-900">English description</h3>
                 </div>
-                <p class="text-base font-semibold text-slate-800">
-                  {{ disease.display_name.en || '—' }}
+                <p class="whitespace-pre-line text-sm leading-7 text-gray-700">
+                  {{ disease.description.en || '—' }}
                 </p>
-              </div>
+              </section>
 
-              <div
-                class="rounded-2xl bg-[#f0ece0] p-5 shadow-[inset_3px_3px_8px_#d9d3c4,inset_-3px_-3px_8px_#ffffff]"
-              >
-                <div class="flex items-center gap-2 mb-1">
-                  <span
-                    class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-bold"
+              <section class="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
+                <div class="mb-3 flex items-center gap-2">
+                  <span class="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-bold text-amber-800"
                     >TL</span
                   >
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wide"
-                    >Pangalan sa Filipino</span
-                  >
+                  <h3 class="text-sm font-semibold text-gray-900">Paglalarawan sa Filipino</h3>
                 </div>
-                <p class="text-base font-semibold text-slate-800 mt-2">
-                  {{ disease.display_name.tl || '—' }}
+                <p class="whitespace-pre-line text-sm leading-7 text-gray-700">
+                  {{ disease.description.tl || '—' }}
                 </p>
-              </div>
-
-              <div
-                class="rounded-2xl bg-[#eef3ec] p-5 shadow-[inset_3px_3px_8px_#d3ddd3,inset_-3px_-3px_8px_#ffffff]"
-              >
-                <div class="flex items-center gap-2 mb-2">
-                  <span
-                    class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px] font-bold"
-                    >EN</span
-                  >
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wide"
-                    >Description</span
-                  >
-                </div>
-                <p class="text-sm text-slate-600 leading-relaxed">
-                  {{ disease.description.en || 'No description available.' }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-2xl bg-[#f0ece0] p-5 shadow-[inset_3px_3px_8px_#d9d3c4,inset_-3px_-3px_8px_#ffffff]"
-              >
-                <div class="flex items-center gap-2 mb-2">
-                  <span
-                    class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-bold"
-                    >TL</span
-                  >
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wide"
-                    >Paglalarawan sa Filipino</span
-                  >
-                </div>
-                <p class="text-sm text-slate-600 leading-relaxed">
-                  {{ disease.description.tl || 'Walang paglalarawan.' }}
-                </p>
-              </div>
+              </section>
             </div>
-          }
+          </div>
+        } @else if (activeTab === 'monitoring') {
+          <div class="space-y-5">
+            @if (monitoringPlans.length === 0) {
+              <div
+                class="rounded-lg border border-dashed border-gray-300 bg-white px-4 py-10 text-center"
+              >
+                <p class="text-sm font-semibold text-gray-700">No monitoring plans configured</p>
+                <p class="mt-1 text-sm text-gray-500">
+                  Edit this disease to add a rescan schedule and field guidance.
+                </p>
+              </div>
+            }
 
-          @if (activeTab === 'monitoring') {
-            <div class="space-y-6">
-              @if (monitoringPlans.length === 0) {
-                <div
-                  class="rounded-2xl bg-[#eef3ec] p-10 sm:p-12 text-center shadow-[inset_4px_4px_10px_#d3ddd3,inset_-4px_-4px_10px_#ffffff]"
-                >
-                  <svg
-                    class="w-10 h-10 mx-auto text-slate-300 mb-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+            @for (group of groupedMonitoringPlans; track group.severity) {
+              <section>
+                <div class="mb-2 flex items-center justify-between gap-3">
+                  <h3 class="text-sm font-semibold capitalize text-gray-900">
+                    {{ group.severity }} severity
+                  </h3>
+                  <span class="text-xs text-gray-500"
+                    >{{ group.items.length }} plan{{ group.items.length !== 1 ? 's' : '' }}</span
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
-                      d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"
-                    />
-                  </svg>
-                  <p class="text-sm font-medium text-slate-500">No monitoring plans configured</p>
-                  <p class="text-xs text-slate-400 mt-1">
-                    Go to Edit to set up monitoring for this disease.
-                  </p>
                 </div>
-              }
 
-              @for (group of groupedMonitoringPlans; track group.severity) {
-                <div class="flex flex-col gap-3">
-                  <h4
-                    class="text-xs font-bold uppercase tracking-wider flex items-center gap-2"
-                    [ngClass]="{
-                      'text-emerald-600': group.severity === 'mild',
-                      'text-amber-600': group.severity === 'moderate',
-                      'text-red-600': group.severity === 'severe',
-                      'text-slate-600': group.severity === 'general',
-                    }"
-                  >
-                    {{ group.severity }} Severity Plans
-                    <div class="h-px flex-1 bg-black/10"></div>
-                  </h4>
-
-                  <div class="space-y-4">
-                    @for (plan of group.items; track plan.id) {
+                <div class="space-y-3">
+                  @for (plan of group.items; track plan.id) {
+                    <article class="overflow-hidden rounded-lg border border-gray-200 bg-white">
                       <div
-                        class="rounded-2xl bg-[#eef3ec] shadow-[5px_5px_14px_#d3ddd3,-5px_-5px_14px_#ffffff] overflow-hidden"
+                        class="grid grid-cols-2 gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3 sm:grid-cols-3"
                       >
-                        <div
-                          class="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-black/5"
-                        >
-                          <div class="flex items-center gap-2">
-                            <svg
-                              class="w-4 h-4 text-violet-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"
-                              />
-                            </svg>
-                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wide"
-                              >Monitoring Plan #{{ plan.id }}</span
-                            >
-                          </div>
+                        <div>
+                          <p class="text-xs font-medium text-gray-500">Rescan after</p>
+                          <p class="mt-1 text-sm font-semibold text-gray-900">
+                            {{ plan.rescan_after_days }} day{{
+                              plan.rescan_after_days !== 1 ? 's' : ''
+                            }}
+                          </p>
                         </div>
-
-                        <div class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div class="flex flex-col gap-1">
-                            <span
-                              class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"
-                              >Rescan After</span
-                            >
-                            <span class="text-sm font-semibold text-slate-700">
-                              {{ plan.rescan_after_days }} day{{
-                                plan.rescan_after_days !== 1 ? 's' : ''
-                              }}
-                            </span>
-                          </div>
-
-                          <div class="flex flex-col gap-1">
-                            <span
-                              class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"
-                              >Preferred Time</span
-                            >
-                            <span class="text-sm font-semibold text-slate-700">
-                              @if (
-                                plan.preferred_time_hour !== null &&
-                                plan.preferred_time_hour !== undefined
-                              ) {
-                                {{ formatHour(plan.preferred_time_hour) }}
-                              } @else {
-                                —
-                              }
-                            </span>
-                          </div>
-
-                          <div class="col-span-1 sm:col-span-2 flex flex-col gap-1.5">
-                            <div class="flex items-center gap-1.5">
-                              <span
-                                class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
-                                >EN</span
-                              >
-                              <span
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"
-                                >Guidance Message</span
-                              >
-                            </div>
-                            <p
-                              class="text-sm text-slate-600 leading-relaxed rounded-xl px-3 py-2.5 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]"
-                            >
-                              {{ plan.message.en || '—' }}
-                            </p>
-                          </div>
-
-                          <div class="col-span-1 sm:col-span-2 flex flex-col gap-1.5">
-                            <div class="flex items-center gap-1.5">
-                              <span
-                                class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
-                                >TL</span
-                              >
-                              <span
-                                class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"
-                                >Mensahe sa Filipino</span
-                              >
-                            </div>
-                            <p
-                              class="text-sm text-slate-600 leading-relaxed rounded-xl px-3 py-2.5 shadow-[inset_2px_2px_5px_#d9d3c4,inset_-2px_-2px_5px_#ffffff]"
-                            >
-                              {{ plan.message.tl || '—' }}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          }
-
-          @if (activeTab === 'recommendations') {
-            <div class="space-y-4">
-              @if (recommendations.length === 0) {
-                <div
-                  class="rounded-2xl bg-[#eef3ec] p-10 sm:p-12 text-center shadow-[inset_4px_4px_10px_#d3ddd3,inset_-4px_-4px_10px_#ffffff]"
-                >
-                  <svg
-                    class="w-10 h-10 mx-auto text-slate-300 mb-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
-                      d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
-                    />
-                  </svg>
-                  <p class="text-sm font-medium text-slate-500">No recommendations configured</p>
-                  <p class="text-xs text-slate-400 mt-1">
-                    Go to Edit to add recommendations for this disease.
-                  </p>
-                </div>
-              }
-
-              @for (group of groupedRecommendations; track group.severity) {
-                <div
-                  class="rounded-2xl overflow-hidden shadow-[5px_5px_14px_#d3ddd3,-5px_-5px_14px_#ffffff]"
-                >
-                  <div
-                    class="flex items-center gap-2 px-4 sm:px-5 py-3 border-b border-black/5"
-                    [ngClass]="{
-                      'bg-emerald-50/60': group.severity === 'mild',
-                      'bg-amber-50/60': group.severity === 'moderate',
-                      'bg-red-50/60': group.severity === 'severe',
-                      'bg-[#e6ede5]': group.severity === 'general',
-                    }"
-                  >
-                    <div
-                      class="w-2 h-2 rounded-full flex-shrink-0"
-                      [ngClass]="{
-                        'bg-emerald-500': group.severity === 'mild',
-                        'bg-amber-500': group.severity === 'moderate',
-                        'bg-red-500': group.severity === 'severe',
-                        'bg-slate-400': group.severity === 'general',
-                      }"
-                    ></div>
-                    <span
-                      class="text-xs font-bold uppercase tracking-wide"
-                      [ngClass]="{
-                        'text-emerald-700': group.severity === 'mild',
-                        'text-amber-700': group.severity === 'moderate',
-                        'text-red-700': group.severity === 'severe',
-                        'text-slate-600': group.severity === 'general',
-                      }"
-                    >
-                      {{ group.severity | titlecase }}
-                    </span>
-                    <span class="ml-auto text-[11px] font-medium text-slate-400">
-                      {{ group.items.length }} item{{ group.items.length !== 1 ? 's' : '' }}
-                    </span>
-                  </div>
-
-                  <div class="divide-y divide-black/5 bg-[#eef3ec]">
-                    @for (rec of group.items; track rec.id) {
-                      <div class="p-4 space-y-3">
-                        <span
-                          class="inline-flex items-center px-2 py-0.5 rounded-md bg-[#e6ede5] text-slate-500 text-[10px] font-bold uppercase tracking-wide"
-                        >
-                          {{ rec.category_key | titlecase }}
-                        </span>
-
-                        @if (isArray(rec.content)) {
-                          <div class="space-y-3">
-                            @for (item of asArray(rec.content); track $index) {
-                              <div
-                                class="rounded-xl p-3 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]"
-                              >
-                                @if (item.en) {
-                                  <div class="mb-2">
-                                    <div class="flex items-center gap-1.5 mb-1">
-                                      <span
-                                        class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
-                                        >EN</span
-                                      >
-                                    </div>
-                                    <p class="text-sm text-slate-600 leading-relaxed">
-                                      {{ item.en }}
-                                    </p>
-                                  </div>
-                                }
-                                @if (item.tl) {
-                                  <div>
-                                    <div class="flex items-center gap-1.5 mb-1">
-                                      <span
-                                        class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
-                                        >TL</span
-                                      >
-                                    </div>
-                                    <p class="text-sm text-slate-600 leading-relaxed">
-                                      {{ item.tl }}
-                                    </p>
-                                  </div>
-                                }
-                              </div>
+                        <div>
+                          <p class="text-xs font-medium text-gray-500">Preferred time</p>
+                          <p class="mt-1 text-sm font-semibold text-gray-900">
+                            @if (
+                              plan.preferred_time_hour !== null &&
+                              plan.preferred_time_hour !== undefined
+                            ) {
+                              {{ formatHour(plan.preferred_time_hour) }}
+                            } @else {
+                              Any time
                             }
-                          </div>
-                        } @else {
-                          @if (asObject(rec.content)?.en) {
-                            <div class="mb-2">
-                              <div class="flex items-center gap-1.5 mb-1">
-                                <span
-                                  class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold"
-                                  >EN</span
-                                >
-                              </div>
-                              <p
-                                class="text-sm text-slate-600 leading-relaxed rounded-lg px-3 py-2 shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff]"
-                              >
-                                {{ asObject(rec.content)!.en }}
-                              </p>
-                            </div>
-                          }
-                          @if (asObject(rec.content)?.tl) {
-                            <div>
-                              <div class="flex items-center gap-1.5 mb-1">
-                                <span
-                                  class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold"
-                                  >TL</span
-                                >
-                              </div>
-                              <p
-                                class="text-sm text-slate-600 leading-relaxed rounded-lg px-3 py-2 shadow-[inset_2px_2px_5px_#d9d3c4,inset_-2px_-2px_5px_#ffffff]"
-                              >
-                                {{ asObject(rec.content)!.tl }}
-                              </p>
-                            </div>
-                          }
-                        }
+                          </p>
+                        </div>
+                        <div class="hidden sm:block">
+                          <p class="text-xs font-medium text-gray-500">Plan ID</p>
+                          <p class="mt-1 text-sm font-semibold text-gray-900">#{{ plan.id }}</p>
+                        </div>
                       </div>
-                    }
-                  </div>
+
+                      <div class="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
+                        <div>
+                          <p
+                            class="mb-2 flex items-center gap-2 text-xs font-semibold text-gray-600"
+                          >
+                            <span class="rounded bg-green-50 px-1.5 py-0.5 font-bold text-green-800"
+                              >EN</span
+                            >
+                            Guidance
+                          </p>
+                          <p class="whitespace-pre-line text-sm leading-6 text-gray-700">
+                            {{ plan.message.en || '—' }}
+                          </p>
+                        </div>
+                        <div>
+                          <p
+                            class="mb-2 flex items-center gap-2 text-xs font-semibold text-gray-600"
+                          >
+                            <span class="rounded bg-amber-50 px-1.5 py-0.5 font-bold text-amber-800"
+                              >TL</span
+                            >
+                            Mensahe
+                          </p>
+                          <p class="whitespace-pre-line text-sm leading-6 text-gray-700">
+                            {{ plan.message.tl || '—' }}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  }
                 </div>
-              }
-            </div>
-          }
+              </section>
+            }
+          </div>
+        } @else {
+          <div class="space-y-5">
+            @if (recommendations.length === 0) {
+              <div
+                class="rounded-lg border border-dashed border-gray-300 bg-white px-4 py-10 text-center"
+              >
+                <p class="text-sm font-semibold text-gray-700">No recommendations configured</p>
+                <p class="mt-1 text-sm text-gray-500">
+                  Edit this disease to add actions and prevention guidance.
+                </p>
+              </div>
+            }
+
+            @for (group of groupedRecommendations; track group.severity) {
+              <section>
+                <div class="mb-2 flex items-center justify-between gap-3">
+                  <h3 class="text-sm font-semibold capitalize text-gray-900">
+                    {{ group.severity }} severity
+                  </h3>
+                  <span class="text-xs text-gray-500"
+                    >{{ group.items.length }} categor{{
+                      group.items.length !== 1 ? 'ies' : 'y'
+                    }}</span
+                  >
+                </div>
+
+                <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                  @for (rec of group.items; track rec.id) {
+                    <article class="border-b border-gray-200 p-4 last:border-b-0 sm:p-5">
+                      <h4 class="mb-3 text-xs font-bold uppercase tracking-wide text-gray-500">
+                        {{ formatCategory(rec.category_key) }}
+                      </h4>
+
+                      @if (isArray(rec.content)) {
+                        <ol class="space-y-3">
+                          @for (item of asArray(rec.content); track $index) {
+                            <li
+                              class="grid grid-cols-[1.5rem_1fr] gap-2 text-sm leading-6 text-gray-700"
+                            >
+                              <span
+                                class="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-600"
+                                >{{ $index + 1 }}</span
+                              >
+                              <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                                <p>
+                                  <span class="mr-1 font-semibold text-green-800">EN</span
+                                  >{{ item.en || '—' }}
+                                </p>
+                                <p>
+                                  <span class="mr-1 font-semibold text-amber-800">TL</span
+                                  >{{ item.tl || '—' }}
+                                </p>
+                              </div>
+                            </li>
+                          }
+                        </ol>
+                      } @else {
+                        <div
+                          class="grid grid-cols-1 gap-3 text-sm leading-6 text-gray-700 lg:grid-cols-2"
+                        >
+                          <p>
+                            <span class="mr-1 font-semibold text-green-800">EN</span
+                            >{{ asObject(rec.content)?.en || '—' }}
+                          </p>
+                          <p>
+                            <span class="mr-1 font-semibold text-amber-800">TL</span
+                            >{{ asObject(rec.content)?.tl || '—' }}
+                          </p>
+                        </div>
+                      }
+                    </article>
+                  }
+                </div>
+              </section>
+            }
+          </div>
         }
       </div>
 
-      <div
-        class="flex items-center justify-between px-4 sm:px-7 py-4 border-t border-black/5 flex-shrink-0"
+      <footer
+        class="flex flex-shrink-0 flex-col-reverse gap-2 border-t border-gray-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-end sm:px-6"
       >
-        <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-          <span class="text-xs text-slate-400 font-medium hidden xs:inline">Read-only view</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button
-            type="button"
-            (click)="close()"
-            class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-[#e6ede5] hover:shadow-[inset_2px_2px_5px_#d3ddd3,inset_-2px_-2px_5px_#ffffff] transition-all"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+        <button
+          type="button"
+          (click)="close()"
+          class="min-h-11 rounded-lg px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          (click)="onEdit()"
+          class="min-h-11 rounded-lg bg-green-700 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
+        >
+          Edit guidance
+        </button>
+      </footer>
+    </section>
   </div>
 }

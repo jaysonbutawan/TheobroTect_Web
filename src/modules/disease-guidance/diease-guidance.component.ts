@@ -49,21 +49,18 @@ export interface ChecklistItem {
 })
 export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   form!: FormGroup;
-  searchQuery = '';
-  filterLocale = '';
   selectedLabel = '';
   selectedDiseaseKey: string | null = null;
   existingRecords: DiseaseDto[] = [];
 
   isEditMode = false;
   currentEditId: number | null = null;
-  selectedDisease: any = null;
   showAddedDiseases = true;
-  editOpenedFromTable = false;
   isLoading = false;
 
   isViewModalOpen = false;
   viewingDisease: DiseaseDto | null = null;
+  isSavingDisease = false;
 
   currentStep = 1;
   translating: Record<string, boolean> = {};
@@ -131,17 +128,7 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   }
 
   get isSaveDisabled(): boolean {
-    return this.form.invalid || !this.selectedLabel;
-  }
-
-  get filteredRecords(): DiseaseDto[] {
-    return this.existingRecords.filter((d) => {
-      const matchesSearch =
-        !this.searchQuery ||
-        d.display_name?.en?.toLowerCase().includes(this.searchQuery.toLowerCase());
-      const matchesLocale = !this.filterLocale || d.locale === this.filterLocale;
-      return matchesSearch && matchesLocale;
-    });
+    return this.form.invalid || !this.selectedLabel || this.isSavingDisease;
   }
 
   setStep(step: number): void {
@@ -176,8 +163,13 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     }, 900);
   }
 
-  onSaveInternal(): void {
-    this.onSave();
+  onSaveAndContinue(): void {
+    this.onSave(true);
+  }
+
+  onFinishConfiguration(): void {
+    this.cancelEdit();
+    this.fetchExistingDiseases();
   }
 
   onCancelInternal(): void {
@@ -191,7 +183,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   }
 
   onTableEditDisease(disease: DiseaseDto): void {
-    this.editOpenedFromTable = this.showAddedDiseases;
     this.showAddedDiseases = false;
     this.onSidebarDiseaseSelected(disease);
   }
@@ -202,7 +193,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   }
 
   onSidebarDiseaseSelected(disease: any): void {
-    this.selectedDisease = disease;
     if (disease?.disease_key) {
       this.selectedLabel = disease.disease_key;
       this.selectedDiseaseKey = disease.disease_key;
@@ -216,11 +206,6 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
         descTl: disease.description?.tl || '',
       });
     }
-  }
-
-  onDiseaseKeyChange(key: string): void {
-    this.selectedLabel = key;
-    this.selectedDiseaseKey = key;
   }
 
   fetchExistingDiseases(): void {
@@ -248,17 +233,20 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     this.currentEditId = null;
     this.selectedLabel = '';
     this.selectedDiseaseKey = null;
-    this.selectedDisease = null;
     this.form.reset();
     this.showAddedDiseases = true;
-    this.editOpenedFromTable = false;
   }
 
-  onSave(): void {
+  onSave(advanceAfterSave = false): void {
     if (this.form.invalid || !this.selectedDiseaseKey) {
       this.form.markAllAsTouched();
       return;
     }
+
+    if (this.isSavingDisease) return;
+
+    this.isSavingDisease = true;
+    const wasEditing = this.isEditMode && !!this.currentEditId;
 
     const payload = {
       disease_key: this.selectedDiseaseKey,
@@ -281,26 +269,40 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
     request$.subscribe({
       next: (res: any) => {
         const saved = res?.data ?? res;
-        this.currentEditId = saved.id;
+        this.currentEditId = saved?.id ?? this.currentEditId;
         this.isEditMode = true;
-        const action = this.isEditMode ? 'updated' : 'created';
+        this.isSavingDisease = false;
+        const action = wasEditing ? 'updated' : 'created';
         this.toastService.show('success', 'Success', `Disease guidance ${action} successfully.`);
         this.fetchExistingDiseases();
+        if (advanceAfterSave) this.currentStep = 2;
+        this.cdr.markForCheck();
       },
       error: () => {
+        this.isSavingDisease = false;
         this.toastService.show(
           'error',
           'Error',
           'Failed to save disease guidance. Please try again.',
         );
+        this.cdr.markForCheck();
       },
     });
   }
 
   onToggleView(): void {
-    this.showAddedDiseases = !this.showAddedDiseases;
     if (this.showAddedDiseases) {
-      this.fetchExistingDiseases();
+      this.isEditMode = false;
+      this.currentEditId = null;
+      this.selectedLabel = '';
+      this.selectedDiseaseKey = null;
+      this.form.reset();
+      this.currentStep = 1;
+      this.showAddedDiseases = false;
+      return;
     }
+
+    this.cancelEdit();
+    this.fetchExistingDiseases();
   }
 }

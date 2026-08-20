@@ -155,6 +155,13 @@ export class DiseaseViewModalComponent implements OnChanges {
     return `${h}:00 ${period}`;
   }
 
+  formatCategory(key: string): string {
+    return key
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) this.close();
   }
