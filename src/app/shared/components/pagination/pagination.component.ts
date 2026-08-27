@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
   template: `
     @if (variant === 'compact') {
       <div
-        class="flex flex-wrap items-center justify-between gap-3 px-8 py-5 border-t border-white/20"
+        class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-3 sm:py-5 border-t border-white/20"
       >
         <p class="text-sm text-slate-500">
           Showing <span class="font-bold text-slate-700">{{ currentPageItemCount }}</span> of
@@ -57,14 +57,14 @@ import { CommonModule } from '@angular/common';
       </div>
     } @else {
       <div
-        class="flex flex-wrap items-center justify-between gap-3 px-8 py-5 border-t border-white/20"
+        class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-3 sm:py-5 border-t border-white/20"
       >
         <p class="text-xs font-bold text-slate-500">
           Showing <span class="text-slate-800">{{ pageStart }} to {{ pageEnd }}</span> of
           <span class="text-slate-800">{{ totalItems }}</span> {{ itemLabel }}
         </p>
 
-        <div class="flex items-center gap-1.5">
+        <div class="flex flex-wrap items-center gap-1.5">
           <button
             (click)="emitPage(currentPage - 1)"
             [disabled]="currentPage === 1"

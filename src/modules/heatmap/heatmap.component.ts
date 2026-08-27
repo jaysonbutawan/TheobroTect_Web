@@ -10,7 +10,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../dashboard/dashboard.service';
+import { ReverseGeocodingService } from '../../app/core/services/reverse-geocoding.service';
 import { Scan } from '../../app/shared/models';
+import { tap, catchError, of } from 'rxjs';
 
 import { FilterBarComponent, FilterState, normalizeDisease } from './widgets/filter-bar.component';
 
@@ -32,6 +34,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   allScans: Scan[] = [];
   filteredScans: Scan[] = [];
   selectedScan: Scan | null = null;
+  selectedBarangay = 'Unknown Barangay';
 
   activeFilter: FilterState = {
     year: new Date().getFullYear(),
@@ -64,10 +67,11 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private dashboardService: DashboardService,
+    private geocoding: ReverseGeocodingService,
     public logic: HeatmapLogicService,
     private mapService: HeatmapMapService,
     private toastService: ToastService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     window.scrollTo(0, 0);
@@ -137,7 +141,23 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.mapService.plotMarkers(this.filteredScans, (scan: Scan) => {
       this.selectedScan = scan;
+      this.selectedBarangay = 'Resolving…';
       this.cdr.markForCheck();
+
+      this.geocoding
+        .resolve(scan.location_lat, scan.location_lng)
+        .pipe(
+          tap((barangay) => {
+            this.selectedBarangay = barangay;
+            this.cdr.markForCheck();
+          }),
+          catchError(() => {
+            this.selectedBarangay = 'Unknown Barangay';
+            this.cdr.markForCheck();
+            return of(undefined);
+          }),
+        )
+        .subscribe();
     });
   }
 
@@ -147,6 +167,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clearSelectedScan(): void {
     this.selectedScan = null;
+    this.selectedBarangay = 'Unknown Barangay';
     this.cdr.markForCheck();
   }
 

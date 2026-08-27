@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DashboardService } from './dashboard.service';
+import { ReverseGeocodingService } from '../../app/core/services/reverse-geocoding.service';
 import { Scan } from '../../app/shared/models';
+import { concatMap, delay, from, of, tap, catchError } from 'rxjs';
 import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-mobile/field-log-skeleton-mobile';
 import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-desktop/field-log-skeleton-desktop';
 import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
@@ -50,6 +52,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
+    private geocoding: ReverseGeocodingService,
   ) {}
 
   private cdr = inject(ChangeDetectorRef);
@@ -62,6 +65,7 @@ export class DashboardComponent implements OnInit {
   previousStats: DashboardStats = createEmptyStats();
 
   recentScans: Scan[] = [];
+  barangayMap = new Map<number, string>();
 
   get summaryCards() {
     return generateSummaryCards(this.stats, this.selectedYear());
@@ -151,6 +155,64 @@ export class DashboardComponent implements OnInit {
       createdAt.setHours(0, 0, 0, 0);
       return createdAt.getTime() === today.getTime();
     });
+
+    this.resolveBarangays();
+  }
+
+  getBarangay(scanId: number): string {
+    return this.barangayMap.get(scanId) ?? 'Loading…';
+  }
+
+  private resolveBarangays(): void {
+    const uniqueCoords = new Map<string, { lat: number; lng: number }>();
+
+    for (const scan of this.recentScans) {
+      const key = `${scan.location_lat.toFixed(4)},${scan.location_lng.toFixed(4)}`;
+      if (!uniqueCoords.has(key)) {
+        uniqueCoords.set(key, { lat: scan.location_lat, lng: scan.location_lng });
+      }
+    }
+
+    const entries = Array.from(uniqueCoords.values());
+
+    if (entries.length === 0) return;
+
+    from(entries)
+      .pipe(
+        concatMap((coords, i) =>
+          i === 0
+            ? of(coords)
+            : of(coords).pipe(delay(1100)),
+        ),
+        concatMap((coords) =>
+          this.geocoding.resolve(coords.lat, coords.lng).pipe(
+            tap((barangay) => {
+              for (const scan of this.recentScans) {
+                if (
+                  scan.location_lat.toFixed(4) === coords.lat.toFixed(4) &&
+                  scan.location_lng.toFixed(4) === coords.lng.toFixed(4)
+                ) {
+                  this.barangayMap.set(scan.id, barangay);
+                }
+              }
+              this.cdr.markForCheck();
+            }),
+            catchError(() => {
+              for (const scan of this.recentScans) {
+                if (
+                  scan.location_lat.toFixed(4) === coords.lat.toFixed(4) &&
+                  scan.location_lng.toFixed(4) === coords.lng.toFixed(4)
+                ) {
+                  this.barangayMap.set(scan.id, 'Unknown Barangay');
+                }
+              }
+              this.cdr.markForCheck();
+              return of(undefined);
+            }),
+          ),
+        ),
+      )
+      .subscribe();
   }
   private processBarChartData(scans: Scan[]): void {
     const dateGroups = groupScansByDate(scans);

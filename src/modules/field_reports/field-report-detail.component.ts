@@ -55,20 +55,22 @@ import { FieldReport, Severity, ReportStatus } from '../../app/shared/models';
           <div
             class="bg-[#f8fafc] rounded-[2rem] shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)] overflow-hidden"
           >
-            <div class="bg-gradient-to-r from-[#3D683A] to-[#2d4f2a] p-6 text-white">
+              <div class="bg-gradient-to-r from-[#3D683A] to-[#2d4f2a] p-6 text-white">
               <div class="flex items-start justify-between">
                 <div>
-                  <h2 class="text-2xl font-black mb-2">{{ report.disease_key }}</h2>
+                  <h2 class="text-2xl font-black mb-2">{{ getDisplayDisease() }}</h2>
                   <p class="text-white/80 text-sm">{{ report.user_address }}</p>
                 </div>
-                <div class="text-right">
-                  <span
-                    [class]="getSeverityBadgeClass(report.severity_key)"
-                    class="inline-block px-4 py-1.5 rounded-full text-xs font-bold"
-                  >
-                    {{ report.severity_key }}
-                  </span>
-                </div>
+                @if (!isHealthyReport()) {
+                  <div class="text-right">
+                    <span
+                      [class]="getSeverityBadgeClass(report.severity_key)"
+                      class="inline-block px-4 py-1.5 rounded-full text-xs font-bold"
+                    >
+                      {{ report.severity_key }}
+                    </span>
+                  </div>
+                }
               </div>
             </div>
 
@@ -255,6 +257,23 @@ export class FieldReportDetailComponent implements OnInit, OnDestroy {
         },
       });
     }
+  }
+
+  isHealthyReport(): boolean {
+    if (!this.report?.disease_key) return true;
+    const key = this.report.disease_key.toLowerCase().replace(/_/g, ' ').trim();
+    return key.includes('healthy') || key.includes('normal') || key.includes('no disease');
+  }
+
+  getDisplayDisease(): string {
+    if (!this.report) return '';
+    if (this.isHealthyReport()) return 'Healthy Cacao';
+    return this.report.disease_key
+      .replace(/_/g, ' ')
+      .replace(/-/g, ' ')
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
   }
 
   goBack(): void {

@@ -18,7 +18,9 @@ export interface BarangayDiseaseCount {
 
 export interface ReportSummary {
   reportDate: string;
-  totalReports: number;
+  totalScans: number;
+  healthyScans: number;
+  diseaseCases: number;
   barangayData: BarangayDiseaseCount[];
   diseaseTypes: string[];
 }
@@ -32,13 +34,49 @@ export interface OfficialSignatories {
   providedIn: 'root',
 })
 export class FieldReportPdfService {
+
+  // 1. Helper function to load the image as Base64 for jsPDF
+  private async getBase64Logo(url: string): Promise<string | null> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        } else {
+          resolve(null);
+        }
+      };
+      img.onerror = () => {
+        console.warn(`Could not load logo at ${url}. Generating PDF without it.`);
+        resolve(null);
+      };
+      img.src = url;
+    });
+  }
+
   aggregateReportData(reports: FieldReport[]): ReportSummary {
     const barangayMap = new Map<string, BarangayDiseaseCount>();
     const diseaseTypesSet = new Set<string>();
 
+    let healthyScans = 0;
+
     reports.forEach((report) => {
+      const normalizedDisease = this.normalizeDiseaseKey(report.disease_key);
+      const isHealthy = normalizedDisease === 'Healthy';
+
+      if (isHealthy) {
+        healthyScans++;
+        return;
+      }
+
       const barangay = report.user_address || 'Unknown';
-      const disease = this.normalizeDiseaseKey(report.disease_key);
+      const disease = normalizedDisease;
       const severity = report.severity_key?.toLowerCase() || 'mild';
 
       diseaseTypesSet.add(disease);
@@ -73,7 +111,7 @@ export class FieldReportPdfService {
     });
 
     const barangayData = Array.from(barangayMap.values()).sort((a, b) =>
-      a.barangay.localeCompare(b.barangay),
+      a.barangay.localeCompare(b.barangay)
     );
 
     return {
@@ -82,160 +120,240 @@ export class FieldReportPdfService {
         month: 'long',
         day: 'numeric',
       }),
-      totalReports: reports.length,
+      totalScans: reports.length,
+      healthyScans,
+      diseaseCases: reports.length - healthyScans,
       barangayData,
       diseaseTypes: Array.from(diseaseTypesSet).sort(),
     };
   }
 
-  generatePDF(summary: ReportSummary, signatories: OfficialSignatories): void {
+  // 2. Changed to async to await the logo loading
+  async generatePDF(summary: ReportSummary, signatories: OfficialSignatories): Promise<void> {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
-    let yPosition = 20;
+    const marginLeft = 20;
+    const marginRight = 20;
+    const contentWidth = pageWidth - marginLeft - marginRight;
 
-    doc.setFontSize(18);
+    // Attempt to load the logo from the Angular public folder
+    const logoBase64 = await this.getBase64Logo('/Sawata,_Davao_Del_Norte_Official_Seal_Logo.png');
+
+    let yPosition = 35; // Start below the header area
+
+    // --- 1. Draw Summary Box (Page 1 Only) ---
+    doc.setFillColor(248, 250, 248);
+    doc.setDrawColor(61, 104, 58);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(marginLeft, yPosition, contentWidth, 22, 2, 2, 'FD');
+
     doc.setFont('helvetica', 'bold');
-    doc.text('CACAO DISEASE FIELD REPORT', pageWidth / 2, yPosition, { align: 'center' });
-
-    yPosition += 8;
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Municipal Department of Agriculture', pageWidth / 2, yPosition, { align: 'center' });
-
-    yPosition += 6;
     doc.setFontSize(10);
-    doc.text('Sawata, Davao del Norte', pageWidth / 2, yPosition, { align: 'center' });
+    doc.setTextColor(40, 40, 40);
+    doc.text('REPORT SUMMARY', marginLeft + 5, yPosition + 6);
 
-    yPosition += 12;
-
-    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Report Date: ${summary.reportDate}`, 14, yPosition);
-    doc.text(`Total Cases: ${summary.totalReports}`, pageWidth - 14, yPosition, { align: 'right' });
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
 
-    yPosition += 10;
+    // Column 1
+    doc.text(`Date of Report:`, marginLeft + 5, yPosition + 12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text(summary.reportDate, marginLeft + 32, yPosition + 12);
 
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Total Scans:`, marginLeft + 5, yPosition + 17);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text(String(summary.totalScans), marginLeft + 32, yPosition + 17);
+
+    // Column 2
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Healthy Pods:`, pageWidth / 2, yPosition + 12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(34, 139, 34);
+    doc.text(String(summary.healthyScans), pageWidth / 2 + 25, yPosition + 12);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Disease Cases:`, pageWidth / 2, yPosition + 17);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(220, 38, 38);
+    doc.text(String(summary.diseaseCases), pageWidth / 2 + 25, yPosition + 17);
+
+    yPosition += 30;
+
+    // --- 2. Iterate through Barangay Data ---
     summary.barangayData.forEach((barangayData) => {
-      if (yPosition > pageHeight - 60) {
+      if (yPosition > pageHeight - 45) {
         doc.addPage();
-        yPosition = 20;
+        yPosition = 35;
       }
 
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
       doc.setFillColor(61, 104, 58);
-      doc.rect(14, yPosition - 5, pageWidth - 28, 8, 'F');
+      doc.roundedRect(marginLeft, yPosition, contentWidth, 8, 1, 1, 'F');
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(255, 255, 255);
-      doc.text(`${barangayData.barangay} (Total Cases: ${barangayData.totalCases})`, 16, yPosition);
-      doc.setTextColor(0, 0, 0);
+      doc.text(`BARANGAY: ${barangayData.barangay.toUpperCase()}`, marginLeft + 4, yPosition + 5.5);
 
-      yPosition += 10;
+      const totalLabel = `Total Cases: ${barangayData.totalCases}`;
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      const totalLabelWidth = doc.getTextWidth(totalLabel);
+      doc.text(totalLabel, pageWidth - marginRight - 4 - totalLabelWidth, yPosition + 5.5);
 
-      const tableData: any[] = [];
+      yPosition += 8;
 
-      Object.keys(barangayData.diseases).forEach((disease) => {
-        const counts = barangayData.diseases[disease];
-        tableData.push([
-          disease,
-          counts.mild.toString(),
-          counts.moderate.toString(),
-          counts.severe.toString(),
-          counts.total.toString(),
-        ]);
-      });
+      const tableBody: string[][] = [];
+      Object.keys(barangayData.diseases)
+        .sort()
+        .forEach((disease) => {
+          const c = barangayData.diseases[disease];
+          tableBody.push([disease, String(c.mild), String(c.moderate), String(c.severe), String(c.total)]);
+        });
 
       autoTable(doc, {
         startY: yPosition,
-        head: [['Disease', 'Mild', 'Moderate', 'Severe', 'Total']],
-        body: tableData,
+        head: [['Disease Type', 'Mild', 'Moderate', 'Severe', 'Total']],
+        body: tableBody,
         theme: 'grid',
         headStyles: {
           fillColor: [241, 245, 249],
-          textColor: [51, 65, 85],
+          textColor: [30, 41, 59],
           fontStyle: 'bold',
           fontSize: 9,
+          cellPadding: 3,
+          halign: 'center',
+          lineColor: [203, 213, 225],
+          lineWidth: 0.1,
         },
         bodyStyles: {
           fontSize: 9,
+          cellPadding: 3,
+          textColor: [51, 65, 85],
+          lineColor: [226, 232, 240],
+          lineWidth: 0.1,
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
         },
         columnStyles: {
-          0: { cellWidth: 80 },
-          1: { cellWidth: 20, halign: 'center' },
+          0: { cellWidth: 'auto', halign: 'left', fontStyle: 'bold', textColor: [15, 23, 42] },
+          1: { cellWidth: 25, halign: 'center' },
           2: { cellWidth: 25, halign: 'center' },
-          3: { cellWidth: 20, halign: 'center' },
-          4: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
+          3: { cellWidth: 25, halign: 'center' },
+          4: { cellWidth: 25, halign: 'center', fontStyle: 'bold' },
         },
-        margin: { left: 14, right: 14 },
-        didDrawPage: (data) => {
-          yPosition = data.cursor?.y || yPosition;
-        },
+        margin: { top: 35, bottom: 25, left: marginLeft, right: marginRight },
+        tableWidth: contentWidth,
       });
 
       yPosition = (doc as any).lastAutoTable.finalY + 8;
     });
 
-    if (yPosition > pageHeight - 50) {
+    // --- 3. Signatures Block ---
+    const signatureBlockHeight = 40;
+    if (yPosition + signatureBlockHeight > pageHeight - 25) {
       doc.addPage();
-      yPosition = 20;
+      yPosition = 35;
     } else {
       yPosition += 10;
     }
 
-    doc.setDrawColor(200, 200, 200);
-    doc.line(14, yPosition, pageWidth - 14, yPosition);
-    yPosition += 8;
-
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('Prepared by:', 14, yPosition);
-    yPosition += 8;
+    doc.setTextColor(30, 30, 30);
+    doc.text('PREPARED AND CERTIFIED BY:', marginLeft, yPosition);
+
+    yPosition += 20;
 
     const sigWidth = 70;
-    const leftSigX = 20;
-    const rightSigX = pageWidth - 20 - sigWidth;
-
-    doc.setFont('helvetica', 'bold');
-    doc.text(signatories.agricultureHeadName.toUpperCase(), leftSigX + sigWidth / 2, yPosition, {
-      align: 'center',
-    });
-    yPosition += 2;
-    doc.line(leftSigX, yPosition, leftSigX + sigWidth, yPosition);
-    yPosition += 5;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text('Head, Municipal Agriculture Office', leftSigX + sigWidth / 2, yPosition, {
-      align: 'center',
-    });
-
-    yPosition -= 7;
+    const leftSigX = 25;
+    const rightSigX = pageWidth - 25 - sigWidth;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text(signatories.mayorName.toUpperCase(), rightSigX + sigWidth / 2, yPosition, {
-      align: 'center',
-    });
-    yPosition += 2;
-    doc.line(rightSigX, yPosition, rightSigX + sigWidth, yPosition);
-    yPosition += 5;
+    doc.text(signatories.agricultureHeadName.toUpperCase(), leftSigX + sigWidth / 2, yPosition, { align: 'center' });
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(leftSigX, yPosition + 2, leftSigX + sigWidth, yPosition + 2);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text('Municipal Mayor', rightSigX + sigWidth / 2, yPosition, { align: 'center' });
+    doc.text('Head, Municipal Agriculture Office', leftSigX + sigWidth / 2, yPosition + 7, { align: 'center' });
 
-    const footerY = pageHeight - 15;
-    doc.setFontSize(8);
-    doc.setTextColor(128, 128, 128);
-    doc.text('This is an official report generated by TheobroTect System', pageWidth / 2, footerY, {
-      align: 'center',
-    });
-    doc.text(`Generated on ${new Date().toLocaleString('en-PH')}`, pageWidth / 2, footerY + 4, {
-      align: 'center',
-    });
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(signatories.mayorName.toUpperCase(), rightSigX + sigWidth / 2, yPosition, { align: 'center' });
+    doc.line(rightSigX, yPosition + 2, rightSigX + sigWidth, yPosition + 2);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Municipal Mayor', rightSigX + sigWidth / 2, yPosition + 7, { align: 'center' });
 
+    // --- 4. Global Header & Footer ---
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+
+      // --- Header Background ---
+      doc.setFillColor(61, 104, 58);
+      doc.rect(0, 0, pageWidth, 25, 'F');
+
+      // --- Draw Logo (if successfully loaded) ---
+      if (logoBase64) {
+        // x=18, y=3.5, width=18, height=18
+        doc.addImage(logoBase64, 'PNG', 18, 3.5, 18, 18);
+      }
+
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('CACAO DISEASE FIELD REPORT', pageWidth / 2, 13, { align: 'center' });
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(220, 235, 220);
+      doc.text('Municipal Department of Agriculture • Sawata, Davao del Norte', pageWidth / 2, 19, { align: 'center' });
+
+      // --- Footer ---
+      const fY = pageHeight - 15;
+      doc.setDrawColor(61, 104, 58);
+      doc.setLineWidth(0.5);
+      doc.line(marginLeft, fY - 5, pageWidth - marginRight, fY - 5);
+
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('helvetica', 'italic');
+      doc.text('Official report generated by TheobroTect System', marginLeft, fY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(
+        `Printed: ${new Date().toLocaleString('en-PH')}`,
+        pageWidth / 2,
+        fY,
+        { align: 'center' }
+      );
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(
+        `Page ${i} of ${totalPages}`,
+        pageWidth - marginRight,
+        fY,
+        { align: 'right' }
+      );
+    }
+
+    // --- 5. Save PDF ---
     const fileName = `Field_Report_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
   }
 
+  // ... (normalizeDiseaseKey and formatDiseaseKey remain exactly the same) ...
   private normalizeDiseaseKey(diseaseKey: string): string {
     if (!diseaseKey) return 'Unknown';
 

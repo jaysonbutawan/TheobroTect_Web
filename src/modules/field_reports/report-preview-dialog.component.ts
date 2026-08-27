@@ -72,7 +72,7 @@ import { FieldReport } from '../../app/shared/models';
               </svg>
               Report Summary
             </h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <div class="bg-white rounded-xl p-3 sm:p-4 border border-slate-200">
                 <p
                   class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide mb-1"
@@ -85,10 +85,20 @@ import { FieldReport } from '../../app/shared/models';
                 <p
                   class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide mb-1"
                 >
-                  Total Cases
+                  Total Scans
+                </p>
+                <p class="text-sm sm:text-lg font-black text-slate-800">
+                  {{ summary.totalScans }}
+                </p>
+              </div>
+              <div class="bg-white rounded-xl p-3 sm:p-4 border border-slate-200">
+                <p
+                  class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide mb-1"
+                >
+                  Disease Cases
                 </p>
                 <p class="text-sm sm:text-lg font-black text-[#3D683A]">
-                  {{ summary.totalReports }}
+                  {{ summary.diseaseCases }}
                 </p>
               </div>
               <div

@@ -466,12 +466,20 @@
                   {{ report.scanned_at | date: 'MMM d, y' }}
                 </p>
               </div>
-              <span
-                [class]="getSeverityClass(report.severity_key)"
-                class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex-shrink-0"
-              >
-                {{ report.severity_key }}
-              </span>
+              @if (!isHealthyReport(report)) {
+                <span
+                  [class]="getSeverityClass(report.severity_key)"
+                  class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex-shrink-0"
+                >
+                  {{ report.severity_key }}
+                </span>
+              } @else {
+                <span
+                  class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex-shrink-0 bg-emerald-50 text-emerald-700 border-emerald-200"
+                >
+                  Healthy
+                </span>
+              }
             </div>
 
             <div class="grid grid-cols-2 gap-3 md:hidden">
@@ -507,12 +515,20 @@
               }}</span>
             </div>
             <div class="hidden md:flex md:col-span-3 justify-center">
-              <span
-                [class]="getSeverityClass(report.severity_key)"
-                class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border"
-              >
-                {{ report.severity_key }}
-              </span>
+              @if (!isHealthyReport(report)) {
+                <span
+                  [class]="getSeverityClass(report.severity_key)"
+                  class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border"
+                >
+                  {{ report.severity_key }}
+                </span>
+              } @else {
+                <span
+                  class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-emerald-50 text-emerald-700 border-emerald-200"
+                >
+                  Healthy
+                </span>
+              }
             </div>
           </div>
         } @empty {

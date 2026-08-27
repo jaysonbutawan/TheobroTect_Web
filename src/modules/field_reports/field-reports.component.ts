@@ -373,6 +373,12 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     }
   }
 
+  isHealthyReport(report: FieldReport): boolean {
+    if (!report?.disease_key) return true;
+    const key = report.disease_key.toLowerCase().replace(/_/g, ' ').trim();
+    return key.includes('healthy') || key.includes('normal') || key.includes('no disease');
+  }
+
   getStatusTextClass(status: ReportStatus | number | string): string {
     const statusStr = this.formatStatus(status);
     switch (statusStr) {
