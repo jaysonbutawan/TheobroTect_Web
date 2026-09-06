@@ -156,7 +156,7 @@
             </div>
 
             <div class="divide-y divide-gray-100 md:divide-y-0">
-              @for (scan of recentScans; track scan.id) {
+              @for (scan of recentScans; track scan.locationKey) {
                 <div
                   (click)="navigateToMap(scan.location_lat + ',' + scan.location_lng)"
                   class="group p-4 sm:p-5 md:px-6 md:py-4 bg-white md:grid md:grid-cols-12 md:gap-4 md:items-center hover:md:bg-green-50/30 active:scale-[0.98] md:active:scale-100 transition-all duration-200 cursor-pointer md:border-b md:border-gray-100 last:md:border-b-0"
@@ -178,7 +178,7 @@
                           class="text-xs text-gray-500 font-medium mt-0.5 flex items-center gap-1 line-clamp-1"
                         >
                           <span class="material-symbols-rounded text-[14px]">location_on</span>
-                          {{ getBarangay(scan.id) }}
+                          {{ scanLocations.get(scan.locationKey)?.label ?? 'Location unavailable' }}
                         </div>
                       </div>
                     </div>

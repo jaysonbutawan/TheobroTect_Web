@@ -1,11 +1,23 @@
-import { Component, inject, ChangeDetectorRef, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DashboardService } from './dashboard.service';
-import { ReverseGeocodingService } from '../../app/core/services/reverse-geocoding.service';
+import {
+  LOCATION_UNAVAILABLE,
+  ReverseGeocodingService,
+} from '../../app/core/services/reverse-geocoding.service';
 import { Scan } from '../../app/shared/models';
-import { concatMap, delay, from, of, tap, catchError } from 'rxjs';
+import { catchError, concatMap, from, Observable, of, Subscription, tap } from 'rxjs';
 import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-mobile/field-log-skeleton-mobile';
 import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-desktop/field-log-skeleton-desktop';
 import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
@@ -32,6 +44,29 @@ import {
   isHealthy,
 } from './widgets/dashboard-helpers';
 
+export type ScanLocationStatus = 'loading' | 'resolved' | 'unavailable' | 'error';
+
+export interface ScanLocationState {
+  coordinateKey: string;
+  lat: number | null;
+  lng: number | null;
+  label: string;
+  status: ScanLocationStatus;
+  loading: boolean;
+  error: boolean;
+}
+
+interface CoordinateGroup {
+  key: string;
+  lat: number;
+  lng: number;
+  scanKeys: string[];
+}
+
+export interface RecentScan extends Scan {
+  locationKey: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -48,7 +83,7 @@ import {
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
@@ -56,6 +91,8 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
+  private barangayResolution?: Subscription;
 
   selectedYear = signal<number>(new Date().getFullYear());
   availableYears: number[] = [];
@@ -64,8 +101,8 @@ export class DashboardComponent implements OnInit {
   stats: DashboardStats = createEmptyStats();
   previousStats: DashboardStats = createEmptyStats();
 
-  recentScans: Scan[] = [];
-  barangayMap = new Map<number, string>();
+  recentScans: RecentScan[] = [];
+  scanLocations = new Map<string, ScanLocationState>();
 
   get summaryCards() {
     return generateSummaryCards(this.stats, this.selectedYear());
@@ -109,21 +146,28 @@ export class DashboardComponent implements OnInit {
     this.errorMessage = '';
     this.cdr.markForCheck();
 
-    this.dashboardService.getUsersScan().subscribe({
-      next: (res) => {
-        this.allScans = res.data;
-        this.populateAvailableYears();
-        this.filterAndProcessData();
+    this.dashboardService
+      .getUsersScan()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.allScans = res.data;
+          this.populateAvailableYears();
+          this.filterAndProcessData();
 
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        this.errorMessage = 'Failed to load data';
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      },
-    });
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.errorMessage = 'Failed to load data';
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.barangayResolution?.unsubscribe();
   }
 
   private populateAvailableYears(): void {
@@ -150,69 +194,144 @@ export class DashboardComponent implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    this.recentScans = filteredScans.filter((scan) => {
-      const createdAt = new Date(scan.scanned_at);
-      createdAt.setHours(0, 0, 0, 0);
-      return createdAt.getTime() === today.getTime();
-    });
+    this.recentScans = filteredScans
+      .filter((scan) => {
+        const createdAt = new Date(scan.scanned_at);
+        createdAt.setHours(0, 0, 0, 0);
+        return createdAt.getTime() === today.getTime();
+      })
+      .map((scan, index) => ({
+        ...scan,
+        locationKey: this.createLocationKey(scan, index),
+      }));
 
     this.resolveBarangays();
   }
 
-  getBarangay(scanId: number): string {
-    return this.barangayMap.get(scanId) ?? 'Loading…';
+  getScanLocation(locationKey: string): ScanLocationState {
+    return (
+      this.scanLocations.get(locationKey) ?? {
+        coordinateKey: '',
+        lat: null,
+        lng: null,
+        label: LOCATION_UNAVAILABLE,
+        status: 'unavailable',
+        loading: false,
+        error: false,
+      }
+    );
   }
 
   private resolveBarangays(): void {
-    const uniqueCoords = new Map<string, { lat: number; lng: number }>();
+    this.barangayResolution?.unsubscribe();
+    this.scanLocations.clear();
+
+    const coordinateGroups = new Map<string, CoordinateGroup>();
 
     for (const scan of this.recentScans) {
-      const key = `${scan.location_lat.toFixed(4)},${scan.location_lng.toFixed(4)}`;
-      if (!uniqueCoords.has(key)) {
-        uniqueCoords.set(key, { lat: scan.location_lat, lng: scan.location_lng });
+      let key: string;
+
+      try {
+        key = this.geocoding.coordinateKey(scan.location_lat, scan.location_lng);
+      } catch {
+        this.scanLocations.set(scan.locationKey, {
+          coordinateKey: '',
+          lat: null,
+          lng: null,
+          label: LOCATION_UNAVAILABLE,
+          status: 'unavailable',
+          loading: false,
+          error: false,
+        });
+        continue;
+      }
+
+      this.scanLocations.set(scan.locationKey, {
+        coordinateKey: key,
+        lat: scan.location_lat,
+        lng: scan.location_lng,
+        label: 'Loading…',
+        status: 'loading',
+        loading: true,
+        error: false,
+      });
+
+      const group = coordinateGroups.get(key);
+      if (group) {
+        group.scanKeys.push(scan.locationKey);
+      } else {
+        coordinateGroups.set(key, {
+          key,
+          lat: scan.location_lat,
+          lng: scan.location_lng,
+          scanKeys: [scan.locationKey],
+        });
       }
     }
 
-    const entries = Array.from(uniqueCoords.values());
+    const groups = Array.from(coordinateGroups.values());
+    if (groups.length === 0) {
+      this.cdr.markForCheck();
+      return;
+    }
 
-    if (entries.length === 0) return;
-
-    from(entries)
+    this.barangayResolution = from(groups)
       .pipe(
-        concatMap((coords, i) =>
-          i === 0
-            ? of(coords)
-            : of(coords).pipe(delay(1100)),
-        ),
-        concatMap((coords) =>
-          this.geocoding.resolve(coords.lat, coords.lng).pipe(
-            tap((barangay) => {
-              for (const scan of this.recentScans) {
-                if (
-                  scan.location_lat.toFixed(4) === coords.lat.toFixed(4) &&
-                  scan.location_lng.toFixed(4) === coords.lng.toFixed(4)
-                ) {
-                  this.barangayMap.set(scan.id, barangay);
-                }
-              }
-              this.cdr.markForCheck();
-            }),
-            catchError(() => {
-              for (const scan of this.recentScans) {
-                if (
-                  scan.location_lat.toFixed(4) === coords.lat.toFixed(4) &&
-                  scan.location_lng.toFixed(4) === coords.lng.toFixed(4)
-                ) {
-                  this.barangayMap.set(scan.id, 'Unknown Barangay');
-                }
-              }
-              this.cdr.markForCheck();
-              return of(undefined);
-            }),
-          ),
-        ),
+        concatMap((group) => this.resolveLocationGroup(group)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
+  }
+
+  private resolveLocationGroup(group: CoordinateGroup): Observable<string | undefined> {
+    return this.geocoding.resolve(group.lat, group.lng).pipe(
+      tap((barangay) => {
+        this.updateLocationGroup(
+          group,
+          barangay,
+          barangay === LOCATION_UNAVAILABLE ? 'unavailable' : 'resolved',
+        );
+        this.cdr.markForCheck();
+      }),
+      catchError(() => {
+        this.updateLocationGroup(group, 'Unable to load location', 'error');
+        this.cdr.markForCheck();
+        return of(undefined);
+      }),
+    );
+  }
+
+  private updateLocationGroup(
+    group: CoordinateGroup,
+    label: string,
+    status: Exclude<ScanLocationStatus, 'loading'>,
+  ): void {
+    for (const scanKey of group.scanKeys) {
+      const current = this.scanLocations.get(scanKey);
+      if (!current || current.coordinateKey !== group.key) continue;
+
+      // Each scan receives its own state object, even when a coordinate lookup is shared.
+      this.scanLocations.set(scanKey, {
+        coordinateKey: current.coordinateKey,
+        lat: current.lat,
+        lng: current.lng,
+        label,
+        status,
+        loading: false,
+        error: status === 'error',
+      });
+    }
+  }
+
+  private createLocationKey(scan: Scan, index: number): string {
+    return [
+      scan.id,
+      scan.local_id,
+      scan.scanned_at,
+      String(scan.location_lat),
+      String(scan.location_lng),
+      index,
+    ].join('|');
   }
   private processBarChartData(scans: Scan[]): void {
     const dateGroups = groupScansByDate(scans);
