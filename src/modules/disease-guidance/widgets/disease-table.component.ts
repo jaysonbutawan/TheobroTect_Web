@@ -52,19 +52,21 @@ import { ConfirmationDialogComponent } from '../../../app/shared/components/conf
 
       <div class="divide-y divide-slate-100">
         @for (disease of pagedRecords; track disease.id) {
-          <div class="px-4 sm:px-6 py-4 md:grid md:grid-cols-12 md:gap-4 md:items-center text-sm">
-            <div class="md:col-span-4 min-w-0">
+          <div class="px-4 sm:px-6 py-4 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 md:grid-cols-12 md:gap-4 md:items-center text-sm">
+            <div class="order-1 md:col-span-4 min-w-0">
               <p class="m-0 font-medium text-slate-900">{{ disease.display_name.en || 'Unnamed' }}</p>
               <p class="m-0 mt-0.5 text-xs text-slate-500">{{ disease.display_name.tl || 'No Filipino name' }}</p>
             </div>
 
-            <p class="md:col-span-3 m-0 mt-2 md:mt-0 text-slate-600">{{ formatLabel(disease.disease_key) }}</p>
+            <p class="order-3 md:order-2 md:col-span-3 m-0 text-xs md:text-sm text-slate-500 md:text-slate-600">
+              {{ formatLabel(disease.disease_key) }}
+            </p>
 
-            <p class="md:col-span-2 m-0 mt-1 md:mt-0 text-slate-600">
+            <p class="order-4 md:order-3 md:col-span-2 m-0 text-right md:text-left text-xs md:text-sm text-slate-500 md:text-slate-600">
               {{ disease.created_at ? (disease.created_at | date: 'MMM d, y') : 'Not recorded' }}
             </p>
 
-            <div class="md:col-span-3 flex items-center gap-5 mt-3 md:mt-0 md:justify-end">
+            <div class="order-2 md:order-4 md:col-span-3 flex items-center gap-4 md:gap-5 md:justify-end">
               <button
                 type="button"
                 (click)="onTableViewDisease(disease)"
