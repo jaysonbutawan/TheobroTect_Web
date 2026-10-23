@@ -2,18 +2,12 @@ import { Injectable } from '@angular/core';
 import type * as LeafletType from 'leaflet';
 import { Scan } from '../../app/shared/models';
 import { DISEASE_SHADES, SeverityShades } from './heatmap.models';
+import { inRing, loadPlaces, LatLon, Places } from './heatmap-places';
 
-export type BaseLayerKey = 'streets' | 'terrain' | 'satellite';
 export type OverlayKey = 'barangays' | 'puroks';
 
 /** Puroks are small, so their labels only appear once the map is zoomed in this far. */
 const PUROK_MIN_ZOOM = 15;
-const PLACES_URL = 'map/places.json';
-
-interface PlacesSnapshot {
-  barangays: { name: string; rings: LeafletType.LatLngTuple[][] }[];
-  puroks: { name: string; lat: number; lon: number }[];
-}
 
 const severityWeight = (p: any[]): number => {
   if (p[4] === 'severe') return 1.0;
@@ -107,12 +101,11 @@ export class HeatmapMapService {
 
   private resizeObserver?: ResizeObserver;
   private mapReady?: Promise<void>;
-  private baseLayers: Record<BaseLayerKey, LeafletType.TileLayer> | null = null;
-  private activeBase: BaseLayerKey = 'streets';
   private heatLayers: any[] = [];
   private heatSyncBound = false;
   private heatFrame = 0;
   private overlayVisible: Record<OverlayKey, boolean> = { barangays: true, puroks: true };
+  private places?: Places;
   private barangayLayer?: LeafletType.LayerGroup;
   private purokLayer?: LeafletType.LayerGroup;
 
@@ -134,22 +127,10 @@ export class HeatmapMapService {
   private async createMap(containerId: string): Promise<void> {
     await this.getLeaflet();
 
-    const streetsAndBuildings = this.L.tileLayer(
-      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-      {
-        attribution: '&copy; Google Maps',
-        maxZoom: 20,
-      },
-    );
-
-    const terrainView = this.L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps',
-      maxZoom: 20,
-    });
-
-    const satelliteHybrid = this.L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps',
-      maxZoom: 20,
+    // OpenStreetMap's standard style: small roads, footpaths, buildings and place names.
+    const streets = this.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
     });
 
     const mapBounds = this.L.latLngBounds(this.boundaryCoords).pad(0.15);
@@ -161,11 +142,8 @@ export class HeatmapMapService {
       maxBounds: mapBounds,
       maxBoundsViscosity: 0.8,
       zoomControl: false,
-      layers: [streetsAndBuildings],
+      layers: [streets],
     });
-
-    this.baseLayers = { streets: streetsAndBuildings, terrain: terrainView, satellite: satelliteHybrid };
-    this.activeBase = 'streets';
 
     this.L.control.scale({ position: 'bottomleft', imperial: false }).addTo(this.map);
     this.L.control.zoom({ position: 'bottomright' }).addTo(this.map);
@@ -173,7 +151,6 @@ export class HeatmapMapService {
     this.drawBoundary();
     this.observeResize(containerId);
     this.map.on('zoomend', () => this.syncOverlays());
-    this.map.attributionControl.addAttribution('Places &copy; OpenStreetMap contributors');
     void this.loadPlaces();
   }
 
@@ -187,34 +164,53 @@ export class HeatmapMapService {
     this.map?.on('click', callback);
   }
 
-  /**
-   * Barangay outlines and purok names are a snapshot of OpenStreetMap (public/map/places.json).
-   * It is bundled because the public Overpass API is too slow and rate-limited to call on every
-   * page load; re-export it from Overpass when the community maps new places.
-   */
+  /** Draws barangay outlines and purok names, keeping only the parts inside the red boundary. */
   private async loadPlaces(): Promise<void> {
-    try {
-      const res = await fetch(PLACES_URL);
-      if (!res.ok || !this.map) return;
-      const data: PlacesSnapshot = await res.json();
+    const data = await loadPlaces();
+    if (!this.map) return;
+    this.places = data;
 
-      const barangays = this.L.layerGroup();
-      for (const b of data.barangays) {
-        b.rings.forEach((ring) =>
-          this.L.polyline(ring, { color: '#334155', weight: 1.5, dashArray: '6 6', opacity: 0.8, interactive: false }).addTo(barangays),
-        );
-        this.addLabel(this.L.latLngBounds(b.rings.flat()).getCenter(), b.name, 'map-label-barangay', barangays);
-      }
-
-      const puroks = this.L.layerGroup();
-      data.puroks.forEach((p) => this.addLabel([p.lat, p.lon], p.name, 'map-label-purok', puroks));
-
-      this.barangayLayer = barangays;
-      this.purokLayer = puroks;
-      this.syncOverlays();
-    } catch {
-      /* labels are optional */
+    const barangays = this.L.layerGroup();
+    for (const b of data.barangays) {
+      b.rings.forEach((ring) =>
+        this.insideBoundary(ring).forEach((run) =>
+          this.L.polyline(run, { color: '#334155', weight: 1.5, dashArray: '6 6', opacity: 0.8, interactive: false }).addTo(barangays),
+        ),
+      );
+      this.addLabel(this.L.latLngBounds(b.rings.flat()).getCenter(), b.name, 'map-label-barangay', barangays);
     }
+
+    const puroks = this.L.layerGroup();
+    data.puroks.forEach((p) => this.addLabel([p.lat, p.lon], p.name, 'map-label-purok', puroks));
+
+    this.barangayLayer = barangays;
+    this.purokLayer = puroks;
+    this.syncOverlays();
+  }
+
+  /** Splits an outline into the runs of vertices that lie inside the boundary. */
+  private insideBoundary(ring: LatLon[]): LatLon[][] {
+    const runs: LatLon[][] = [];
+    let run: LatLon[] = [];
+    for (const pt of ring) {
+      if (inRing(pt[0], pt[1], this.boundaryCoords as LatLon[])) run.push(pt);
+      else if (run.length) {
+        runs.push(run);
+        run = [];
+      }
+    }
+    if (run.length) runs.push(run);
+    return runs;
+  }
+
+  /** Zooms to the chosen barangay (or purok); with nothing chosen, back to the whole area. */
+  showPlace(barangay: string | null, purok: string | null): void {
+    if (!this.map || !this.places) return;
+    const target = this.places.puroks.find((p) => p.name === purok && p.barangay === barangay);
+    const area = this.places.barangays.find((b) => b.name === barangay);
+    if (target) this.map.flyTo([target.lat, target.lon], 17, { duration: 1 });
+    else if (area) this.map.flyToBounds(this.L.latLngBounds(area.rings.flat()), { padding: [24, 24], duration: 1 });
+    else this.recenter();
   }
 
   private addLabel(at: LeafletType.LatLngExpression, name: string | undefined, cls: string, group: LeafletType.LayerGroup): void {
@@ -238,13 +234,6 @@ export class HeatmapMapService {
     };
     show(this.barangayLayer, this.overlayVisible.barangays);
     show(this.purokLayer, this.overlayVisible.puroks && this.map.getZoom() >= PUROK_MIN_ZOOM);
-  }
-
-  setBaseLayer(key: BaseLayerKey): void {
-    if (!this.map || !this.baseLayers || key === this.activeBase) return;
-    this.map.removeLayer(this.baseLayers[this.activeBase]);
-    this.baseLayers[key].addTo(this.map).bringToBack();
-    this.activeBase = key;
   }
 
   /** Fires when the user starts dragging the map. */
