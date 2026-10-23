@@ -25,15 +25,52 @@ export class SettingsComponent {
   private toastService = inject(ToastService);
 
   passwordChangeLoading = false;
-  showCurrentPassword = false;
-  showNewPassword = false;
-  showConfirmPassword = false;
+
+  readonly passwordFields = [
+    { key: 'currentPassword', label: 'Current password', autocomplete: 'current-password' },
+    { key: 'newPassword', label: 'New password', autocomplete: 'new-password' },
+    { key: 'confirmPassword', label: 'Confirm new password', autocomplete: 'new-password' },
+  ] as const;
+
+  private visibleFields = new Set<string>();
 
   passwordForm = this.fb.nonNullable.group({
     currentPassword: ['', Validators.required],
     newPassword: ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', Validators.required],
   });
+
+  get passwordRules(): { label: string; met: boolean }[] {
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.getRawValue();
+    return [
+      { label: 'Be at least 8 characters long', met: newPassword.length >= 8 },
+      { label: 'Be different from your current password', met: !!newPassword && newPassword !== currentPassword },
+      { label: 'Match the confirmation', met: !!newPassword && newPassword === confirmPassword },
+    ];
+  }
+
+  isVisible(key: string): boolean {
+    return this.visibleFields.has(key);
+  }
+
+  toggleVisibility(key: string): void {
+    if (!this.visibleFields.delete(key)) this.visibleFields.add(key);
+  }
+
+  fieldError(key: (typeof this.passwordFields)[number]['key']): string {
+    const control = this.passwordForm.controls[key];
+    if (!control.touched) return '';
+    if (control.hasError('required')) {
+      return {
+        currentPassword: 'Current password is required.',
+        newPassword: 'New password is required.',
+        confirmPassword: 'Please confirm your new password.',
+      }[key];
+    }
+    if (control.hasError('minlength')) return 'Use at least 8 characters.';
+    if (control.hasError('passwordMismatch')) return 'The new passwords do not match.';
+    return '';
+  }
 
   onChangePassword(): void {
     if (this.passwordChangeLoading) return;

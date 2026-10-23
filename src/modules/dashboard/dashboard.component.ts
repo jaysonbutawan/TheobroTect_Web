@@ -23,7 +23,7 @@ import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/das
 import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
 import { ChartSkeletonComponent } from '../../app/shared/skeletons/dashboard/chart-skeleton/chart-skeleton';
 import { LineChartComponent } from './widgets/line-chart.component';
-import { SummaryStatCardComponent, TrendIndicator } from './widgets/summary-stat-card.component';
+import { SummaryStatCardComponent } from './widgets/summary-stat-card.component';
 import { DiseaseCardComponent } from './widgets/disease-card.component';
 import { getInitialLineChartData } from './widgets/chart-config';
 import { generateSummaryCards, generateDiseaseCards } from './widgets/card-config';
@@ -31,8 +31,6 @@ import {
   DashboardStats,
   createEmptyStats,
   calculateStats,
-  calculatePercentageChange,
-  getTrendDirection,
   groupScansByDate,
   groupScansByMonth,
   getMonthsOfYear,
@@ -81,7 +79,6 @@ export interface RecentScan extends Scan {
     DiseaseCardComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
@@ -99,13 +96,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   allScans: Scan[] = [];
 
   stats: DashboardStats = createEmptyStats();
-  previousStats: DashboardStats = createEmptyStats();
 
   recentScans: RecentScan[] = [];
   scanLocations = new Map<string, ScanLocationState>();
 
   get summaryCards() {
-    return generateSummaryCards(this.stats, this.selectedYear());
+    return generateSummaryCards(this.stats);
   }
 
   get diseaseCards() {
@@ -113,8 +109,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   Math = Math;
-  calculatePercentageChange = calculatePercentageChange;
-  getTrendDirection = getTrendDirection;
 
   isLoading = false;
   errorMessage = '';
@@ -185,10 +179,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private filterAndProcessData(): void {
     const year = this.selectedYear();
     const filteredScans = filterScansByYear(this.allScans, year);
-    const previousYearScans = filterScansByYear(this.allScans, year - 1);
 
     this.processBarChartData(filteredScans);
-    this.processPreviousYearStats(previousYearScans);
     this.processLineChartData(filteredScans, year);
 
     const today = new Date();
@@ -360,53 +352,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.stats = calculateStats(scans);
   }
-  private processPreviousYearStats(scans: Scan[]): void {
-    this.previousStats = calculateStats(scans);
-  }
-
-  getTrendForMetric(current: number, previous: number): TrendIndicator | undefined {
-    if (previous === 0 && current === 0) return undefined;
-
-    const change = calculatePercentageChange(current, previous);
-    return {
-      direction: getTrendDirection(current, previous),
-      value: `${Math.abs(change).toFixed(0)}%`,
-    };
-  }
-
-  getHealthRateTrend(): TrendIndicator | undefined {
-    const currentRate =
-      this.stats.totalScans > 0 ? (this.stats.healthy / this.stats.totalScans) * 100 : 0;
-    const previousRate =
-      this.previousStats.totalScans > 0
-        ? (this.previousStats.healthy / this.previousStats.totalScans) * 100
-        : 0;
-
-    if (this.previousStats.totalScans === 0) return undefined;
-
-    const direction = getTrendDirection(currentRate, previousRate);
-    return {
-      direction,
-      label: direction === 'up' ? 'Better' : direction === 'down' ? 'Lower' : 'Stable',
-    };
-  }
-
-  getHealthRateInfo(): string {
-    if (this.previousStats.totalScans === 0) {
-      return 'No previous data';
-    }
-    const prevRate = ((this.previousStats.healthy / this.previousStats.totalScans) * 100).toFixed(
-      1,
-    );
-    return `vs ${prevRate}% last year`;
-  }
-
-  getPercentageInfo(value: number): string {
-    return this.stats.totalScans > 0
-      ? `${((value / this.stats.totalScans) * 100).toFixed(1)}% of total`
-      : '0% of total';
-  }
-
   private processLineChartData(scans: Scan[], year: number): void {
     const monthGroups = groupScansByMonth(scans);
     const sortedMonths = getMonthsOfYear(year);
@@ -434,6 +379,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         { ...this.lineChartData.datasets[3], data: podBorerCounts },
       ],
     };
+  }
+
+  formatDisease(key: string | null | undefined): string {
+    const text = (key || 'healthy').replace(/[_-]+/g, ' ').trim();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   navigateToMap(coords?: string) {

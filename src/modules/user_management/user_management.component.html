@@ -1,197 +1,173 @@
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-5 mb-5">
-  <div
-    class="lg:col-span-8 bg-white rounded-[1.5rem] p-3 sm:p-4 shadow-sm border border-slate-100 flex items-center select-none"
-  >
-    <div class="relative group w-full">
-      <span
-        class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 transition-colors text-[22px] z-10"
-      >
-        search
-      </span>
-      <input
-        type="text"
-        placeholder="Search users by name or email..."
-        [(ngModel)]="search"
-        (input)="onSearchChange()"
-        class="block w-full pl-12 pr-5 py-3.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:bg-white transition-all border border-transparent focus:border-green-200"
-      />
-    </div>
-  </div>
+<div class="max-w-7xl mx-auto flex flex-col gap-6 font-['DM_Sans',sans-serif] text-slate-900">
+  <header>
+    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight m-0">User management</h1>
+    <p class="text-sm text-slate-500 m-0 mt-1">Farmers registered in the app and how often they scan.</p>
+  </header>
 
-  <div
-    class="lg:col-span-4 bg-white rounded-[1.5rem] p-4 sm:p-5 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center select-none"
+  <section
+    class="grid grid-cols-3 gap-px bg-slate-200 rounded-2xl border border-slate-200 overflow-hidden"
   >
-    <span class="text-3xl font-bold text-green-600 leading-none">{{ totalUsers }}</span>
-    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 mt-1.5"
-      >Total Users</span
-    >
-  </div>
-</div>
+    <div class="bg-white p-4 sm:p-5">
+      <p class="text-sm text-slate-500 m-0">Users</p>
+      <p class="text-2xl sm:text-3xl font-semibold leading-none mt-2 m-0">{{ users.length }}</p>
+    </div>
+    <div class="bg-white p-4 sm:p-5">
+      <p class="text-sm text-slate-500 m-0">Total scans</p>
+      <p class="text-2xl sm:text-3xl font-semibold leading-none mt-2 m-0">{{ totalScans }}</p>
+    </div>
+    <div class="bg-white p-4 sm:p-5">
+      <p class="text-sm text-slate-500 m-0">Scans per user</p>
+      <p class="text-2xl sm:text-3xl font-semibold leading-none mt-2 m-0">
+        {{ averageScans | number: '1.0-1' }}
+      </p>
+    </div>
+  </section>
 
-<div
-  class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 select-none overflow-hidden"
->
-  <div
-    class="hidden md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 bg-slate-50/50"
-  >
-    <div class="md:col-span-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-      User
-    </div>
-    <div class="md:col-span-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-      Email Address
-    </div>
-    <div class="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-      Barangay
-    </div>
+  <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
     <div
-      class="md:col-span-1 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center"
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-200"
     >
-      Scans
-    </div>
-    <div
-      class="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center"
-    >
-      Actions
-    </div>
-  </div>
+      <h2 class="text-lg font-semibold m-0">
+        {{ totalUsers }} {{ totalUsers === 1 ? 'user' : 'users' }}
+      </h2>
 
-  <div class="flex flex-col">
-    @if (isLoading) {
-      @for (i of [1, 2, 3, 4, 5]; track i) {
-        <div
-          class="flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-b-0 animate-pulse md:items-center"
-        >
-          <div class="flex items-center gap-4 md:col-span-4">
-            <div class="w-10 h-10 rounded-full bg-slate-200 shrink-0"></div>
-            <div class="space-y-2 w-full max-w-[150px]">
-              <div class="h-4 bg-slate-200 rounded-md w-full"></div>
-              <div class="h-3 bg-slate-100 rounded-md w-2/3"></div>
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <label class="block">
+          <span class="sr-only">Search users</span>
+          <input
+            type="search"
+            placeholder="Search name, email or barangay"
+            [(ngModel)]="search"
+            (input)="onSearchChange()"
+            class="block w-full sm:w-72 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus-visible:outline-2 focus-visible:outline-green-700"
+          />
+        </label>
+        <label class="flex items-center gap-2 text-sm text-slate-500">
+          Sort by
+          <select
+            [(ngModel)]="sortBy"
+            (ngModelChange)="onSortChange()"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 focus-visible:outline-2 focus-visible:outline-green-700"
+          >
+            <option value="name">Name</option>
+            <option value="scans">Most scans</option>
+            <option value="newest">Newest</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div
+      class="hidden md:grid md:grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500"
+    >
+      <span class="md:col-span-3">User</span>
+      <span class="md:col-span-3">Email</span>
+      <span class="md:col-span-2">Barangay</span>
+      <span class="md:col-span-3">Scans</span>
+      <span class="md:col-span-1 text-right">Actions</span>
+    </div>
+
+    <div class="divide-y divide-slate-100">
+      @if (isLoading) {
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="px-4 sm:px-6 py-4 md:grid md:grid-cols-12 md:gap-4 md:items-center animate-pulse">
+            <div class="md:col-span-3 space-y-2">
+              <div class="h-4 w-36 bg-slate-100 rounded"></div>
+              <div class="h-3 w-24 bg-slate-100 rounded"></div>
             </div>
+            <div class="hidden md:block md:col-span-3 h-4 w-3/4 bg-slate-100 rounded"></div>
+            <div class="hidden md:block md:col-span-2 h-4 w-2/3 bg-slate-100 rounded"></div>
+            <div class="hidden md:block md:col-span-3 h-2 w-3/4 bg-slate-100 rounded"></div>
+            <div class="hidden md:block md:col-span-1 h-4 w-10 bg-slate-100 rounded ml-auto"></div>
           </div>
-          <div class="md:col-span-3 h-4 bg-slate-200 rounded-md w-3/4 hidden md:block"></div>
-          <div class="md:col-span-2 h-4 bg-slate-200 rounded-md w-2/3 hidden md:block"></div>
-          <div class="md:col-span-1 hidden md:flex justify-center">
-            <div class="w-10 h-8 bg-slate-200 rounded-lg"></div>
-          </div>
-          <div class="md:col-span-2 hidden md:flex justify-center gap-2">
-            <div class="w-9 h-9 bg-slate-200 rounded-lg"></div>
-            <div class="w-9 h-9 bg-slate-200 rounded-lg"></div>
-          </div>
-        </div>
-      }
-    } @else {
-      @for (user of pagedUsers; track user.id) {
-        <div
-          (click)="viewUser(user)"
-          class="group cursor-pointer flex flex-col md:grid md:grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 last:border-b-0 md:items-center hover:bg-slate-50 transition-colors duration-200"
-        >
-          <div class="flex items-center gap-4 md:col-span-4">
-            <div
-              class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-700 text-sm shrink-0"
-            >
-              {{ user.name ? user.name.charAt(0).toUpperCase() : '?' }}
-            </div>
-            <div class="min-w-0">
-              <p
-                class="text-sm font-bold text-slate-800 truncate group-hover:text-green-600 transition-colors"
-              >
-                {{ user.name }}
-              </p>
-              <p class="text-[13px] text-slate-500 mt-0.5">
+        }
+      } @else {
+        @for (user of pagedUsers; track user.id) {
+          <div
+            (click)="viewUser(user)"
+            (keydown.enter)="viewUser(user)"
+            tabindex="0"
+            role="link"
+            class="px-4 sm:px-6 py-4 md:grid md:grid-cols-12 md:gap-4 md:items-center cursor-pointer hover:bg-slate-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-green-700"
+          >
+            <div class="md:col-span-3 min-w-0">
+              <p class="text-sm font-medium text-slate-900 m-0 truncate">{{ user.name }}</p>
+              <p class="text-xs text-slate-500 m-0 mt-0.5">
                 Joined {{ formatDate(user.created_at) }}
               </p>
             </div>
-          </div>
 
-          <div class="flex flex-col md:block md:col-span-3">
-            <span
-              class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-1"
-              >Email Address</span
-            >
-            <span class="text-sm text-slate-600 truncate block">{{ user.email }}</span>
-          </div>
+            <p class="md:col-span-3 text-sm text-slate-600 m-0 mt-2 md:mt-0 truncate">
+              {{ user.email }}
+            </p>
 
-          <div class="flex flex-col md:block md:col-span-2">
-            <span
-              class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-1"
-              >Location</span
-            >
-            <div class="flex items-center gap-1.5 text-sm text-slate-600">
-              <span class="material-symbols-rounded text-[16px] text-slate-400 md:hidden"
-                >location_on</span
-              >
-              <span class="truncate">{{ user.address }}</span>
-            </div>
-          </div>
+            <p class="md:col-span-2 text-sm text-slate-600 m-0 truncate">
+              {{ user.address || 'No barangay' }}
+            </p>
 
-          <div
-            class="flex items-center justify-between md:contents pt-3 md:pt-0 mt-2 md:mt-0 border-t border-slate-100 md:border-none"
-          >
-            <div class="flex items-center gap-2 md:col-span-1 md:justify-center">
-              <span
-                class="md:hidden text-[10px] font-semibold uppercase text-slate-400 tracking-wider"
-                >Scans</span
-              >
-              <span
-                class="inline-flex items-center justify-center min-w-[2.5rem] h-7 px-2.5 bg-slate-100 rounded-full text-xs font-bold text-slate-700 group-hover:bg-green-100 group-hover:text-green-700 transition-colors"
-              >
-                {{ user.total_scans }}
+            <div class="md:col-span-3 flex items-center gap-3 mt-2 md:mt-0">
+              <div class="flex-1 max-w-40 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-green-700 rounded-full"
+                  [style.width.%]="scanShare(user)"
+                ></div>
+              </div>
+              <span class="text-sm font-medium text-slate-900 tabular-nums">
+                {{ user.total_scans ?? 0 }}
               </span>
+              <span class="text-xs text-slate-500 md:hidden">scans</span>
             </div>
 
-            <div class="flex items-center gap-2 md:col-span-2 md:justify-center">
+            <div class="md:col-span-1 flex items-center gap-4 mt-3 md:mt-0 md:justify-end text-sm">
               <button
                 (click)="viewUser(user); $event.stopPropagation()"
-                title="View Profile"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                class="font-medium text-green-700 hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
               >
-                <span class="material-symbols-rounded text-[20px]">visibility</span>
+                View
               </button>
               <button
                 (click)="deleteUser(user); $event.stopPropagation()"
-                title="Delete User"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                class="text-slate-500 hover:text-red-600 hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
               >
-                <span class="material-symbols-rounded text-[20px]">delete</span>
+                Delete
               </button>
             </div>
           </div>
-        </div>
-      } @empty {
-        <div class="py-20 flex flex-col items-center justify-center text-center">
-          <div
-            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4"
-          >
-            <span class="material-symbols-rounded text-3xl text-slate-400">group_off</span>
+        } @empty {
+          <div class="py-14 px-6 text-center">
+            <h3 class="text-base font-semibold m-0">No users found</h3>
+            <p class="text-sm text-slate-500 mt-1 mb-0">
+              @if (search) {
+                Nothing matches "{{ search }}". Try a different name, email or barangay.
+              } @else {
+                Users appear here after they register in the app.
+              }
+            </p>
           </div>
-          <h3 class="text-base font-bold text-slate-800">No users found</h3>
-          <p class="text-sm text-slate-500 mt-1 max-w-sm">
-            We couldn't find anyone matching your search criteria. Try adjusting your filters.
-          </p>
-        </div>
+        }
       }
-    }
-  </div>
-
-  @if (!isLoading && totalUsers > 0) {
-    <div class="p-4 border-t border-slate-100 bg-slate-50/30">
-      <app-pagination
-        variant="compact"
-        [currentPage]="currentPage"
-        [totalPages]="totalPages"
-        [pageStart]="pageStart"
-        [pageEnd]="pageEnd"
-        [totalItems]="totalUsers"
-        itemLabel="users"
-        (pageChange)="goToPage($event)"
-      />
     </div>
-  }
+
+    @if (!isLoading && totalUsers > 0) {
+      <div class="border-t border-slate-200">
+        <app-pagination
+          variant="compact"
+          [currentPage]="currentPage"
+          [totalPages]="totalPages"
+          [pageStart]="pageStart"
+          [pageEnd]="pageEnd"
+          [totalItems]="totalUsers"
+          itemLabel="users"
+          (pageChange)="goToPage($event)"
+        />
+      </div>
+    }
+  </section>
 </div>
 
 <app-confirmation-dialog
   [isOpen]="isConfirmDialogOpen"
-  title="Delete User"
+  title="Delete user"
   [message]="
     'Are you sure you want to delete ' +
     (userToDelete?.name || 'this user') +
@@ -199,7 +175,7 @@
   "
   cancelText="Cancel"
   confirmText="Delete"
-  confirmButtonClass="bg-red-500 hover:bg-red-600"
+  confirmButtonClass="bg-red-600 hover:bg-red-700"
   [isLoading]="isDeleting"
   (confirm)="confirmDelete()"
   (cancel)="cancelDelete()"

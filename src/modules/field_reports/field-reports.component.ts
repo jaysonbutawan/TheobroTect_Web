@@ -7,6 +7,7 @@ import { PaginationComponent } from '../../app/shared/components/pagination/pagi
 import { FieldReportsApiService } from '../../app/core/services/api/field-reports-api.service';
 import { FieldReport, Severity, ReportStatus } from '../../app/shared/models';
 import { ReportPreviewDialogComponent } from './report-preview-dialog.component';
+import { DISEASE_COLORS } from '../dashboard/widgets/chart-config';
 
 @Component({
   selector: 'app-field-reports',
@@ -43,7 +44,7 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   categoryOptions: string[] = ['Black Pod Disease', 'Mealybug', 'Cacao Pod Borer'];
   severityOptions: Severity[] = ['Mild', 'Moderate', 'Severe'];
 
-  yearOptions: number[] = [2026, 2025, 2024, 2023, 2022];
+  yearOptions: number[] = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
   monthOptions = [
     { value: '01', label: 'January' },
@@ -60,69 +61,6 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     { value: '12', label: 'December' },
   ];
 
-  activeDropdown: 'address' | 'category' | 'severity' | 'period' | null = null;
-
-  toggleDropdown(menu: 'address' | 'category' | 'severity' | 'period'): void {
-    if (this.activeDropdown === menu) {
-      this.activeDropdown = null;
-    } else {
-      this.activeDropdown = menu;
-      if (menu === 'period') {
-        this.pendingYear = this.filters.year ? parseInt(this.filters.year, 10) : this.currentYear;
-        this.pendingMonth = this.filters.month ? parseInt(this.filters.month, 10) - 1 : null;
-      }
-    }
-    this.cdr.markForCheck();
-  }
-
-  closeDropdowns(): void {
-    this.activeDropdown = null;
-    this.cdr.markForCheck();
-  }
-
-  selectAddress(val: string): void {
-    this.filters.address = val;
-    this.closeDropdowns();
-    this.onFilterChange();
-  }
-
-  selectCategory(val: string): void {
-    this.filters.disease_key = val;
-    this.closeDropdowns();
-    this.onFilterChange();
-  }
-
-  selectSeverity(val: Severity | ''): void {
-    this.filters.severity_key = val;
-    this.closeDropdowns();
-    this.onFilterChange();
-  }
-
-  panelOpen = false;
-  triggerLabel = 'All Time';
-
-  currentYear = new Date().getFullYear();
-  minYear = 2020;
-  maxYear = this.currentYear;
-
-  pendingYear: number = this.currentYear;
-  pendingMonth: number | null = null;
-
-  months: string[] = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
   filters = {
     address: '',
     disease_key: '',
@@ -135,7 +73,7 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   filteredReports: FieldReport[] = [];
   pagedReports: FieldReport[] = [];
 
-  pageSize = 5;
+  pageSize = 10;
   currentPage = 1;
 
   showReportDialog = false;
@@ -148,54 +86,6 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  togglePanel(): void {
-    this.panelOpen = !this.panelOpen;
-    if (this.panelOpen) {
-      this.pendingYear = this.filters.year ? parseInt(this.filters.year, 10) : this.currentYear;
-      this.pendingMonth = this.filters.month ? parseInt(this.filters.month, 10) - 1 : null;
-    }
-    this.cdr.markForCheck();
-  }
-
-  closePanel(): void {
-    this.panelOpen = false;
-    this.cdr.markForCheck();
-  }
-
-  prevYear(): void {
-    if (this.pendingYear > this.minYear) {
-      this.pendingYear--;
-      this.cdr.markForCheck();
-    }
-  }
-
-  nextYear(): void {
-    if (this.pendingYear < this.maxYear) {
-      this.pendingYear++;
-      this.cdr.markForCheck();
-    }
-  }
-
-  selectMonth(index: number | null): void {
-    this.pendingMonth = index;
-    this.cdr.markForCheck();
-  }
-
-  applyFilter(): void {
-    this.filters.year = this.pendingYear.toString();
-    this.filters.month =
-      this.pendingMonth !== null ? (this.pendingMonth + 1).toString().padStart(2, '0') : '';
-
-    if (this.pendingMonth !== null) {
-      this.triggerLabel = `${this.months[this.pendingMonth]} ${this.pendingYear}`;
-    } else {
-      this.triggerLabel = `${this.pendingYear}`;
-    }
-
-    this.closePanel();
-    this.onFilterChange();
   }
 
   loadReports(): void {
@@ -229,6 +119,10 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
+  get hasActiveFilters(): boolean {
+    return Object.values(this.filters).some((value) => value !== '');
+  }
+
   resetFilters(): void {
     this.filters = {
       address: '',
@@ -237,12 +131,6 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
       year: '',
       month: '',
     };
-
-    this.triggerLabel = 'All Time';
-    this.pendingYear = this.currentYear;
-    this.pendingMonth = null;
-    this.panelOpen = false;
-
     this.onFilterChange();
   }
 
@@ -363,11 +251,11 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   getSeverityClass(sev: Severity): string {
     switch (sev) {
       case 'Mild':
-        return 'bg-green-50 text-green-700 border-green-200';
+        return 'bg-green-50 text-green-700 border-green-100';
       case 'Moderate':
-        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+        return 'bg-amber-50 text-amber-700 border-amber-100';
       case 'Severe':
-        return 'bg-red-50 text-red-700 border-red-200';
+        return 'bg-red-50 text-red-700 border-red-100';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
     }
@@ -391,6 +279,15 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
       default:
         return 'text-slate-600';
     }
+  }
+
+  diseaseColor(diseaseKey: string): string {
+    const key = (diseaseKey || '').toLowerCase().replace(/[-_\s]/g, '');
+    if (key.includes('healthy')) return DISEASE_COLORS.healthy.primary;
+    if (key.includes('blackpod')) return DISEASE_COLORS.blackPod.primary;
+    if (key.includes('mealybug')) return DISEASE_COLORS.mealybug.primary;
+    if (key.includes('podborer')) return DISEASE_COLORS.podBorer.primary;
+    return '#64748b';
   }
 
   getStatusDotClass(status: ReportStatus | number | string): string {

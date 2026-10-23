@@ -35,6 +35,11 @@ export class DiseaseViewModalComponent implements OnChanges {
   @Output() editRequested = new EventEmitter<DiseaseDto>();
 
   activeTab: ModalTab = 'general';
+  readonly tabs: { key: ModalTab; label: string }[] = [
+    { key: 'general', label: 'General' },
+    { key: 'monitoring', label: 'Monitoring' },
+    { key: 'recommendations', label: 'Recommendations' },
+  ];
   isLoading: boolean = false;
 
   monitoringPlans: MonitoringPlanDto[] = [];

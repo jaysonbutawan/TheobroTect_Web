@@ -6,120 +6,55 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    @if (variant === 'compact') {
-      <div
-        class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-3 sm:py-5 border-t border-white/20"
-      >
-        <p class="text-sm text-slate-500">
-          Showing <span class="font-bold text-slate-700">{{ currentPageItemCount }}</span> of
-          <span class="font-bold text-slate-700">{{ totalItems }}</span> {{ itemLabel }}
-        </p>
+    <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 text-sm">
+      <p class="m-0 text-slate-500">
+        @if (variant === 'compact') {
+          Showing {{ currentPageItemCount }} of {{ totalItems }} {{ itemLabel }}
+        } @else {
+          Showing {{ pageStart }} to {{ pageEnd }} of {{ totalItems }} {{ itemLabel }}
+        }
+      </p>
 
-        <div class="flex items-center gap-2">
-          <button
-            (click)="emitPage(currentPage - 1)"
-            [disabled]="currentPage === 1"
-            class="w-7 h-7 bg-white border border-slate-200 rounded-md flex items-center justify-center text-slate-400 disabled:opacity-30 hover:bg-slate-50 transition-colors"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button
+          (click)="emitPage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+          class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+        >
+          Previous
+        </button>
 
-          <div
-            class="w-8 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-md text-sm font-bold text-slate-700"
-          >
-            {{ currentPage }}
-          </div>
-
-          <button
-            (click)="emitPage(currentPage + 1)"
-            [disabled]="currentPage === totalPages"
-            class="w-7 h-7 bg-white border border-slate-200 rounded-md flex items-center justify-center text-slate-400 disabled:opacity-30 hover:bg-slate-50 transition-colors"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    } @else {
-      <div
-        class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-3 sm:py-5 border-t border-white/20"
-      >
-        <p class="text-xs font-bold text-slate-500">
-          Showing <span class="text-slate-800">{{ pageStart }} to {{ pageEnd }}</span> of
-          <span class="text-slate-800">{{ totalItems }}</span> {{ itemLabel }}
-        </p>
-
-        <div class="flex flex-wrap items-center gap-1.5">
-          <button
-            (click)="emitPage(currentPage - 1)"
-            [disabled]="currentPage === 1"
-            class="w-7 h-7 bg-white/80 border border-white/40 rounded-lg flex items-center justify-center disabled:opacity-30 hover:bg-white transition-colors"
-          >
-            <svg
-              class="w-3 h-3 text-slate-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              stroke-width="2.5"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-
+        @if (variant === 'compact') {
+          <span class="px-2 text-slate-600">Page {{ currentPage }} of {{ totalPages }}</span>
+        } @else {
           @for (p of visiblePages; track p) {
             @if (p === -1) {
-              <span
-                class="w-7 h-7 flex items-center justify-center text-xs font-black text-slate-400"
-                >…</span
-              >
+              <span class="px-1 text-slate-400">…</span>
             } @else {
               <button
                 (click)="emitPage(p)"
-                class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black border transition-colors"
+                class="min-w-8 px-2 py-1.5 rounded-lg border"
                 [ngClass]="
                   p === currentPage
-                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                    : 'bg-white/80 border-white/40 text-slate-600 hover:bg-white'
+                    ? 'bg-slate-900 border-slate-900 text-white'
+                    : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
                 "
               >
                 {{ p }}
               </button>
             }
           }
+        }
 
-          <button
-            (click)="emitPage(currentPage + 1)"
-            [disabled]="currentPage === totalPages"
-            class="w-7 h-7 bg-white/80 border border-white/40 rounded-lg flex items-center justify-center disabled:opacity-30 hover:bg-white transition-colors"
-          >
-            <svg
-              class="w-3 h-3 text-slate-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              stroke-width="2.5"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div>
+        <button
+          (click)="emitPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+          class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+        >
+          Next
+        </button>
       </div>
-    }
+    </div>
   `,
 })
 export class PaginationComponent {

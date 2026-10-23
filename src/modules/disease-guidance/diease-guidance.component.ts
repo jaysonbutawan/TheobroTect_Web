@@ -63,6 +63,11 @@ export class DiseaseGuidanceComponent implements OnInit, OnDestroy {
   isSavingDisease = false;
 
   currentStep = 1;
+  readonly steps = [
+    { number: 1, label: 'General information' },
+    { number: 2, label: 'Monitoring' },
+    { number: 3, label: 'Recommendations' },
+  ];
   translating: Record<string, boolean> = {};
   private debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 

@@ -5,299 +5,149 @@
   (editRequested)="onTableEditDisease($event)"
 />
 
-<main class="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-gray-50 text-slate-900">
-  <header
-    class="z-30 flex flex-shrink-0 flex-col gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:px-6 lg:px-8"
-  >
-    <div class="min-w-0 flex-1">
-      <h1 class="text-xl font-bold tracking-tight text-gray-950 sm:text-2xl">Disease Guidance</h1>
-      <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
-        Manage detection labels, field monitoring schedules, and severity-based guidance.
+<div class="max-w-7xl mx-auto flex flex-col gap-6 font-['DM_Sans',sans-serif] text-slate-900">
+  <header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight m-0">Disease guide</h1>
+      <p class="text-sm text-slate-500 m-0 mt-1">
+        What the app tells farmers about each disease: description, rescan schedule and advice.
       </p>
     </div>
 
-    <div class="flex items-center gap-2 sm:flex-shrink-0">
-      <div
-        class="hidden items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-600 md:flex"
-        aria-label="English content is translated to Filipino"
-      >
-        <svg
-          class="h-4 w-4 text-green-700"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <path d="m5 8 6 6" />
-          <path d="m4 14 6-6 2-3" />
-          <path d="M2 5h12" />
-          <path d="M7 2h1" />
-          <path d="m22 22-5-10-5 10" />
-          <path d="M14 18h6" />
-        </svg>
-        English to Filipino
-      </div>
-
-      <button
-        type="button"
-        (click)="onToggleView()"
-        class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 sm:flex-none"
-        [ngClass]="
-          showAddedDiseases
-            ? 'bg-green-700 text-white hover:bg-green-800'
-            : 'border border-gray-300 bg-white text-gray-700 hover:border-green-600 hover:text-green-700'
-        "
-      >
-        @if (showAddedDiseases) {
-          <svg
-            class="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Add disease
-        } @else {
-          <svg
-            class="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          View diseases
-        }
-      </button>
-    </div>
+    <button
+      type="button"
+      (click)="onToggleView()"
+      class="self-start sm:self-auto px-4 py-2.5 rounded-lg text-sm font-medium focus-visible:outline-2 focus-visible:outline-green-700"
+      [ngClass]="
+        showAddedDiseases
+          ? 'bg-slate-900 text-white hover:bg-slate-800'
+          : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
+      "
+    >
+      {{ showAddedDiseases ? 'Add disease' : 'Back to all diseases' }}
+    </button>
   </header>
 
   @if (!showAddedDiseases) {
-    <section
-      class="flex min-h-0 flex-1 flex-col overflow-hidden"
-      aria-label="Disease guidance editor"
-    >
-      <div class="flex-shrink-0 border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-5xl">
-          @if (currentEditId) {
-            <div class="flex items-center justify-between gap-3 border-b border-gray-100 py-3">
-              <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-wide text-green-700">
-                  Editing saved guidance
-                </p>
-                <p class="mt-0.5 truncate text-sm font-semibold text-gray-900">
-                  {{ form.get('nameEn')?.value || 'Disease guidance' }}
-                </p>
-              </div>
-              <span
-                class="hidden rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 sm:inline"
-              >
-                {{ selectedDiseaseKey || 'No label' }}
-              </span>
-            </div>
+    <section class="flex flex-col gap-6 w-full max-w-5xl" aria-label="Disease guidance editor">
+      <div>
+        @if (currentEditId) {
+          <p class="text-sm text-slate-500 m-0 mb-3">
+            Editing
+            <span class="font-medium text-slate-900">{{ form.get('nameEn')?.value || 'this disease' }}</span>
+          </p>
+        }
+
+        <nav class="flex gap-1 border-b border-slate-200 overflow-x-auto" aria-label="Steps">
+          @for (step of steps; track step.number) {
+            <button
+              type="button"
+              (click)="setStep(step.number)"
+              [disabled]="step.number > 1 && !isDiseaseContextActive"
+              class="whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="
+                currentStep === step.number
+                  ? 'border-slate-900 text-slate-900'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
+              "
+              [attr.aria-current]="currentStep === step.number ? 'step' : null"
+            >
+              {{ step.number }}. {{ step.label }}
+            </button>
           }
-
-          <nav class="overflow-x-auto py-3 sm:py-4" aria-label="Configuration steps">
-            <ol class="grid min-w-[34rem] grid-cols-3 gap-2 sm:min-w-0">
-              <li>
-                <button
-                  type="button"
-                  (click)="setStep(1)"
-                  class="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
-                  [ngClass]="
-                    currentStep === 1
-                      ? 'bg-green-50 text-green-800'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  "
-                  [attr.aria-current]="currentStep === 1 ? 'step' : null"
-                >
-                  <span
-                    class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                    [ngClass]="
-                      currentStep === 1 ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'
-                    "
-                    >1</span
-                  >
-                  <span>
-                    <span class="block text-sm font-semibold">General information</span>
-                    <span class="hidden text-xs text-gray-500 lg:block"
-                      >Name, description, and label</span
-                    >
-                  </span>
-                </button>
-              </li>
-
-              <li>
-                <button
-                  type="button"
-                  (click)="setStep(2)"
-                  [disabled]="!isDiseaseContextActive"
-                  class="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 disabled:cursor-not-allowed disabled:opacity-45"
-                  [ngClass]="
-                    currentStep === 2
-                      ? 'bg-green-50 text-green-800'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  "
-                  [attr.aria-current]="currentStep === 2 ? 'step' : null"
-                  [attr.aria-label]="
-                    !isDiseaseContextActive
-                      ? 'Monitoring, locked until general information is saved'
-                      : 'Monitoring'
-                  "
-                >
-                  <span
-                    class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                    [ngClass]="
-                      currentStep === 2 ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'
-                    "
-                    >2</span
-                  >
-                  <span>
-                    <span class="block text-sm font-semibold">Monitoring</span>
-                    <span class="hidden text-xs text-gray-500 lg:block"
-                      >Rescan schedule and message</span
-                    >
-                  </span>
-                </button>
-              </li>
-
-              <li>
-                <button
-                  type="button"
-                  (click)="setStep(3)"
-                  [disabled]="!isDiseaseContextActive"
-                  class="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 disabled:cursor-not-allowed disabled:opacity-45"
-                  [ngClass]="
-                    currentStep === 3
-                      ? 'bg-green-50 text-green-800'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  "
-                  [attr.aria-current]="currentStep === 3 ? 'step' : null"
-                  [attr.aria-label]="
-                    !isDiseaseContextActive
-                      ? 'Recommendations, locked until general information is saved'
-                      : 'Recommendations'
-                  "
-                >
-                  <span
-                    class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                    [ngClass]="
-                      currentStep === 3 ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'
-                    "
-                    >3</span
-                  >
-                  <span>
-                    <span class="block text-sm font-semibold">Recommendations</span>
-                    <span class="hidden text-xs text-gray-500 lg:block">Actions by severity</span>
-                  </span>
-                </button>
-              </li>
-            </ol>
-          </nav>
-        </div>
-      </div>
-
-      <div class="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-        <div class="mx-auto max-w-5xl">
-          @if (currentStep === 1) {
-            <app-general-info-form
-              [form]="form"
-              [translating]="translating"
-              [diseaseKeys]="diseaseKeys"
-              [selectedLabel]="selectedLabel"
-              (nameInput)="onEnInput('nameEn', 'nameTl')"
-              (descriptionInput)="onEnInput('descEn', 'descTl')"
-              (labelChange)="onLabelSelectedFromChild($event)"
-            />
-          } @else if (currentStep === 2) {
-            <app-monitoring-setup
-              [form]="form"
-              [diseaseId]="currentEditId"
-              [diseaseKey]="selectedDiseaseKey"
-            />
-          } @else {
-            <app-recommendations-setup
-              [form]="form"
-              [diseaseKey]="selectedDiseaseKey ?? ''"
-              [sevData]="sevData"
-              [diseaseId]="currentEditId"
-            />
-          }
-        </div>
-      </div>
-
-      <footer class="flex-shrink-0 border-t border-gray-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
-        <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-          <button
-            type="button"
-            (click)="onCancelInternal()"
-            class="min-h-11 rounded-lg px-3 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
-          >
-            Cancel
-          </button>
-
-          <div class="ml-auto flex items-center gap-2">
-            @if (currentStep > 1) {
-              <button
-                type="button"
-                (click)="setStep(currentStep - 1)"
-                class="min-h-11 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
-              >
-                Previous
-              </button>
-            }
-
-            @if (currentStep === 1) {
-              <button
-                type="button"
-                (click)="onSaveAndContinue()"
-                [disabled]="isSaveDisabled"
-                class="min-h-11 rounded-lg bg-green-700 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
-              >
-                {{ isSavingDisease ? 'Saving…' : 'Save and continue' }}
-              </button>
-            } @else if (currentStep === 2) {
-              <button
-                type="button"
-                (click)="setStep(3)"
-                class="min-h-11 rounded-lg bg-green-700 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
-              >
-                Continue
-              </button>
-            } @else {
-              <button
-                type="button"
-                (click)="onFinishConfiguration()"
-                class="min-h-11 rounded-lg bg-green-700 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
-              >
-                Finish
-              </button>
-            }
-          </div>
-        </div>
-      </footer>
-    </section>
-  } @else {
-    <section class="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" aria-label="Saved diseases">
-      <div class="mx-auto max-w-7xl">
-        @if (isLoading) {
-          <app-disease-table-skeleton />
-        } @else {
-          <app-disease-table
-            [existingRecords]="existingRecords"
-            [diseaseKeys]="diseaseKeys"
-            (view)="onTableViewDisease($event)"
-            (edit)="onTableEditDisease($event)"
-            (deleteConfirmed)="onTableDeleteConfirmed($event)"
-          />
+        </nav>
+        @if (!isDiseaseContextActive) {
+          <p class="text-sm text-slate-500 m-0 mt-3">
+            Save the general information first to unlock the other steps.
+          </p>
         }
       </div>
+
+      @if (currentStep === 1) {
+        <app-general-info-form
+          [form]="form"
+          [translating]="translating"
+          [diseaseKeys]="diseaseKeys"
+          [selectedLabel]="selectedLabel"
+          (nameInput)="onEnInput('nameEn', 'nameTl')"
+          (descriptionInput)="onEnInput('descEn', 'descTl')"
+          (labelChange)="onLabelSelectedFromChild($event)"
+        />
+      } @else if (currentStep === 2) {
+        <app-monitoring-setup
+          [form]="form"
+          [diseaseId]="currentEditId"
+          [diseaseKey]="selectedDiseaseKey"
+        />
+      } @else {
+        <app-recommendations-setup
+          [form]="form"
+          [diseaseKey]="selectedDiseaseKey ?? ''"
+          [sevData]="sevData"
+          [diseaseId]="currentEditId"
+        />
+      }
+
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          (click)="onCancelInternal()"
+          class="text-sm font-medium text-slate-500 hover:text-slate-900 hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
+        >
+          Cancel
+        </button>
+
+        <div class="flex items-center gap-2 ml-auto">
+          @if (currentStep > 1) {
+            <button
+              type="button"
+              (click)="setStep(currentStep - 1)"
+              class="px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-green-700"
+            >
+              Previous
+            </button>
+          }
+
+          @if (currentStep === 1) {
+            <button
+              type="button"
+              (click)="onSaveAndContinue()"
+              [disabled]="isSaveDisabled"
+              class="px-4 py-2.5 rounded-lg bg-slate-900 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-green-700"
+            >
+              {{ isSavingDisease ? 'Saving…' : 'Save and continue' }}
+            </button>
+          } @else if (currentStep === 2) {
+            <button
+              type="button"
+              (click)="setStep(3)"
+              class="px-4 py-2.5 rounded-lg bg-slate-900 text-sm font-medium text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-green-700"
+            >
+              Continue
+            </button>
+          } @else {
+            <button
+              type="button"
+              (click)="onFinishConfiguration()"
+              class="px-4 py-2.5 rounded-lg bg-slate-900 text-sm font-medium text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-green-700"
+            >
+              Finish
+            </button>
+          }
+        </div>
+      </div>
     </section>
+  } @else {
+    @if (isLoading) {
+      <app-disease-table-skeleton />
+    } @else {
+      <app-disease-table
+        [existingRecords]="existingRecords"
+        [diseaseKeys]="diseaseKeys"
+        (view)="onTableViewDisease($event)"
+        (edit)="onTableEditDisease($event)"
+        (deleteConfirmed)="onTableDeleteConfirmed($event)"
+      />
+    }
   }
-</main>
+</div>

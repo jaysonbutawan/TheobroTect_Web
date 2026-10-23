@@ -1,6 +1,14 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterOutlet,
+} from '@angular/router';
 
 import { SidebarComponent } from '../../modules/sidebar/sidebar.component';
 import { ToastService } from '../../app/shared/components/toast/toast.service';
@@ -19,6 +27,8 @@ export class LayoutComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
 
+  /** True while a page is loading, so a click on the menu never looks ignored. */
+  navigating = signal(false);
   isMobileMenuOpen = false;
   sideCollapsed = false;
   showLogoutConfirm = false;
@@ -28,7 +38,18 @@ export class LayoutComponent {
   readonly SIDEBAR_COLLAPSED_WIDTH = SIDEBAR_COLLAPSED_WIDTH;
   readonly SIDEBAR_EXPANDED_WIDTH = SIDEBAR_EXPANDED_WIDTH;
 
-  constructor(public toastService: ToastService) {}
+  constructor(public toastService: ToastService) {
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
+      if (event instanceof NavigationStart) this.navigating.set(true);
+      else if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        this.navigating.set(false);
+      }
+    });
+  }
 
   toggleMobileMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;

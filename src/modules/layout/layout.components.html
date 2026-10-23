@@ -7,6 +7,12 @@
     class="hidden md:flex h-screen fixed left-0 top-0 shrink-0 z-20 overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"
   />
 
+  @if (navigating()) {
+    <div class="nav-progress fixed top-0 left-0 right-0 h-0.5 z-[10000] overflow-hidden bg-green-100">
+      <div class="nav-progress-bar h-full w-1/3 bg-green-700"></div>
+    </div>
+  }
+
   <main
     [style.--sbw.px]="sideCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH"
     class="flex-1 flex flex-col min-w-0 ml-0 md:ml-[var(--sbw)] transition-[margin] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"

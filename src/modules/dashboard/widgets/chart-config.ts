@@ -3,28 +3,24 @@ import { ChartConfiguration } from 'chart.js';
 export const DISEASE_COLORS = {
   healthy: {
     primary: '#10b981',
-    rgb: 'rgba(16, 185, 129, 0.1)',
   },
   blackPod: {
     primary: '#dc2626',
-    rgb: 'rgba(220, 38, 38, 0.1)',
   },
   mealybug: {
     primary: '#3b82f6',
-    rgb: 'rgba(59, 130, 246, 0.1)',
   },
   podBorer: {
     primary: '#eab308',
-    rgb: 'rgba(234, 179, 8, 0.1)',
   },
 } as const;
 
 const commonLineDatasetConfig = {
-  tension: 0.4,
-  fill: true,
-  pointRadius: 4,
-  pointHoverRadius: 6,
-  borderWidth: 3,
+  tension: 0,
+  fill: false,
+  pointRadius: 3,
+  pointHoverRadius: 5,
+  borderWidth: 2,
   pointBorderColor: '#ffffff',
   pointBorderWidth: 2,
 };
@@ -37,7 +33,6 @@ export function createLineChartDataset(
     data: [],
     label,
     borderColor: color.primary,
-    backgroundColor: color.rgb,
     pointBackgroundColor: color.primary,
     ...commonLineDatasetConfig,
   };

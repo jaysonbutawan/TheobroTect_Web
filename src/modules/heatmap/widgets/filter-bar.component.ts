@@ -85,12 +85,8 @@ const DEFAULT_FILTER: FilterState = {
       [class.shadow-[0_0_0_3px_rgba(15,23,42,0.06)]]="panelOpen"
       (click)="togglePanel()"
     >
-      <svg class="w-[15px] h-[15px] text-slate-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-      <span class="hidden sm:inline text-slate-400 font-normal">Period:</span>
-      <span class="hidden sm:inline">{{ triggerLabel }}</span>
-      <svg class="hidden sm:block w-[13px] h-[13px] text-slate-400 transition-transform duration-200" [class.rotate-180]="panelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="text-slate-400 font-normal">Period:</span>
+      <span>{{ triggerLabel }}</span>
     </button>
 
     @if (panelOpen) {
@@ -110,12 +106,12 @@ const DEFAULT_FILTER: FilterState = {
         <div class="grid grid-cols-3 gap-[6px] mb-[18px]">
           @for (month of months; track $index) {
             <button
-              class="py-[9px] px-1 bg-white border border-slate-200 rounded-lg text-[11.5px] font-semibold tracking-[0.03em] text-slate-600 hover:bg-slate-50"
+              class="py-[9px] px-1 bg-white border border-slate-200 rounded-lg text-[11.5px] font-semibold text-slate-600 hover:bg-slate-50"
               [class.!bg-slate-900]="$index === pendingMonth"
               [class.!border-slate-900]="$index === pendingMonth"
               [class.!text-white]="$index === pendingMonth"
               (click)="selectMonth($index)"
-            >{{ month.toUpperCase() }}</button>
+            >{{ month }}</button>
           }
         </div>
 
@@ -133,15 +129,12 @@ const DEFAULT_FILTER: FilterState = {
       aria-label="Filter by disease: {{ activeDisease?.label || 'Select Disease' }}"
       title="Filter by disease: {{ activeDisease?.label || 'Select Disease' }}"
       class="flex items-center gap-[7px] px-[10px] sm:px-[14px] py-[9px] bg-white border border-slate-200 rounded-[10px] cursor-pointer text-[13px] font-medium text-slate-900 transition-all duration-150 whitespace-nowrap select-none leading-none hover:bg-slate-50 hover:border-slate-300"
-      [class.border-slate-900]="diseasePanelOpen"
+      [class.border-slate-900]="diseasePanelOpen || appliedFilter.disease !== 'all'"
       [class.shadow-[0_0_0_3px_rgba(15,23,42,0.06)]]="diseasePanelOpen"
       (click)="toggleDiseasePanel()"
     >
-      <svg class="w-[15px] h-[15px] text-slate-400 flex-shrink-0" [class.text-slate-900]="diseasePanelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <span class="hidden sm:inline">{{ activeDisease?.label || 'Select Disease' }}</span>
-      <svg class="hidden sm:block w-[13px] h-[13px] text-slate-400 transition-transform duration-200" [class.rotate-180]="diseasePanelOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="text-slate-400 font-normal">Disease:</span>
+      <span>{{ activeDisease?.label || 'Select Disease' }}</span>
     </button>
 
     @if (diseasePanelOpen) {
@@ -153,14 +146,11 @@ const DEFAULT_FILTER: FilterState = {
             <h3 class="text-[15px] font-semibold text-slate-900 leading-tight">Disease Filter</h3>
             <p class="text-[12px] text-slate-500 mt-0.5">Select specific diseases for reporting</p>
           </div>
-          <button aria-label="Close" class="text-slate-400 hover:text-slate-700 transition-colors" (click)="closeDiseasePanel()">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
+          <button class="text-[13px] text-slate-500 hover:text-slate-900 transition-colors" (click)="closeDiseasePanel()">Close</button>
         </div>
 
         <div class="px-4 py-3">
           <div class="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-md focus-within:border-slate-400 focus-within:ring-1 focus-within:ring-slate-400 transition-all">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
               type="text"
               [(ngModel)]="searchQuery"
@@ -216,27 +206,13 @@ const DEFAULT_FILTER: FilterState = {
     }
   </div>
 
-  @if (activeDisease && activeDisease.value !== 'all') {
-    <span
-      aria-label="Active filter: {{ activeDisease.label }}"
-      title="Active filter: {{ activeDisease.label }}"
-      class="inline-flex items-center gap-[6px] px-[9px] sm:px-[11px] py-[5px] bg-green-50 border border-green-200 rounded-full text-[12px] font-medium text-green-700"
-    >
-      <span class="w-[6px] h-[6px] rounded-full bg-green-500 flex-shrink-0"></span>
-      <span class="hidden sm:inline">{{ activeDisease.label }}</span>
-    </span>
-  }
-
   <button
     aria-label="Reset filters"
     title="Reset filters"
     class="flex items-center gap-[6px] px-[10px] sm:px-[14px] py-[9px] bg-slate-50 border border-slate-200 rounded-[10px] text-[13px] font-medium text-slate-500 cursor-pointer transition-all hover:bg-white hover:text-slate-900"
     (click)="resetFilters()"
   >
-    <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
-    </svg>
-    <span class="hidden sm:inline">Reset</span>
+    <span>Reset</span>
   </button>
 
 </div>`

@@ -1,6 +1,73 @@
 import { Injectable } from '@angular/core';
 import type * as LeafletType from 'leaflet';
 import { Scan } from '../../app/shared/models';
+import { DISEASE_SHADES, SeverityShades } from './heatmap.models';
+
+export type BaseLayerKey = 'streets' | 'terrain' | 'satellite';
+export type OverlayKey = 'barangays' | 'puroks';
+
+/** Puroks are small, so their labels only appear once the map is zoomed in this far. */
+const PUROK_MIN_ZOOM = 15;
+const PLACES_URL = 'map/places.json';
+
+interface PlacesSnapshot {
+  barangays: { name: string; rings: LeafletType.LatLngTuple[][] }[];
+  puroks: { name: string; lat: number; lon: number }[];
+}
+
+const severityWeight = (p: any[]): number => {
+  if (p[4] === 'severe') return 1.0;
+  if (p[4] === 'moderate') return 0.6;
+  return 0.25;
+};
+
+/** Flat colour bands (no blending between severities): weights 0.25 / 0.6 / 1.0 land in mild / moderate / severe. */
+const bandedGradient = (c: SeverityShades): Record<number, string> => ({
+  0: c.mild,
+  0.4: c.mild,
+  0.41: c.moderate,
+  0.8: c.moderate,
+  0.81: c.severe,
+  1: c.severe,
+});
+
+const HEAT_GROUPS: {
+  match: (d: string) => boolean;
+  shades: SeverityShades;
+  minOpacity: number;
+  weight: (p: any[]) => number;
+}[] = [
+  {
+    match: (d) => d.includes('healthy'),
+    shades: DISEASE_SHADES.healthy,
+    minOpacity: 0.45,
+    weight: () => 0.6,
+  },
+  {
+    match: (d) => d.includes('mealybug'),
+    shades: DISEASE_SHADES.mealybug,
+    minOpacity: 0.45,
+    weight: severityWeight,
+  },
+  {
+    match: (d) => d.includes('blackpod'),
+    shades: DISEASE_SHADES.blackPod,
+    minOpacity: 0.4,
+    weight: severityWeight,
+  },
+  {
+    match: (d) => d.includes('podborer'),
+    shades: DISEASE_SHADES.podBorer,
+    minOpacity: 0.45,
+    weight: severityWeight,
+  },
+  {
+    match: (d) => !['healthy', 'mealybug', 'blackpod', 'podborer'].some((k) => d.includes(k)),
+    shades: DISEASE_SHADES.mealybug,
+    minOpacity: 0.45,
+    weight: severityWeight,
+  },
+];
 
 @Injectable({ providedIn: 'root' })
 export class HeatmapMapService {
@@ -39,6 +106,15 @@ export class HeatmapMapService {
   ];
 
   private resizeObserver?: ResizeObserver;
+  private mapReady?: Promise<void>;
+  private baseLayers: Record<BaseLayerKey, LeafletType.TileLayer> | null = null;
+  private activeBase: BaseLayerKey = 'streets';
+  private heatLayers: any[] = [];
+  private heatSyncBound = false;
+  private heatFrame = 0;
+  private overlayVisible: Record<OverlayKey, boolean> = { barangays: true, puroks: true };
+  private barangayLayer?: LeafletType.LayerGroup;
+  private purokLayer?: LeafletType.LayerGroup;
 
   private async getLeaflet(): Promise<typeof LeafletType> {
     if (!this.L) {
@@ -49,7 +125,13 @@ export class HeatmapMapService {
     return this.L;
   }
 
-  async initMap(containerId: string): Promise<void> {
+  /** Scan plotting waits on this, so data that arrives before the map is built is not lost. */
+  initMap(containerId: string): Promise<void> {
+    this.mapReady = this.createMap(containerId);
+    return this.mapReady;
+  }
+
+  private async createMap(containerId: string): Promise<void> {
     await this.getLeaflet();
 
     const streetsAndBuildings = this.L.tileLayer(
@@ -82,16 +164,92 @@ export class HeatmapMapService {
       layers: [streetsAndBuildings],
     });
 
-    const baseMaps = {
-      'Streets & Buildings': streetsAndBuildings,
-      'Detailed Terrain': terrainView,
-      'Satellite Hybrid': satelliteHybrid,
-    };
+    this.baseLayers = { streets: streetsAndBuildings, terrain: terrainView, satellite: satelliteHybrid };
+    this.activeBase = 'streets';
 
-    this.L.control.layers(baseMaps, {}, { position: 'bottomleft' }).addTo(this.map);
+    this.L.control.scale({ position: 'bottomleft', imperial: false }).addTo(this.map);
+    this.L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
     this.drawBoundary();
     this.observeResize(containerId);
+    this.map.on('zoomend', () => this.syncOverlays());
+    this.map.attributionControl.addAttribution('Places &copy; OpenStreetMap contributors');
+    void this.loadPlaces();
+  }
+
+  setOverlay(key: OverlayKey, visible: boolean): void {
+    this.overlayVisible[key] = visible;
+    this.syncOverlays();
+  }
+
+  /** Fires when the user clicks empty map (a click on a scan spot does not count). */
+  onMapClick(callback: () => void): void {
+    this.map?.on('click', callback);
+  }
+
+  /**
+   * Barangay outlines and purok names are a snapshot of OpenStreetMap (public/map/places.json).
+   * It is bundled because the public Overpass API is too slow and rate-limited to call on every
+   * page load; re-export it from Overpass when the community maps new places.
+   */
+  private async loadPlaces(): Promise<void> {
+    try {
+      const res = await fetch(PLACES_URL);
+      if (!res.ok || !this.map) return;
+      const data: PlacesSnapshot = await res.json();
+
+      const barangays = this.L.layerGroup();
+      for (const b of data.barangays) {
+        b.rings.forEach((ring) =>
+          this.L.polyline(ring, { color: '#334155', weight: 1.5, dashArray: '6 6', opacity: 0.8, interactive: false }).addTo(barangays),
+        );
+        this.addLabel(this.L.latLngBounds(b.rings.flat()).getCenter(), b.name, 'map-label-barangay', barangays);
+      }
+
+      const puroks = this.L.layerGroup();
+      data.puroks.forEach((p) => this.addLabel([p.lat, p.lon], p.name, 'map-label-purok', puroks));
+
+      this.barangayLayer = barangays;
+      this.purokLayer = puroks;
+      this.syncOverlays();
+    } catch {
+      /* labels are optional */
+    }
+  }
+
+  private addLabel(at: LeafletType.LatLngExpression, name: string | undefined, cls: string, group: LeafletType.LayerGroup): void {
+    if (!name) return;
+    const span = document.createElement('span');
+    span.className = `map-label ${cls}`;
+    span.textContent = name;
+    this.L.marker(at, {
+      interactive: false,
+      keyboard: false,
+      icon: this.L.divIcon({ className: 'map-label-icon', html: span, iconSize: [0, 0] }),
+    }).addTo(group);
+  }
+
+  private syncOverlays(): void {
+    if (!this.map) return;
+    const show = (layer: LeafletType.LayerGroup | undefined, on: boolean) => {
+      if (!layer) return;
+      if (on && !this.map.hasLayer(layer)) layer.addTo(this.map);
+      else if (!on && this.map.hasLayer(layer)) this.map.removeLayer(layer);
+    };
+    show(this.barangayLayer, this.overlayVisible.barangays);
+    show(this.purokLayer, this.overlayVisible.puroks && this.map.getZoom() >= PUROK_MIN_ZOOM);
+  }
+
+  setBaseLayer(key: BaseLayerKey): void {
+    if (!this.map || !this.baseLayers || key === this.activeBase) return;
+    this.map.removeLayer(this.baseLayers[this.activeBase]);
+    this.baseLayers[key].addTo(this.map).bringToBack();
+    this.activeBase = key;
+  }
+
+  /** Fires when the user starts dragging the map. */
+  onDragStart(callback: () => void): void {
+    this.map?.on('dragstart', callback);
   }
 
   private observeResize(containerId: string): void {
@@ -107,6 +265,11 @@ export class HeatmapMapService {
 
   destroyMap(): void {
     this.resizeObserver?.disconnect();
+    if (this.heatFrame) cancelAnimationFrame(this.heatFrame);
+    this.heatFrame = 0;
+    this.heatLayers = [];
+    this.heatSyncBound = false;
+    this.barangayLayer = this.purokLayer = undefined;
     if (this.map) this.map.remove();
   }
 
@@ -115,9 +278,11 @@ export class HeatmapMapService {
   }
 
   async clearScanLayers(): Promise<void> {
+    await this.mapReady;
     if (!this.map) return;
     await this.getLeaflet();
 
+    this.heatLayers = [];
     this.map.eachLayer((layer) => {
       if (layer instanceof (this.L as any).HeatLayer || layer instanceof this.L.CircleMarker) {
         if (!layer.getPopup()?.getContent()?.toString().includes('Target Area')) {
@@ -128,6 +293,8 @@ export class HeatmapMapService {
   }
 
   async plotMarkers(scans: Scan[], onMarkerClick: (scan: Scan) => void): Promise<void> {
+    await this.mapReady;
+    if (!this.map) return;
     await this.getLeaflet();
     await this.clearScanLayers();
 
@@ -153,6 +320,7 @@ export class HeatmapMapService {
   }
 
   async focusOnLocation(lat: number, lng: number): Promise<void> {
+    await this.mapReady;
     if (!this.map) return;
     await this.getLeaflet();
 
@@ -160,12 +328,9 @@ export class HeatmapMapService {
 
     const highlightIcon = this.L.divIcon({
       className: 'custom-div-icon',
-      html: `<div class="relative flex items-center justify-center">
-               <div class="absolute w-12 h-12 bg-green-500 rounded-full animate-ping opacity-20"></div>
-               <div class="w-8 h-8 bg-white border-4 border-green-600 rounded-full shadow-2xl relative z-10"></div>
-             </div>`,
-      iconSize: [48, 48],
-      iconAnchor: [24, 24],
+      html: `<div class="w-6 h-6 bg-white border-4 border-green-600 rounded-full"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
     });
 
     this.L.marker([lat, lng], { icon: highlightIcon })
@@ -174,111 +339,50 @@ export class HeatmapMapService {
       .openPopup();
   }
 
+  /**
+   * Heat colours are unchanged per disease. Each layer is registered so it can be
+   * redrawn while the map moves (leaflet.heat only redraws on `moveend`, which made
+   * the spots slide and clip at the canvas edge during a drag).
+   */
   private renderHeatLayers(heatPoints: any[]): void {
-    const healthyPoints = heatPoints
-      .filter((p) => p[2] !== undefined && (p[3] as string).includes('healthy'))
-      .map((p) => [p[0], p[1], p[2]]);
+    const radius = this.heatRadius();
+    for (const g of HEAT_GROUPS) {
+      const points = heatPoints
+        .filter((p) => g.match(p[3] as string))
+        .map((p) => [p[0], p[1], g.weight(p)]);
+      if (!points.length) continue;
 
-    if (healthyPoints.length) {
-      (this.L as any)
-        .heatLayer(healthyPoints, {
-          radius: 50,
-          blur: 25,
-          max: 1.0,
-          minOpacity: 0.45,
-          gradient: { 0.2: '#bbf7d0', 0.5: '#4ade80', 0.8: '#16a34a', 1.0: '#14532d' },
-        })
+      const layer = (this.L as any)
+        .heatLayer(points, { radius, blur: 25, max: 1.0, minOpacity: g.minOpacity, gradient: bandedGradient(g.shades) })
         .addTo(this.map);
+      this.heatLayers.push(layer);
     }
 
-    const mealybugPoints = heatPoints
-      .filter((p) => (p[3] as string).includes('mealybug'))
-      .map((p) => [p[0], p[1], p[2]]);
+    this.bindHeatSync();
+  }
 
-    if (mealybugPoints.length) {
-      (this.L as any)
-        .heatLayer(mealybugPoints, {
-          radius: 50,
-          blur: 25,
-          max: 1.0,
-          minOpacity: 0.45,
-          gradient: { 0.2: '#bfdbfe', 0.5: '#3b82f6', 0.8: '#1d4ed8', 1.0: '#1e3a8a' },
-        })
-        .addTo(this.map);
-    }
+  /** Radius in px that scales with zoom so hotspots stay anchored to the ground. */
+  private heatRadius(): number {
+    const zoom = this.map.getZoom();
+    return Math.max(14, Math.min(36, 14 + (zoom - 12) * 7));
+  }
 
-    const getSeverityWeight = (p: any[]): number => {
-      const severityStr = p[4] as string;
-      if (severityStr === 'severe') return 1.0;
-      if (severityStr === 'moderate') return 0.6;
-      if (severityStr === 'mild') return 0.25;
-      return typeof p[2] === 'number' ? p[2] : 0.5;
-    };
+  private bindHeatSync(): void {
+    if (this.heatSyncBound) return;
+    this.heatSyncBound = true;
 
-    const blackPodPoints = heatPoints
-      .filter((p) => (p[3] as string).includes('blackpod'))
-      .map((p) => {
-        const lat = p[0];
-        const lng = p[1];
-        const weight = getSeverityWeight(p);
-        return [lat, lng, weight];
+    this.map.on('move', () => {
+      if (this.heatFrame) return;
+      this.heatFrame = requestAnimationFrame(() => {
+        this.heatFrame = 0;
+        this.heatLayers.forEach((l) => l._reset?.());
       });
+    });
 
-    if (blackPodPoints.length) {
-      (this.L as any)
-        .heatLayer(blackPodPoints, {
-          radius: 50,
-          blur: 25,
-          max: 1.0,
-          minOpacity: 0.4,
-          gradient: {
-            0.25: '#fca5a5',
-            0.6: '#ef4444',
-            1.0: '#7f1d1d',
-          },
-        })
-        .addTo(this.map);
-    }
-
-    const podBorerPoints = heatPoints
-      .filter((p) => (p[3] as string).includes('podborer'))
-      .map((p) => [p[0], p[1], p[2]]);
-
-    if (podBorerPoints.length) {
-      (this.L as any)
-        .heatLayer(podBorerPoints, {
-          radius: 50,
-          blur: 25,
-          max: 1.0,
-          minOpacity: 0.45,
-          gradient: { 0.2: '#FFFBA7', 0.5: '#FFEA6C', 0.8: '#eab308', 1.0: '#FFCC00' },
-        })
-        .addTo(this.map);
-    }
-
-    const otherPoints = heatPoints
-      .filter((p) => {
-        const d = p[3] as string;
-        return (
-          !d.includes('healthy') &&
-          !d.includes('mealybug') &&
-          !d.includes('blackpod') &&
-          !d.includes('podborer')
-        );
-      })
-      .map((p) => [p[0], p[1], p[2]]);
-
-    if (otherPoints.length) {
-      (this.L as any)
-        .heatLayer(otherPoints, {
-          radius: 50,
-          blur: 25,
-          max: 1.0,
-          minOpacity: 0.45,
-          gradient: { 0.2: '#bfdbfe', 0.5: '#3b82f6', 0.8: '#1d4ed8', 1.0: '#1e3a8a' },
-        })
-        .addTo(this.map);
-    }
+    this.map.on('zoomend', () => {
+      const radius = this.heatRadius();
+      this.heatLayers.forEach((l) => l.setOptions({ radius }));
+    });
   }
 
   private addClickableMarker(
@@ -287,38 +391,46 @@ export class HeatmapMapService {
     scan: Scan,
     onClick: (scan: Scan) => void,
   ): void {
-    const ghostMarker = this.L.circleMarker([lat, lng], {
-      radius: 20,
-      stroke: false,
-      fillColor: '#000',
-      fillOpacity: 0,
+    const diseaseKey = (scan.disease_key || '').toLowerCase().replace(/[-_\s]/g, '');
+    const severity = (scan.severity_key || 'mild').toLowerCase() as keyof SeverityShades;
+    const shades = HEAT_GROUPS.find((g) => g.match(diseaseKey))?.shades ?? DISEASE_SHADES.mealybug;
+    const color = shades[severity] ?? shades.mild;
+
+    this.L.circleMarker([lat, lng], {
+      radius: 6,
+      color: '#ffffff',
+      weight: 2,
+      fillColor: color,
+      fillOpacity: 0.95,
+      interactive: false,
     }).addTo(this.map);
 
-    ghostMarker.bindTooltip(
-      `<div style="font-size:11px;font-weight:700;padding:2px 4px;white-space:nowrap;">${scan.user_name || 'Unknown'} &nbsp;·&nbsp; ${scan.disease_key || '—'}</div>`,
+    const hitArea = this.L.circleMarker([lat, lng], {
+      radius: 16,
+      stroke: false,
+      fillOpacity: 0,
+      bubblingMouseEvents: false,
+    }).addTo(this.map);
+
+    hitArea.bindTooltip(
+      `<div style="font-size:11px;font-weight:600;padding:2px 4px;white-space:nowrap;">${scan.user_name || 'Unknown'} · ${scan.disease_key || '—'}</div>`,
       { sticky: true, direction: 'top' },
     );
-    ghostMarker.on('click', () => onClick(scan));
-    ghostMarker.on('mouseover', (e) =>
-      (e.target as LeafletType.CircleMarker).setStyle({ fillOpacity: 0.08, fillColor: '#1e293b' }),
-    );
-    ghostMarker.on('mouseout', (e) =>
-      (e.target as LeafletType.CircleMarker).setStyle({ fillOpacity: 0 }),
-    );
+    hitArea.on('click', () => onClick(scan));
   }
 
   private drawBoundary(): void {
     this.L.polygon(this.boundaryCoords, {
       color: '#dc2626',
-      weight: 5,
+      weight: 3,
       fillColor: '#000',
-      fillOpacity: 0.05,
+      fillOpacity: 0.03,
       interactive: false,
     }).addTo(this.map);
     this.L.polygon(this.boundaryCoords, {
       color: '#ffffff',
-      weight: 5,
-      dashArray: '10, 15',
+      weight: 3,
+      dashArray: '8, 12',
       fill: false,
       interactive: false,
     }).addTo(this.map);

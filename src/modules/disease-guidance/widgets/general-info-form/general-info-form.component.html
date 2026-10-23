@@ -1,228 +1,115 @@
-<section [formGroup]="form" class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-  <header class="border-b border-gray-200 px-4 py-4 sm:px-6 sm:py-5">
-    <div class="flex items-start gap-3">
-      <span
-        class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-green-700 text-xs font-bold text-white"
-        aria-hidden="true"
-        >01</span
-      >
-      <div>
-        <h2 class="text-lg font-semibold text-gray-950">General information</h2>
-        <p class="mt-1 text-sm leading-6 text-gray-500">
-          Add the name shown to users and connect it to its detection label.
-        </p>
-      </div>
-    </div>
-  </header>
+<section [formGroup]="form" class="bg-white rounded-2xl border border-slate-200">
+  <div class="px-5 sm:px-6 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold m-0">General information</h2>
+    <p class="text-sm text-slate-500 m-0 mt-0.5">
+      Write the English text. The Filipino version is filled in for you and can be edited. All
+      fields are required.
+    </p>
+  </div>
 
-  <div class="space-y-8 p-4 sm:p-6">
-    <fieldset>
-      <legend class="text-sm font-semibold text-gray-900">Disease identity</legend>
-      <p class="mt-1 text-sm text-gray-500">English is the source used for Filipino translation.</p>
-
-      <div class="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
+  <div class="px-5 sm:px-6 py-5 flex flex-col gap-8">
+    <fieldset class="border-0 p-0 m-0 min-w-0">
+      <legend class="text-base font-semibold p-0 mb-3">Name</legend>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div>
-          <label
-            for="disease-name-en"
-            class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
-          >
-            <span class="rounded bg-green-50 px-1.5 py-0.5 text-xs font-bold text-green-800"
-              >EN</span
-            >
-            Disease name <span class="text-red-600">*</span>
+          <label for="disease-name-en" class="block text-sm font-medium text-slate-700 mb-1.5">
+            Name in English
           </label>
           <input
             id="disease-name-en"
             type="text"
             formControlName="nameEn"
-            placeholder="e.g. Black Pod Disease"
+            placeholder="For example, Black Pod Disease"
             autocomplete="off"
             (input)="nameInput.emit()"
-            class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600/20 sm:text-sm"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm placeholder:text-slate-400 focus-visible:outline-2 focus-visible:outline-green-700"
           />
           @if (form.get('nameEn')?.invalid && form.get('nameEn')?.touched) {
-            <p class="mt-1.5 text-sm text-red-600">Enter the English disease name.</p>
+            <p class="mt-1.5 mb-0 text-sm text-red-600">Enter the English disease name.</p>
           }
         </div>
 
         <div>
-          <div class="mb-2 flex min-h-5 items-center justify-between gap-2">
-            <label
-              for="disease-name-tl"
-              class="flex items-center gap-2 text-sm font-medium text-gray-700"
-            >
-              <span class="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-bold text-amber-800"
-                >TL</span
-              >
-              Pangalan sa Filipino <span class="text-red-600">*</span>
-            </label>
+          <label for="disease-name-tl" class="flex items-center justify-between text-sm font-medium text-slate-700 mb-1.5">
+            Name in Filipino
             @if (translating['nameTl']) {
-              <span class="flex items-center gap-1.5 text-xs text-gray-500" aria-live="polite">
-                <span
-                  class="h-3 w-3 animate-spin rounded-full border-2 border-gray-200 border-t-green-700"
-                  aria-hidden="true"
-                ></span>
-                Translating…
-              </span>
+              <span class="text-xs font-normal text-slate-500" aria-live="polite">Translating…</span>
             }
-          </div>
+          </label>
           <input
             id="disease-name-tl"
             type="text"
             formControlName="nameTl"
-            placeholder="Filipino translation"
             autocomplete="off"
             [class.opacity-60]="translating['nameTl']"
-            class="min-h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-600/20 sm:text-sm"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus-visible:outline-2 focus-visible:outline-green-700"
           />
           @if (form.get('nameTl')?.invalid && form.get('nameTl')?.touched) {
-            <p class="mt-1.5 text-sm text-red-600">Enter or review the Filipino disease name.</p>
+            <p class="mt-1.5 mb-0 text-sm text-red-600">Enter or review the Filipino name.</p>
           }
         </div>
       </div>
     </fieldset>
 
-    <div class="border-t border-gray-200"></div>
-
-    <fieldset>
-      <legend class="text-sm font-semibold text-gray-900">Description</legend>
-      <p class="mt-1 text-sm text-gray-500">
-        Explain recognition, spread, and conditions that worsen the disease.
+    <fieldset class="border-0 p-0 m-0 min-w-0">
+      <legend class="text-base font-semibold p-0 mb-1">Description</legend>
+      <p class="text-sm text-slate-500 m-0 mb-3">
+        How to recognize the disease, how it spreads, and what makes it worse.
       </p>
-
-      <div class="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div>
-          <label
-            for="disease-description-en"
-            class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
-          >
-            <span class="rounded bg-green-50 px-1.5 py-0.5 text-xs font-bold text-green-800"
-              >EN</span
-            >
-            English description <span class="text-red-600">*</span>
+          <label for="disease-description-en" class="block text-sm font-medium text-slate-700 mb-1.5">
+            Description in English
           </label>
           <textarea
             id="disease-description-en"
             formControlName="descEn"
             rows="6"
-            placeholder="Describe the disease in clear, practical language…"
             (input)="descriptionInput.emit()"
-            class="w-full resize-y rounded-lg border border-gray-300 bg-white px-3.5 py-3 text-base leading-6 text-gray-900 placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600/20 sm:text-sm"
+            class="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 focus-visible:outline-2 focus-visible:outline-green-700"
           ></textarea>
           @if (form.get('descEn')?.invalid && form.get('descEn')?.touched) {
-            <p class="mt-1.5 text-sm text-red-600">Enter an English description.</p>
+            <p class="mt-1.5 mb-0 text-sm text-red-600">Enter an English description.</p>
           }
         </div>
 
         <div>
-          <div class="mb-2 flex min-h-5 items-center justify-between gap-2">
-            <label
-              for="disease-description-tl"
-              class="flex items-center gap-2 text-sm font-medium text-gray-700"
-            >
-              <span class="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-bold text-amber-800"
-                >TL</span
-              >
-              Paglalarawan sa Filipino <span class="text-red-600">*</span>
-            </label>
+          <label for="disease-description-tl" class="flex items-center justify-between text-sm font-medium text-slate-700 mb-1.5">
+            Description in Filipino
             @if (translating['descTl']) {
-              <span class="flex items-center gap-1.5 text-xs text-gray-500" aria-live="polite">
-                <span
-                  class="h-3 w-3 animate-spin rounded-full border-2 border-gray-200 border-t-green-700"
-                  aria-hidden="true"
-                ></span>
-                Translating…
-              </span>
+              <span class="text-xs font-normal text-slate-500" aria-live="polite">Translating…</span>
             }
-          </div>
+          </label>
           <textarea
             id="disease-description-tl"
             formControlName="descTl"
             rows="6"
-            placeholder="Filipino translation"
             [class.opacity-60]="translating['descTl']"
-            class="w-full resize-y rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-3 text-base leading-6 text-gray-900 placeholder:text-gray-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-600/20 sm:text-sm"
+            class="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 focus-visible:outline-2 focus-visible:outline-green-700"
           ></textarea>
           @if (form.get('descTl')?.invalid && form.get('descTl')?.touched) {
-            <p class="mt-1.5 text-sm text-red-600">Enter or review the Filipino description.</p>
+            <p class="mt-1.5 mb-0 text-sm text-red-600">Enter or review the Filipino description.</p>
           }
         </div>
       </div>
     </fieldset>
 
-    <div class="border-t border-gray-200"></div>
-
-    <fieldset>
-      <legend class="text-sm font-semibold text-gray-900">Detection label</legend>
-      <p class="mt-1 text-sm text-gray-500">
-        Choose the classifier output that opens this guidance.
+    <div class="max-w-md">
+      <label for="detection-label" class="block text-base font-semibold mb-1">Detection label</label>
+      <p class="text-sm text-slate-500 m-0 mb-3">
+        The result from the scanner that opens this guidance.
       </p>
-
-      <div class="relative mt-4 max-w-xl">
-        <button
-          type="button"
-          (click)="isDropdownOpen = !isDropdownOpen"
-          class="flex min-h-11 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-left text-base transition-colors hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600/20 sm:text-sm"
-          [ngClass]="selectedLabel ? 'font-medium text-gray-900' : 'text-gray-400'"
-          [attr.aria-expanded]="isDropdownOpen"
-          aria-haspopup="listbox"
-        >
-          <span class="truncate">{{
-            selectedLabel ? formatLabel(selectedLabel) : 'Select a detection label'
-          }}</span>
-          <svg
-            class="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform"
-            [class.rotate-180]="isDropdownOpen"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </button>
-
-        @if (isDropdownOpen) {
-          <div
-            class="absolute z-50 mt-2 w-full overflow-hidden rounded-lg border border-gray-200 bg-white p-1.5 shadow-lg"
-            role="listbox"
-          >
-            <ul class="max-h-64 space-y-0.5 overflow-y-auto">
-              @for (key of diseaseKeys; track key) {
-                <li>
-                  <button
-                    type="button"
-                    (click)="onCustomSelect(key)"
-                    class="flex min-h-11 w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors"
-                    [ngClass]="
-                      selectedLabel === key
-                        ? 'bg-green-50 font-semibold text-green-800'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    "
-                    role="option"
-                    [attr.aria-selected]="selectedLabel === key"
-                  >
-                    <span>{{ formatLabel(key) }}</span>
-                    @if (selectedLabel === key) {
-                      <svg
-                        class="h-4 w-4 text-green-700"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        aria-hidden="true"
-                      >
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                    }
-                  </button>
-                </li>
-              }
-            </ul>
-          </div>
+      <select
+        id="detection-label"
+        [value]="selectedLabel"
+        (change)="labelChange.emit($any($event.target).value)"
+        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-green-700"
+      >
+        <option value="" disabled [selected]="!selectedLabel">Select a detection label</option>
+        @for (key of diseaseKeys; track key) {
+          <option [value]="key" [selected]="key === selectedLabel">{{ formatLabel(key) }}</option>
         }
-      </div>
-    </fieldset>
+      </select>
+    </div>
   </div>
 </section>

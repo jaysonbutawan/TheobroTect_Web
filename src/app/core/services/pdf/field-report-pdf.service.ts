@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { FieldReport } from '../../../shared/models';
 
 export interface BarangayDiseaseCount {
@@ -130,6 +128,8 @@ export class FieldReportPdfService {
 
   // 2. Changed to async to await the logo loading
   async generatePDF(summary: ReportSummary, signatories: OfficialSignatories): Promise<void> {
+    // Loaded on demand so the Field Reports page opens without downloading the PDF libraries.
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import('jspdf'), import('jspdf-autotable')]);
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;

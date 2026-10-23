@@ -18,18 +18,11 @@ export class GeneralInfoFormComponent {
   @Output() descriptionInput = new EventEmitter<void>();
   @Output() labelChange = new EventEmitter<string>();
 
-  isDropdownOpen = false;
-
   formatLabel(key: string): string {
     if (!key) return '';
     return key
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  }
-
-  onCustomSelect(key: string): void {
-    this.labelChange.emit(key);
-    this.isDropdownOpen = false;
   }
 }

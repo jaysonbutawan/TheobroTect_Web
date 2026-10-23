@@ -28,6 +28,11 @@ export class MonitoringSetupComponent implements OnChanges, OnInit {
   @Input() diseaseKey: string | null = null;
 
   activeSev: 'mild' | 'moderate' | 'severe' = 'mild';
+  readonly severityOptions = [
+    { key: 'mild', label: 'Mild' },
+    { key: 'moderate', label: 'Moderate' },
+    { key: 'severe', label: 'Severe' },
+  ] as const;
   existingSeverities: any[] = [];
 
   translating: Record<string, boolean> = {};

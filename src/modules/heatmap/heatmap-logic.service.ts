@@ -44,18 +44,15 @@ export class HeatmapLogicService {
     return Math.round((count / total) * 100);
   }
 
+  formatDisease(key: string | undefined): string {
+    const text = (key || '').replace(/[_-]+/g, ' ').trim();
+    return text ? text.charAt(0).toUpperCase() + text.slice(1) : '—';
+  }
+
   getSeverityClass(severity: string | undefined): string {
     const s = (severity || '').toLowerCase();
     if (s === 'severe') return 'bg-red-50 text-red-600 border-red-100';
     if (s === 'moderate') return 'bg-yellow-50 text-yellow-700 border-yellow-100';
     return 'bg-blue-50 text-blue-600 border-blue-100';
-  }
-
-  getInitials(name: string | undefined): string {
-    if (!name) return 'U';
-    const parts = name.trim().split(' ');
-    return parts.length >= 2
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : parts[0][0].toUpperCase();
   }
 }

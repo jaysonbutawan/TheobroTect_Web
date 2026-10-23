@@ -1,78 +1,32 @@
-<div class="mt-8 px-6 pb-12 antialiased font-['DM_Sans',sans-serif]">
-  @if (isLoading) {
-    <app-stats-skeleton />
-  } @else {
-    <div class="mb-8 sm:mb-10">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
-            Disease Report
-          </h2>
-          <p class="text-xs sm:text-sm text-gray-500 mt-1">
-            Overview of cacao health status for {{ selectedYear() }}
-          </p>
-        </div>
-        <div
-          class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full border border-green-200"
-        >
-          <span
-            class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-green-500 rounded-full animate-pulse shadow-sm shadow-green-200"
-          ></span>
-          <span class="text-xs sm:text-sm font-bold text-green-700"
-            >{{ stats.totalScans }} Total Scans</span
-          >
-        </div>
-      </div>
+<div class="antialiased font-['DM_Sans',sans-serif] text-slate-900">
+  <div class="max-w-7xl mx-auto flex flex-col gap-6">
+    @if (isLoading) {
+      <app-stats-skeleton />
+    } @else {
+      <header>
+        <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight m-0">Disease report</h2>
+        <p class="text-sm text-slate-500 m-0 mt-1">
+          Cacao health across {{ stats.totalScans }} scans in {{ selectedYear() }}
+        </p>
+      </header>
 
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <app-summary-stat-card [config]="summaryCards[0]" />
+      <section
+        class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 rounded-2xl border border-slate-200 overflow-hidden"
+      >
+        @for (card of summaryCards; track card.label) {
+          <app-summary-stat-card [config]="card" />
+        }
+      </section>
 
-        <app-summary-stat-card
-          [config]="summaryCards[1]"
-          [trend]="getTrendForMetric(stats.healthy, previousStats.healthy)"
-          [additionalInfo]="getPercentageInfo(stats.healthy)"
-        />
+      <section
+        class="grid grid-cols-1 sm:grid-cols-3 gap-px bg-slate-200 rounded-2xl border border-slate-200 overflow-hidden"
+      >
+        @for (card of diseaseCards; track card.title) {
+          <app-disease-card [config]="card" />
+        }
+      </section>
+    }
 
-        <app-summary-stat-card
-          [config]="summaryCards[2]"
-          [trend]="
-            getTrendForMetric(
-              stats.blackPod + stats.mealybug + stats.podBorer,
-              previousStats.blackPod + previousStats.mealybug + previousStats.podBorer
-            )
-          "
-          [additionalInfo]="getPercentageInfo(stats.blackPod + stats.mealybug + stats.podBorer)"
-        />
-
-        <app-summary-stat-card
-          [config]="summaryCards[3]"
-          [trend]="getHealthRateTrend()"
-          [additionalInfo]="getHealthRateInfo()"
-        />
-      </div>
-    </div>
-
-    <div
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16 font-['DM_Sans',sans-serif]"
-    >
-      <app-disease-card
-        [config]="diseaseCards[0]"
-        [trend]="getTrendForMetric(stats.blackPod, previousStats.blackPod)"
-      />
-
-      <app-disease-card
-        [config]="diseaseCards[1]"
-        [trend]="getTrendForMetric(stats.mealybug, previousStats.mealybug)"
-      />
-
-      <app-disease-card
-        [config]="diseaseCards[2]"
-        [trend]="getTrendForMetric(stats.podBorer, previousStats.podBorer)"
-      />
-    </div>
-  }
-
-  <div class="mt-8 grid grid-cols-1 gap-6">
     @if (isLoading) {
       <app-chart-skeleton />
     } @else {
@@ -85,120 +39,70 @@
       </app-line-chart>
     }
 
-    <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+    <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
       <div
-        class="px-5 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 border-b border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sticky top-0 bg-white/90 backdrop-blur-md z-20 select-none"
+        class="px-4 sm:px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
       >
         <div>
-          <h4 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Recent Field Logs</h4>
-          <p class="text-xs sm:text-sm text-gray-500 mt-1">
-            Latest disease detections and farm status
+          <h3 class="text-lg font-semibold m-0">Recent field logs</h3>
+          <p class="text-sm text-slate-500 m-0 mt-0.5">
+            Latest detections from farmers. Select a row to see it on the map.
           </p>
         </div>
-        <div class="flex items-center gap-2 sm:gap-3">
-          <button
-            (click)="navigateToMap()"
-            class="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95 text-xs sm:text-sm font-bold"
-          >
-            <span class="material-symbols-rounded text-base sm:text-lg">map</span>
-            <span class="hidden xs:inline">Explore Heatmap</span>
-          </button>
-          <div
-            class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-50 rounded-full border border-green-200"
-          >
-            <span
-              class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-green-500 rounded-full animate-pulse shadow-sm shadow-green-200"
-            ></span>
-            <span class="text-xs sm:text-sm font-semibold text-green-700"
-              >{{ recentScans.length }} Logs</span
-            >
-          </div>
-        </div>
+        <button
+          (click)="navigateToMap()"
+          class="self-start sm:self-auto px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-green-700"
+        >
+          Open heatmap
+        </button>
       </div>
 
-      <div class="px-3 sm:px-6 md:px-8 py-5 sm:py-6">
+      <div>
         @if (isLoading) {
-          <app-field-log-skeleton-mobile class="md:hidden" />
-          <app-field-log-skeleton-desktop class="hidden md:block" />
+          <div class="p-4 sm:p-6">
+            <app-field-log-skeleton-mobile class="md:hidden" />
+            <app-field-log-skeleton-desktop class="hidden md:block" />
+          </div>
         } @else if (recentScans.length === 0) {
-          <div class="py-16 flex flex-col items-center justify-center text-center">
-            <div
-              class="w-20 h-20 bg-gray-50/50 rounded-2xl flex items-center justify-center mb-5 border border-gray-100 shadow-sm"
-            >
-              <span class="material-symbols-rounded text-gray-400 text-4xl">eco</span>
-            </div>
-            <h5 class="text-gray-900 font-bold text-lg">No Logs Found</h5>
-            <p class="text-gray-500 text-sm mt-2 max-w-sm leading-relaxed">
-              Field data will appear here as soon as your team starts logging new scans.
+          <div class="py-14 px-6 text-center">
+            <h4 class="text-base font-semibold m-0">No logs yet</h4>
+            <p class="text-sm text-slate-500 mt-1 mb-0 max-w-sm mx-auto">
+              Scans appear here as soon as farmers start logging them.
             </p>
           </div>
         } @else {
-          <div class="rounded-xl border border-gray-100 overflow-hidden">
-            <div
-              class="hidden md:grid md:grid-cols-12 md:gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100"
-            >
-              <span class="md:col-span-3 text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >Farmer Details</span
-              >
-              <span class="md:col-span-2 text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >Disease Type</span
-              >
-              <span class="md:col-span-2 text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >Severity</span
-              >
-              <span class="md:col-span-3 text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >Confidence</span
-              >
-              <span
-                class="md:col-span-2 text-xs font-bold text-gray-500 uppercase tracking-wider text-center"
-                >Action</span
-              >
-            </div>
+          <div
+            class="hidden md:grid md:grid-cols-12 md:gap-4 px-6 py-3 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500"
+          >
+            <span class="md:col-span-4">Farmer</span>
+            <span class="md:col-span-2">Disease</span>
+            <span class="md:col-span-2">Severity</span>
+            <span class="md:col-span-3">Confidence</span>
+            <span class="md:col-span-1 text-right">Map</span>
+          </div>
 
-            <div class="divide-y divide-gray-100 md:divide-y-0">
-              @for (scan of recentScans; track scan.locationKey) {
-                <div
-                  (click)="navigateToMap(scan.location_lat + ',' + scan.location_lng)"
-                  class="group p-4 sm:p-5 md:px-6 md:py-4 bg-white md:grid md:grid-cols-12 md:gap-4 md:items-center hover:md:bg-green-50/30 active:scale-[0.98] md:active:scale-100 transition-all duration-200 cursor-pointer md:border-b md:border-gray-100 last:md:border-b-0"
-                >
-                  <div class="flex items-center justify-between md:col-span-3 md:justify-start">
-                    <div class="flex items-center gap-3 flex-1 min-w-0">
-                      <div
-                        class="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-green-100 to-emerald-50 border border-green-200 flex items-center justify-center font-bold text-green-700 text-base md:text-sm flex-shrink-0 group-hover:md:scale-105 transition-transform"
-                      >
-                        {{ scan.user_name.charAt(0).toUpperCase() }}
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <div
-                          class="font-bold text-gray-900 text-sm md:text-sm line-clamp-1 group-hover:md:text-green-700 transition-colors"
-                        >
-                          {{ scan.user_name }}
-                        </div>
-                        <div
-                          class="text-xs text-gray-500 font-medium mt-0.5 flex items-center gap-1 line-clamp-1"
-                        >
-                          <span class="material-symbols-rounded text-[14px]">location_on</span>
-                          {{ scanLocations.get(scan.locationKey)?.label ?? 'Location unavailable' }}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      (click)="$event.stopPropagation()"
-                      class="md:hidden w-9 h-9 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center flex-shrink-0 group-hover:bg-green-100 group-hover:text-green-700 transition-colors"
-                    >
-                      <span class="material-symbols-rounded text-xl">navigate_next</span>
-                    </button>
-                  </div>
+          <div class="divide-y divide-slate-100">
+            @for (scan of recentScans; track scan.locationKey) {
+              <div
+                (click)="navigateToMap(scan.location_lat + ',' + scan.location_lng)"
+                (keydown.enter)="navigateToMap(scan.location_lat + ',' + scan.location_lng)"
+                tabindex="0"
+                role="link"
+                class="px-4 sm:px-6 py-4 md:grid md:grid-cols-12 md:gap-4 md:items-center cursor-pointer hover:bg-slate-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-green-700"
+              >
+                <div class="md:col-span-4 min-w-0">
+                  <p class="text-sm font-medium text-slate-900 m-0 truncate">{{ scan.user_name }}</p>
+                  <p class="text-xs text-slate-500 m-0 mt-0.5 truncate">
+                    {{ scanLocations.get(scan.locationKey)?.label ?? 'Location unavailable' }}
+                  </p>
+                </div>
 
-                  <div class="flex items-center gap-2 mt-3 md:mt-0 md:col-span-2">
-                    <span class="text-base md:text-lg">🌿</span>
-                    <span
-                      class="text-xs md:text-sm font-semibold text-gray-700 group-hover:md:text-gray-900"
-                      >{{ scan.disease_key }}</span
-                    >
-                  </div>
+                <div class="flex items-center gap-3 mt-3 md:mt-0 md:contents">
+                  <span class="md:col-span-2 text-sm text-slate-700">
+                    {{ formatDisease(scan.disease_key) }}
+                  </span>
 
-                  <div class="mt-2 md:mt-0 md:col-span-2">
+                  <span class="md:col-span-2">
                     <span
                       [ngClass]="{
                         'bg-red-50 text-red-700 border-red-100':
@@ -207,54 +111,40 @@
                           scan.severity_key.toLowerCase() === 'moderate',
                         'bg-green-50 text-green-700 border-green-100':
                           scan.severity_key.toLowerCase() === 'mild' || !scan.severity_key,
-                        'bg-gray-50 text-gray-700 border-gray-100': ![
+                        'bg-slate-50 text-slate-700 border-slate-200': ![
                           'severe',
                           'moderate',
                           'mild',
                         ].includes(scan.severity_key.toLowerCase() || ''),
                       }"
-                      class="inline-block px-2.5 md:px-3 py-1 md:py-1.5 text-[11px] md:text-xs font-semibold border rounded-lg whitespace-nowrap"
+                      class="inline-block px-2 py-0.5 text-xs font-medium border rounded-md capitalize"
                     >
                       {{ scan.severity_key || 'N/A' }}
                     </span>
-                  </div>
-
-                  <div
-                    class="flex items-center justify-between md:justify-start md:gap-3 mt-4 pt-4 md:mt-0 md:pt-0 border-t border-gray-50 md:border-t-0 md:col-span-3"
-                  >
-                    <span
-                      class="text-[10px] md:hidden text-gray-400 font-semibold uppercase tracking-wider"
-                      >Confidence</span
-                    >
-                    <div class="hidden md:block flex-1 max-w-[100px]">
-                      <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all"
-                          [style.width.%]="(scan.confidence || 0) * 100"
-                        ></div>
-                      </div>
-                    </div>
-                    <span
-                      class="text-sm md:text-xs font-bold text-gray-700 md:text-gray-600 whitespace-nowrap"
-                    >
-                      {{ scan.confidence ? (scan.confidence * 100 | number: '0.0') + '%' : 'N/A' }}
-                    </span>
-                  </div>
-
-                  <div class="hidden md:flex md:col-span-2 md:justify-center">
-                    <button
-                      (click)="$event.stopPropagation()"
-                      class="p-2 rounded-full text-gray-400 group-hover:text-green-700 group-hover:bg-white border border-transparent group-hover:border-green-100 group-hover:shadow-sm transition-all flex items-center justify-center"
-                    >
-                      <span class="material-symbols-rounded text-xl">navigate_next</span>
-                    </button>
-                  </div>
+                  </span>
                 </div>
-              }
-            </div>
+
+                <div class="md:col-span-3 flex items-center gap-3 mt-2 md:mt-0">
+                  <div class="hidden md:block flex-1 max-w-[100px] h-1.5 bg-slate-100 rounded-full">
+                    <div
+                      class="h-full bg-green-600 rounded-full"
+                      [style.width.%]="(scan.confidence || 0) * 100"
+                    ></div>
+                  </div>
+                  <span class="text-xs text-slate-600">
+                    {{ scan.confidence ? (scan.confidence * 100 | number: '0.0') + '%' : 'N/A' }}
+                    <span class="md:hidden text-slate-400">confidence</span>
+                  </span>
+                </div>
+
+                <span class="hidden md:block md:col-span-1 text-right text-sm text-green-700">
+                  View
+                </span>
+              </div>
+            }
           </div>
         }
       </div>
-    </div>
+    </section>
   </div>
 </div>

@@ -3,163 +3,130 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { FieldReportsApiService } from '../../app/core/services/api/field-reports-api.service';
-import { FieldReport, Severity, ReportStatus } from '../../app/shared/models';
+import { FieldReport, ReportStatus } from '../../app/shared/models';
 
 @Component({
   selector: 'app-field-report-detail',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="p-4 sm:p-6 md:p-10 bg-transparent min-h-screen font-sans select-none">
+    <div class="max-w-4xl mx-auto flex flex-col gap-6 font-['DM_Sans',sans-serif] text-slate-900">
+      <div>
+        <button
+          (click)="goBack()"
+          class="text-sm text-slate-500 hover:text-slate-900 hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
+        >
+          Back to field reports
+        </button>
+      </div>
+
       @if (isLoading) {
-        <div class="flex items-center justify-center py-20">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3D683A]"></div>
+        <div class="flex flex-col gap-6 animate-pulse" role="status" aria-label="Loading report">
+          <div class="h-24 rounded-2xl border border-slate-200 bg-white"></div>
+          <div class="h-64 rounded-2xl border border-slate-200 bg-white"></div>
         </div>
-      }
-
-      @if (errorMsg && !isLoading) {
-        <div class="max-w-2xl mx-auto">
-          <div class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-            <p class="text-red-600 font-semibold">{{ errorMsg }}</p>
-            <button
-              (click)="goBack()"
-              class="mt-4 px-6 py-2 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
-      }
-
-      @if (report && !isLoading) {
-        <div class="max-w-5xl mx-auto space-y-6">
-          <div class="flex items-center justify-between">
-            <button
-              (click)="goBack()"
-              class="flex items-center gap-2 px-4 py-2 bg-[#f1f5f9] text-slate-700 rounded-xl font-semibold hover:bg-[#e2e8f0] transition-all"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Back
-            </button>
-            <h1 class="text-2xl font-black text-slate-800">Field Report Details</h1>
-            <div class="w-20"></div>
-          </div>
-
-          <div
-            class="bg-[#f8fafc] rounded-[2rem] shadow-[10px_10px_20px_rgba(0,0,0,0.05),inset_4px_4px_10px_rgba(255,255,255,1),inset_-4px_-4px_10px_rgba(0,0,0,0.03)] overflow-hidden"
+      } @else if (errorMsg) {
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-6" role="alert">
+          <p class="m-0 text-sm font-medium text-red-700">{{ errorMsg }}</p>
+          <button
+            (click)="goBack()"
+            class="mt-4 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800"
           >
-              <div class="bg-gradient-to-r from-[#3D683A] to-[#2d4f2a] p-6 text-white">
-              <div class="flex items-start justify-between">
-                <div>
-                  <h2 class="text-2xl font-black mb-2">{{ getDisplayDisease() }}</h2>
-                  <p class="text-white/80 text-sm">{{ report.user_address }}</p>
-                </div>
-                @if (!isHealthyReport()) {
-                  <div class="text-right">
-                    <span
-                      [class]="getSeverityBadgeClass(report.severity_key)"
-                      class="inline-block px-4 py-1.5 rounded-full text-xs font-bold"
-                    >
-                      {{ report.severity_key }}
-                    </span>
-                  </div>
-                }
-              </div>
+            Back to field reports
+          </button>
+        </div>
+      } @else if (report) {
+        <header class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight m-0">
+                {{ getDisplayDisease() }}
+              </h1>
+              <p class="text-sm text-slate-500 m-0 mt-1">
+                Scanned {{ report.scanned_at | date: 'MMMM d, y' }} at
+                {{ report.scanned_at | date: 'h:mm a' }}
+              </p>
             </div>
-
-            <div class="p-6 space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                  <label class="text-xs font-black text-slate-400 uppercase tracking-widest"
-                    >Scanned Date</label
-                  >
-                  <p class="text-base font-bold text-slate-700">
-                    {{ report.scanned_at | date: 'MMM d, y, h:mm a' }}
-                  </p>
-                </div>
-              </div>
-
-              @if (report.user_address) {
-                <div class="space-y-2">
-                  <label class="text-xs font-black text-slate-400 uppercase tracking-widest"
-                    >Location</label
-                  >
-                  <div class="flex items-start gap-2">
-                    <svg
-                      class="w-5 h-5 text-[#3D683A] mt-0.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    <div>
-                      <p class="text-base font-bold text-slate-700">{{ report.user_address }}</p>
-                    </div>
-                  </div>
-                </div>
-              }
-
-              <div class="pt-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
-                @if (report.scanned_at) {
-                  <div>
-                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest"
-                      >Scanned</label
-                    >
-                    <p class="text-sm text-slate-600">
-                      {{ report.scanned_at | date: 'MMM d, y, h:mm a' }}
-                    </p>
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3">
-            @if (report.user_address) {
-              <button
-                (click)="viewOnMap()"
-                class="px-6 py-3 bg-[#3D683A] text-white rounded-xl font-semibold hover:bg-[#2d4f2a] transition-colors shadow-lg"
+            @if (!isHealthyReport()) {
+              <span
+                class="px-2.5 py-1 text-sm font-medium border rounded-md"
+                [ngClass]="{
+                  'bg-red-50 text-red-700 border-red-100': report.severity_key === 'Severe',
+                  'bg-amber-50 text-amber-700 border-amber-100': report.severity_key === 'Moderate',
+                  'bg-green-50 text-green-700 border-green-100': report.severity_key === 'Mild',
+                }"
               >
-                View on Map
-              </button>
+                {{ report.severity_key }} severity
+              </span>
+            } @else {
+              <span
+                class="px-2.5 py-1 text-sm font-medium border rounded-md bg-green-50 text-green-700 border-green-100"
+              >
+                No disease found
+              </span>
             }
-            <button
-              (click)="goBack()"
-              class="px-6 py-3 bg-[#f1f5f9] text-slate-700 rounded-xl font-semibold hover:bg-[#e2e8f0] transition-colors"
-            >
-              Close
-            </button>
           </div>
+        </header>
+
+        <section class="bg-white rounded-2xl border border-slate-200">
+          <div class="px-5 sm:px-6 py-4 border-b border-slate-200">
+            <h2 class="text-lg font-semibold m-0">Scan details</h2>
+          </div>
+          <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 m-0 px-5 sm:px-6 py-5 text-sm">
+            @if (report.user_name) {
+              <div>
+                <dt class="text-slate-500">Farmer</dt>
+                <dd class="m-0 mt-0.5 font-medium">{{ report.user_name }}</dd>
+              </div>
+            }
+            <div>
+              <dt class="text-slate-500">Barangay</dt>
+              <dd class="m-0 mt-0.5 font-medium">{{ report.user_address || 'Not recorded' }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">Confidence</dt>
+              <dd class="m-0 mt-0.5 font-medium">{{ report.confidence * 100 | number: '1.0-1' }}%</dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">Status</dt>
+              <dd class="m-0 mt-0.5 font-medium">{{ statusLabel() }}</dd>
+            </div>
+            @if (hasCoordinates()) {
+              <div>
+                <dt class="text-slate-500">Coordinates</dt>
+                <dd class="m-0 mt-0.5 font-medium">
+                  {{ report.location_lat | number: '1.5-5' }}, {{ report.location_lng | number: '1.5-5' }}
+                </dd>
+              </div>
+            }
+            @if (report.location_label) {
+              <div>
+                <dt class="text-slate-500">Location note</dt>
+                <dd class="m-0 mt-0.5 font-medium">{{ report.location_label }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <div class="flex flex-wrap gap-3">
+          @if (hasCoordinates()) {
+            <button
+              (click)="viewOnMap()"
+              class="px-4 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-green-700"
+            >
+              View on map
+            </button>
+          }
+          <button
+            (click)="goBack()"
+            class="px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-green-700"
+          >
+            Back to list
+          </button>
         </div>
       }
     </div>
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-    `,
-  ],
 })
 export class FieldReportDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -179,7 +146,6 @@ export class FieldReportDetailComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       return;
     }
-    this.cdr.markForCheck();
     this.loadReport(id);
   }
 
@@ -196,61 +162,33 @@ export class FieldReportDetailComponent implements OnInit, OnDestroy {
       .getReportById(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (report) => {
-          this.report = report;
+        next: (response) => {
+          // The API may return the report directly or wrapped as { data: report }.
+          const wrapped = response as unknown as { data?: FieldReport };
+          this.report = wrapped.data && !Array.isArray(wrapped.data) ? wrapped.data : response;
           this.isLoading = false;
           this.cdr.markForCheck();
         },
-        error: (error) => {
+        error: () => {
           this.errorMsg = 'Failed to load report details. The report may not exist.';
           this.isLoading = false;
           this.cdr.markForCheck();
-          console.error('Error loading report:', error);
         },
       });
   }
 
-  getSeverityBadgeClass(severity: Severity): string {
-    switch (severity) {
-      case 'Mild':
-        return 'bg-yellow-400/20 text-yellow-100 border border-yellow-300/30';
-      case 'Moderate':
-        return 'bg-orange-400/20 text-orange-100 border border-orange-300/30';
-      case 'Severe':
-        return 'bg-red-400/20 text-red-100 border border-red-300/30';
-      default:
-        return 'bg-gray-400/20 text-gray-100 border border-gray-300/30';
-    }
+  statusLabel(): string {
+    const status: ReportStatus | number | string | undefined = this.report?.status;
+    if (typeof status === 'number') return ['Pending', 'Under Review', 'Resolved'][status] ?? 'Unknown';
+    return status || 'Unknown';
   }
 
-  getStatusTextClass(status: ReportStatus): string {
-    switch (status) {
-      case 'Pending':
-        return 'text-red-600';
-      case 'Under Review':
-        return 'text-sky-600';
-      case 'Resolved':
-        return 'text-emerald-600';
-      default:
-        return 'text-slate-600';
-    }
-  }
-
-  getStatusDotClass(status: ReportStatus): string {
-    switch (status) {
-      case 'Pending':
-        return 'bg-red-500';
-      case 'Under Review':
-        return 'bg-sky-500';
-      case 'Resolved':
-        return 'bg-emerald-500';
-      default:
-        return 'bg-slate-500';
-    }
+  hasCoordinates(): boolean {
+    return !!this.report?.location_lat && !!this.report?.location_lng;
   }
 
   viewOnMap(): void {
-    if (this.report?.location_lat && this.report?.location_lng) {
+    if (this.report && this.hasCoordinates()) {
       this.router.navigate(['/dashboard/heatmap'], {
         queryParams: {
           loc: `${this.report.location_lat},${this.report.location_lng}`,
@@ -267,7 +205,7 @@ export class FieldReportDetailComponent implements OnInit, OnDestroy {
 
   getDisplayDisease(): string {
     if (!this.report) return '';
-    if (this.isHealthyReport()) return 'Healthy Cacao';
+    if (this.isHealthyReport()) return 'Healthy cacao';
     return this.report.disease_key
       .replace(/_/g, ' ')
       .replace(/-/g, ' ')

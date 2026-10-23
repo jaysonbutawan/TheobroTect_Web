@@ -1,16 +1,15 @@
 import { Component, OnInit, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { ScanHistoryProfileSkeletonComponent } from '../../../app/shared/skeletons/disease-guidance/scan-history-skeleton/scan-history-skeleton';
-import {
-  ChartComponent,
-  ChartDatum,
-} from '../../../app/shared/components/chart/chart.component';
+import { Subject, catchError, forkJoin, of, takeUntil } from 'rxjs';
+import { PaginationComponent } from '../../../app/shared/components/pagination/pagination.component';
 import { ScansApiService } from '../../../app/core/services/api/scans-api.service';
+import { UsersApiService } from '../../../app/core/services/api/users-api.service';
 import { Scan as ApiScan } from '../../../app/shared/models/scan.model';
+import { User } from '../../../app/shared/models/user.model';
 import { Severity } from '../../../app/shared/models/common.model';
 import { ToastService } from '../../../app/shared/components/toast/toast.service';
+import { DISEASE_COLORS } from '../../dashboard/widgets/chart-config';
 
 export interface LocalScan {
   id: number;
@@ -22,6 +21,8 @@ export interface LocalScan {
   confidence: number;
   scanned_at: string;
   location: string;
+  lat: number | null;
+  lng: number | null;
 }
 
 export interface DiseaseSummary {
@@ -42,10 +43,11 @@ export interface DashboardKpis {
   severeCases: number;
   latestScanDate: string | null;
 }
+
 @Component({
   selector: 'app-scan-history',
   standalone: true,
-  imports: [CommonModule, ScanHistoryProfileSkeletonComponent, ChartComponent],
+  imports: [CommonModule, PaginationComponent],
   templateUrl: './user_scan_history.component.html',
 })
 export class ScanHistoryComponent implements OnInit, OnDestroy {
@@ -53,15 +55,20 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private scansApi = inject(ScansApiService);
+  private usersApi = inject(UsersApiService);
   private toast = inject(ToastService);
   private destroy$ = new Subject<void>();
 
-  view: 'list' | 'detail' = 'list';
   isLoading = true;
   userId = 0;
+  user: User | null = null;
 
   allScans: LocalScan[] = [];
+  pagedScans: LocalScan[] = [];
   diseaseSummary: DiseaseSummary[] = [];
+
+  pageSize = 10;
+  currentPage = 1;
 
   kpis: DashboardKpis = {
     totalScans: 0,
@@ -71,12 +78,10 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
     latestScanDate: null,
   };
 
-  diseaseChartData: ChartDatum[] = [];
-
   private readonly DISEASE_NAMES: Record<string, string> = {
-    'cacao_pod_borer': 'Cacao Pod Borer',
-    'mealybug': 'Mealybug',
-    'black_pod': 'Black Pod Disease',
+    cacao_pod_borer: 'Cacao Pod Borer',
+    mealybug: 'Mealybug',
+    black_pod: 'Black Pod Disease',
   };
 
   private readonly HEALTHY_KEY = 'healthy';
@@ -85,7 +90,7 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.userId = +id;
-      this.loadScans();
+      this.load();
     } else {
       this.isLoading = false;
     }
@@ -96,13 +101,27 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadScans(): void {
-    this.scansApi.getUserScans(this.userId)
+  private load(): void {
+    forkJoin({
+      users: this.usersApi.getUsers().pipe(catchError(() => of(null))),
+      scans: this.scansApi.getUserScans(this.userId),
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res) => {
-          this.allScans = (res?.data ?? []).map(s => this.mapApiScan(s));
-          this.finishLoad();
+        next: ({ users, scans }) => {
+          this.user = users?.data?.find((u) => u.id === this.userId) ?? null;
+
+          // The endpoint filters by user, but keep only this user's scans in case it does not.
+          this.allScans = (scans?.data ?? [])
+            .filter((s) => !s.user_id || s.user_id === this.userId)
+            .map((s) => this.mapApiScan(s))
+            .sort((a, b) => b.scanned_at.localeCompare(a.scanned_at));
+
+          this.computeDiseaseSummary();
+          this.computeKpis();
+          this.updatePagedScans();
+          this.isLoading = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.toast.show('error', 'Load Failed', 'Could not load scan history.');
@@ -112,15 +131,11 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
       });
   }
 
-  private finishLoad(): void {
-    this.computeDiseaseSummary();
-    this.computeKpis();
-    this.computeChartData();
-    this.isLoading = false;
-    this.cdr.markForCheck();
-  }
-
   private mapApiScan(s: ApiScan): LocalScan {
+    const lat = Number(s.location_lat);
+    const lng = Number(s.location_lng);
+    const hasCoords = Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0);
+
     return {
       id: s.id,
       disease: this.diseaseDisplayName(s.disease_key),
@@ -130,12 +145,25 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
       severity_key: s.severity_key,
       confidence: s.confidence,
       scanned_at: s.scanned_at,
-      location: s.location_label || s.user_address || 'N/A',
+      location: s.location_label || s.user_address || 'Not recorded',
+      lat: hasCoords ? lat : null,
+      lng: hasCoords ? lng : null,
     };
   }
 
   diseaseDisplayName(key: string): string {
-    return this.DISEASE_NAMES[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return (
+      this.DISEASE_NAMES[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+    );
+  }
+
+  diseaseColor(key: string): string {
+    const k = (key || '').toLowerCase().replace(/[-_\s]/g, '');
+    if (k.includes('healthy')) return DISEASE_COLORS.healthy.primary;
+    if (k.includes('blackpod')) return DISEASE_COLORS.blackPod.primary;
+    if (k.includes('mealybug')) return DISEASE_COLORS.mealybug.primary;
+    if (k.includes('podborer')) return DISEASE_COLORS.podBorer.primary;
+    return '#64748b';
   }
 
   private capitalizeSeverity(key: string): Severity {
@@ -184,32 +212,42 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
 
   private computeKpis(): void {
     const total = this.allScans.length;
-    const healthy = this.allScans.filter(s => s.disease_key === this.HEALTHY_KEY).length;
-    const diseased = total - healthy;
-    const severeCases = this.allScans.filter(s => s.severity === 'Severe').length;
-
-    const latest = this.allScans.reduce<string | null>((latestSoFar, scan) => {
-      if (!latestSoFar || scan.scanned_at > latestSoFar) return scan.scanned_at;
-      return latestSoFar;
-    }, null);
+    const healthy = this.allScans.filter((s) => s.disease_key === this.HEALTHY_KEY).length;
 
     this.kpis = {
       totalScans: total,
       healthy,
-      diseased,
-      severeCases,
-      latestScanDate: latest,
+      diseased: total - healthy,
+      severeCases: this.allScans.filter((s) => s.severity === 'Severe').length,
+      latestScanDate: this.allScans[0]?.scanned_at ?? null,
     };
   }
 
-  get totalDetections(): number {
-    return this.allScans.length;
+  private updatePagedScans(): void {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedScans = this.allScans.slice(start, start + this.pageSize);
   }
 
-  private computeChartData(): void {
-    this.diseaseChartData = this.diseaseSummary
-      .map(d => ({ name: d.diseaseName, value: d.count }))
-      .sort((a, b) => b.value - a.value);
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.allScans.length / this.pageSize));
+  }
+
+  get pageStart(): number {
+    return this.allScans.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.allScans.length);
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = page;
+    this.updatePagedScans();
+  }
+
+  viewOnMap(scan: LocalScan): void {
+    if (scan.lat === null || scan.lng === null) return;
+    this.router.navigate(['/dashboard/heatmap'], { queryParams: { loc: `${scan.lat},${scan.lng}` } });
   }
 
   goBack(): void {

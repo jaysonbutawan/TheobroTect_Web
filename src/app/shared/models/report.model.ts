@@ -2,6 +2,7 @@ import { Severity, ReportStatus } from './common.model';
 export interface FieldReport {
   id: string;
   user_id: number;
+  user_name?: string;
   scanned_at: string;
   user_address: string;
   disease_key: string;

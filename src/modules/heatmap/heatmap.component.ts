@@ -16,9 +16,9 @@ import { tap, catchError, of } from 'rxjs';
 
 import { FilterBarComponent, FilterState, normalizeDisease } from './widgets/filter-bar.component';
 
-import { DiseaseCounts, Observation } from './heatmap.models';
+import { DISEASE_SHADES, DiseaseCounts, Observation } from './heatmap.models';
 import { HeatmapLogicService } from './heatmap-logic.service';
-import { HeatmapMapService } from './heatmap-map.service';
+import { BaseLayerKey, HeatmapMapService, OverlayKey } from './heatmap-map.service';
 import { ToastService } from '../../app/shared/components/toast/toast.service';
 
 @Component({
@@ -50,9 +50,24 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     total: 0,
   };
 
-  scanCoverage: number = 83;
+  get diseaseStats() {
+    const c = this.diseaseCounts;
+    return [
+      { label: 'Black pod rot', count: c.blackPod, shades: DISEASE_SHADES.blackPod },
+      { label: 'Pod borer', count: c.podBorer, shades: DISEASE_SHADES.podBorer },
+      { label: 'Mealybug', count: c.mealybug, shades: DISEASE_SHADES.mealybug },
+      { label: 'Healthy pods', count: c.healthy, shades: DISEASE_SHADES.healthy },
+    ];
+  }
+
+  baseLayer: BaseLayerKey = 'streets';
+  readonly baseLayerOptions: { key: BaseLayerKey; label: string }[] = [
+    { key: 'streets', label: 'Streets' },
+    { key: 'terrain', label: 'Terrain' },
+    { key: 'satellite', label: 'Satellite' },
+  ];
+
   isSyncing = false;
-  lastSyncTime = new Date();
   newObservation = '';
   observations: Observation[] = [
     {
@@ -78,7 +93,10 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.mapService.initMap('map');
+    this.mapService.initMap('map').then(() => {
+      this.mapService.onDragStart(() => this.closeDetailCard());
+      this.mapService.onMapClick(() => this.closeDetailCard());
+    });
 
     setTimeout(() => this.loadScans(), 0);
 
@@ -165,6 +183,21 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.logic.getCoveragePercent(count, this.diseaseCounts.total);
   }
 
+  overlays: Record<OverlayKey, boolean> = { barangays: true, puroks: true };
+  readonly overlayOptions: { key: OverlayKey; label: string }[] = [
+    { key: 'barangays', label: 'Barangays' },
+    { key: 'puroks', label: 'Puroks' },
+  ];
+
+  toggleOverlay(key: OverlayKey): void {
+    this.overlays[key] = !this.overlays[key];
+    this.mapService.setOverlay(key, this.overlays[key]);
+  }
+
+  private closeDetailCard(): void {
+    if (this.selectedScan) this.clearSelectedScan();
+  }
+
   clearSelectedScan(): void {
     this.selectedScan = null;
     this.selectedBarangay = 'Unknown Barangay';
@@ -176,7 +209,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isSyncing = true;
     this.loadScans();
     setTimeout(() => {
-      this.lastSyncTime = new Date();
       this.isSyncing = false;
       this.cdr.markForCheck();
     }, 1200);
@@ -187,6 +219,11 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!text) return;
     this.observations.unshift({ text, time: new Date() });
     this.newObservation = '';
+  }
+
+  setBaseLayer(key: BaseLayerKey): void {
+    this.baseLayer = key;
+    this.mapService.setBaseLayer(key);
   }
 
   recenterMap() {

@@ -24,6 +24,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   filteredUsers: User[] = [];
   pagedUsers: User[] = [];
   search = '';
+  sortBy: 'name' | 'scans' | 'newest' = 'name';
   totalUsers = 0;
   isLoading = false;
   errorMsg = '';
@@ -96,8 +97,35 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       return matchSearch;
     });
 
+    this.filteredUsers.sort((a, b) => {
+      if (this.sortBy === 'scans') return (b.total_scans ?? 0) - (a.total_scans ?? 0);
+      if (this.sortBy === 'newest') {
+        return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
+      }
+      return (a.name ?? '').localeCompare(b.name ?? '');
+    });
+
     this.totalUsers = this.filteredUsers.length;
     this.updatePagedUsers();
+  }
+
+  onSortChange(): void {
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+
+  get totalScans(): number {
+    return this.users.reduce((sum, u) => sum + (u.total_scans ?? 0), 0);
+  }
+
+  get averageScans(): number {
+    return this.users.length === 0 ? 0 : this.totalScans / this.users.length;
+  }
+
+  /** Width of a user's scan bar, relative to the most active user. */
+  scanShare(user: User): number {
+    const max = Math.max(0, ...this.users.map((u) => u.total_scans ?? 0));
+    return max === 0 ? 0 : ((user.total_scans ?? 0) / max) * 100;
   }
 
   private updatePagedUsers(): void {

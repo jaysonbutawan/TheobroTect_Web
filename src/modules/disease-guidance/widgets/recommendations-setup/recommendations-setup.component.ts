@@ -61,6 +61,44 @@ export class RecommendationsSetupComponent implements OnChanges, OnInit, OnDestr
 
   private initialLoadDone = false;
 
+  readonly bulletLists = [
+    {
+      key: 'actions',
+      title: 'Recommended actions',
+      hint: 'Immediate steps the user should take.',
+      add: 'Add action',
+      empty: 'No actions yet. Add the first practical step for this severity.',
+      placeholder: 'What should the user do?',
+      noun: 'action',
+    },
+    {
+      key: 'prevention',
+      title: 'Prevention',
+      hint: 'Steps that reduce recurrence or further spread.',
+      add: 'Add prevention step',
+      empty: 'No prevention steps yet.',
+      placeholder: 'How can users prevent further damage?',
+      noun: 'prevention step',
+    },
+  ] as const;
+
+  readonly textBlocks = [
+    {
+      field: 'escalate',
+      enKey: 'escalateEn',
+      tlKey: 'escalateTl',
+      title: 'Signs it is getting worse',
+      hint: 'When the condition should be treated as more severe.',
+    },
+    {
+      field: 'seekHelp',
+      enKey: 'seekHelpEn',
+      tlKey: 'seekHelpTl',
+      title: 'When to ask for help',
+      hint: 'When users should contact an expert or the local office.',
+    },
+  ] as const;
+
   themeMap = {
     mild: {
       bg: 'bg-emerald-50/30',

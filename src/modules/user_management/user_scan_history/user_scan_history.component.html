@@ -1,209 +1,221 @@
-<div class="bg-transparent min-h-screen font-sans antialiased text-slate-700">
-  <button
-    (click)="goBack()"
-    title="Back to User Management"
-    class="mt-4 ml-4 sm:mt-5 sm:ml-5 lg:mt-6 lg:ml-6 w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 bg-[#f1f5f9] shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1)] hover:text-[#3D683A] transition-colors"
-  >
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-    </svg>
-  </button>
-  @if (view === 'list') {
-    <div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto select-none">
-      @if (isLoading) {
-        <app-scan-history-profile-skeleton />
-      } @else {
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8 px-2">
-          <div
-            class="bg-[#f8fafc] rounded-2xl p-4 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_1px_1px_3px_rgba(255,255,255,1)]"
-          >
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-              Total Scans
-            </p>
-            <p class="text-2xl font-black text-slate-800">{{ kpis.totalScans }}</p>
-          </div>
-          <div
-            class="bg-[#f8fafc] rounded-2xl p-4 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_1px_1px_3px_rgba(255,255,255,1)]"
-          >
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-              Healthy
-            </p>
-            <p class="text-2xl font-black text-[#3D683A]">{{ kpis.healthy }}</p>
-          </div>
-          <div
-            class="bg-[#f8fafc] rounded-2xl p-4 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_1px_1px_3px_rgba(255,255,255,1)]"
-          >
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-              Diseased
-            </p>
-            <p class="text-2xl font-black text-amber-500">{{ kpis.diseased }}</p>
-          </div>
-          <div
-            class="bg-[#f8fafc] rounded-2xl p-4 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_1px_1px_3px_rgba(255,255,255,1)]"
-          >
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-              Severe Cases
-            </p>
-            <p class="text-2xl font-black text-red-500">{{ kpis.severeCases }}</p>
-          </div>
-          <div
-            class="col-span-2 sm:col-span-1 bg-[#f8fafc] rounded-2xl p-4 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_1px_1px_3px_rgba(255,255,255,1)]"
-          >
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-              Latest Scan
-            </p>
-            <p class="text-sm font-black text-slate-800">
-              {{ kpis.latestScanDate ? formatDate(kpis.latestScanDate) : '—' }}
-            </p>
-          </div>
+<div class="max-w-7xl mx-auto flex flex-col gap-6 font-['DM_Sans',sans-serif] text-slate-900">
+  <div>
+    <button
+      (click)="goBack()"
+      class="text-sm text-slate-500 hover:text-slate-900 hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
+    >
+      Back to users
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="flex flex-col gap-6 animate-pulse" role="status" aria-label="Loading scan history">
+      <div class="h-28 rounded-2xl border border-slate-200 bg-white"></div>
+      <div class="h-24 rounded-2xl border border-slate-200 bg-white"></div>
+      <div class="h-64 rounded-2xl border border-slate-200 bg-white"></div>
+    </div>
+  } @else {
+    <header class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6">
+      <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight m-0">
+        {{ user?.name || 'User ' + userId }}
+      </h1>
+      <dl class="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-3 m-0 mt-4 text-sm">
+        <div>
+          <dt class="text-slate-500">Email</dt>
+          <dd class="m-0 mt-0.5 font-medium break-all">{{ user?.email || 'Not available' }}</dd>
+        </div>
+        <div>
+          <dt class="text-slate-500">Barangay</dt>
+          <dd class="m-0 mt-0.5 font-medium">{{ user?.address || 'Not recorded' }}</dd>
+        </div>
+        <div>
+          <dt class="text-slate-500">Joined</dt>
+          <dd class="m-0 mt-0.5 font-medium">
+            {{ user?.created_at ? formatDate(user!.created_at!) : 'Not available' }}
+          </dd>
+        </div>
+      </dl>
+    </header>
+
+    <section
+      class="grid grid-cols-2 lg:grid-cols-5 gap-px bg-slate-200 rounded-2xl border border-slate-200 overflow-hidden"
+    >
+      <div class="bg-white p-4 sm:p-5">
+        <p class="text-sm text-slate-500 m-0">Total scans</p>
+        <p class="text-2xl sm:text-3xl font-semibold leading-none mt-2 m-0">{{ kpis.totalScans }}</p>
+      </div>
+      <div class="bg-white p-4 sm:p-5">
+        <p class="text-sm text-slate-500 m-0">Healthy</p>
+        <p class="text-2xl sm:text-3xl font-semibold leading-none mt-2 m-0">{{ kpis.healthy }}</p>
+      </div>
+      <div class="bg-white p-4 sm:p-5">
+        <p class="text-sm text-slate-500 m-0">Diseased</p>
+        <p class="text-2xl sm:text-3xl font-semibold leading-none mt-2 m-0">{{ kpis.diseased }}</p>
+      </div>
+      <div class="bg-white p-4 sm:p-5">
+        <p class="text-sm text-slate-500 m-0">Severe cases</p>
+        <p class="text-2xl sm:text-3xl font-semibold leading-none mt-2 m-0 text-red-600">
+          {{ kpis.severeCases }}
+        </p>
+      </div>
+      <div class="bg-white p-4 sm:p-5 col-span-2 lg:col-span-1">
+        <p class="text-sm text-slate-500 m-0">Latest scan</p>
+        <p class="text-lg sm:text-xl font-semibold leading-none mt-2 m-0">
+          {{ kpis.latestScanDate ? formatDate(kpis.latestScanDate) : 'None yet' }}
+        </p>
+      </div>
+    </section>
+
+    @if (allScans.length === 0) {
+      <section class="bg-white rounded-2xl border border-slate-200 py-14 px-6 text-center">
+        <h2 class="text-base font-semibold m-0">No scans yet</h2>
+        <p class="text-sm text-slate-500 mt-1 mb-0">
+          This user has not recorded any scans. They will appear here once they do.
+        </p>
+      </section>
+    } @else {
+      <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="px-4 sm:px-6 py-4 border-b border-slate-200">
+          <h2 class="text-lg font-semibold m-0">Detections by disease</h2>
+          <p class="text-sm text-slate-500 m-0 mt-0.5">
+            How this user's {{ kpis.totalScans }} scans break down.
+          </p>
         </div>
 
         <div
-          class="bg-[#f8fafc] rounded-[1.5rem] p-5 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1)] w-full"
+          class="hidden md:grid md:grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500"
         >
-          <div class="flex items-baseline justify-between mb-3">
-            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Disease Occurrence Distribution
-            </p>
-            <p class="text-[11px] font-bold text-slate-400">
-              Total: <span class="text-[#3D683A] font-black">{{ totalDetections }}</span> detections
-            </p>
-          </div>
-
-          <div class="w-full h-64 sm:h-72 lg:h-80 relative">
-            <app-chart type="bar" [data]="diseaseChartData"></app-chart>
-          </div>
+          <span class="md:col-span-3">Disease</span>
+          <span class="md:col-span-3">Share of scans</span>
+          <span class="md:col-span-1 text-right">Total</span>
+          <span class="md:col-span-1 text-right">Mild</span>
+          <span class="md:col-span-1 text-right">Moderate</span>
+          <span class="md:col-span-1 text-right">Severe</span>
+          <span class="md:col-span-2 text-right">Last detected</span>
         </div>
 
-        @if (diseaseSummary.length > 0) {
-          <div class="mb-8 px-2">
-            <p
-              class="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-              >
-                <path
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-              Disease Summary
-            </p>
-
-            <div class="md:hidden space-y-3">
-              @for (item of diseaseSummary; track item.diseaseKey) {
-                <div
-                  class="bg-[#f8fafc] rounded-2xl p-4 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_1px_1px_3px_rgba(255,255,255,1)]"
-                >
-                  <div class="flex items-center justify-between mb-3">
-                    <span class="font-black text-slate-800 text-sm">{{ item.diseaseName }}</span>
-                    <span class="font-black text-slate-700 text-sm">{{ item.percentage }}%</span>
-                  </div>
-                  <div class="grid grid-cols-3 gap-2 text-center">
-                    <div>
-                      <p class="text-[10px] font-bold uppercase text-slate-400 mb-0.5">Mild</p>
-                      <p class="text-sm font-black text-[#3D683A]">{{ item.mild }}</p>
-                    </div>
-                    <div>
-                      <p class="text-[10px] font-bold uppercase text-amber-500 mb-0.5">Moderate</p>
-                      <p class="text-sm font-black text-amber-500">{{ item.moderate }}</p>
-                    </div>
-                    <div>
-                      <p class="text-[10px] font-bold uppercase text-red-500 mb-0.5">Severe</p>
-                      <p class="text-sm font-black text-red-500">{{ item.severe }}</p>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-200/50">
-                    <span class="text-[11px] font-bold text-slate-500">
-                      Total: <span class="text-slate-800">{{ item.count }}</span>
-                    </span>
-                    <span class="text-[11px] font-semibold text-slate-500">
-                      {{ formatDate(item.latestDate) }}
-                    </span>
-                  </div>
+        <div class="divide-y divide-slate-100">
+          @for (item of diseaseSummary; track item.diseaseKey) {
+            <div class="px-4 sm:px-6 py-4 md:grid md:grid-cols-12 md:gap-4 md:items-center text-sm">
+              <div class="md:col-span-3 flex items-center gap-2 font-medium">
+                <span
+                  class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  [style.background-color]="diseaseColor(item.diseaseKey)"
+                ></span>
+                {{ item.diseaseName }}
+              </div>
+              <div class="md:col-span-3 flex items-center gap-3 mt-2 md:mt-0">
+                <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full"
+                    [style.background-color]="diseaseColor(item.diseaseKey)"
+                    [style.width.%]="item.percentage"
+                  ></div>
                 </div>
-              }
+                <span class="text-xs text-slate-500 w-10 text-right">{{ item.percentage }}%</span>
+              </div>
+              <div class="grid grid-cols-4 gap-2 mt-3 md:mt-0 md:contents text-slate-600">
+                <span class="md:col-span-1 md:text-right">
+                  <span class="md:hidden block text-xs text-slate-400">Total</span>
+                  <span class="font-medium text-slate-900">{{ item.count }}</span>
+                </span>
+                <span class="md:col-span-1 md:text-right">
+                  <span class="md:hidden block text-xs text-slate-400">Mild</span>
+                  {{ item.mild }}
+                </span>
+                <span class="md:col-span-1 md:text-right">
+                  <span class="md:hidden block text-xs text-slate-400">Moderate</span>
+                  {{ item.moderate }}
+                </span>
+                <span class="md:col-span-1 md:text-right">
+                  <span class="md:hidden block text-xs text-slate-400">Severe</span>
+                  {{ item.severe }}
+                </span>
+              </div>
+              <p class="md:col-span-2 md:text-right text-slate-500 m-0 mt-2 md:mt-0 text-xs md:text-sm md:whitespace-nowrap">
+                <span class="md:hidden">Last detected </span>{{ formatDate(item.latestDate) }}
+              </p>
             </div>
+          }
+        </div>
+      </section>
 
-            <div
-              class="hidden md:block bg-[#f8fafc] rounded-[1.5rem] p-4 md:p-6 shadow-[4px_4px_10px_rgba(0,0,0,0.04),inset_2px_2px_5px_rgba(255,255,255,1)] overflow-x-auto"
-            >
-              <table class="w-full text-sm min-w-[720px]">
-                <thead>
-                  <tr class="border-b border-slate-200/50">
-                    <th
-                      class="text-left py-2 px-3 text-[11px] font-black uppercase tracking-widest text-slate-400"
-                    >
-                      Disease
-                    </th>
-                    <th
-                      class="text-center py-2 px-3 text-[11px] font-black uppercase tracking-widest text-slate-400"
-                    >
-                      Total Cases
-                    </th>
-                    <th
-                      class="text-center py-2 px-3 text-[11px] font-black uppercase tracking-widest text-[#3D683A]"
-                    >
-                      Mild
-                    </th>
-                    <th
-                      class="text-center py-2 px-3 text-[11px] font-black uppercase tracking-widest text-amber-500"
-                    >
-                      Moderate
-                    </th>
-                    <th
-                      class="text-center py-2 px-3 text-[11px] font-black uppercase tracking-widest text-red-500"
-                    >
-                      Severe
-                    </th>
-                    <th
-                      class="text-left py-2 px-3 text-[11px] font-black uppercase tracking-widest text-slate-400"
-                    >
-                      Latest Detection
-                    </th>
-                    <th
-                      class="text-right py-2 px-3 text-[11px] font-black uppercase tracking-widest text-slate-400"
-                    >
-                      % of Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of diseaseSummary; track item.diseaseKey) {
-                    <tr
-                      class="border-b border-slate-100 last:border-none hover:bg-[#f1f5f9] transition-colors"
-                    >
-                      <td class="py-2.5 px-3 font-black text-slate-800">{{ item.diseaseName }}</td>
-                      <td class="py-2.5 px-3 text-center font-bold text-slate-700">
-                        {{ item.count }}
-                      </td>
-                      <td class="py-2.5 px-3 text-center font-bold text-[#3D683A]">
-                        {{ item.mild }}
-                      </td>
-                      <td class="py-2.5 px-3 text-center font-bold text-amber-500">
-                        {{ item.moderate }}
-                      </td>
-                      <td class="py-2.5 px-3 text-center font-bold text-red-500">
-                        {{ item.severe }}
-                      </td>
-                      <td class="py-2.5 px-3 text-slate-500 font-semibold">
-                        {{ formatDate(item.latestDate) }}
-                      </td>
-                      <td class="py-2.5 px-3 text-right font-black text-slate-700">
-                        {{ item.percentage }}%
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+      <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="px-4 sm:px-6 py-4 border-b border-slate-200">
+          <h2 class="text-lg font-semibold m-0">Scan records</h2>
+          <p class="text-sm text-slate-500 m-0 mt-0.5">Every scan this user has submitted, newest first.</p>
+        </div>
+
+        <div
+          class="hidden md:grid md:grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500"
+        >
+          <span class="md:col-span-2">Date</span>
+          <span class="md:col-span-3">Disease</span>
+          <span class="md:col-span-2">Severity</span>
+          <span class="md:col-span-1">Confidence</span>
+          <span class="md:col-span-3">Location</span>
+          <span class="md:col-span-1 text-right">Map</span>
+        </div>
+
+        <div class="divide-y divide-slate-100">
+          @for (scan of pagedScans; track scan.id) {
+            <div class="px-4 sm:px-6 py-4 md:grid md:grid-cols-12 md:gap-4 md:items-center text-sm">
+              <p class="md:col-span-2 m-0">
+                <span class="font-medium">{{ scan.scanned_at | date: 'MMM d, y' }}</span>
+                <span class="block text-xs text-slate-500">{{ scan.scanned_at | date: 'h:mm a' }}</span>
+              </p>
+              <p class="md:col-span-3 m-0 mt-2 md:mt-0 flex items-center gap-2">
+                <span
+                  class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  [style.background-color]="diseaseColor(scan.disease_key)"
+                ></span>
+                {{ scan.disease }}
+              </p>
+              <p class="md:col-span-2 m-0 mt-2 md:mt-0">
+                <span
+                  class="inline-block px-2 py-0.5 text-xs font-medium border rounded-md"
+                  [ngClass]="{
+                    'bg-red-50 text-red-700 border-red-100': scan.severity === 'Severe',
+                    'bg-amber-50 text-amber-700 border-amber-100': scan.severity === 'Moderate',
+                    'bg-green-50 text-green-700 border-green-100': scan.severity === 'Mild',
+                  }"
+                >
+                  {{ scan.disease_key === 'healthy' ? 'Healthy' : scan.severity }}
+                </span>
+              </p>
+              <p class="md:col-span-1 m-0 mt-2 md:mt-0 text-slate-600">
+                {{ scan.confidence * 100 | number: '1.0-0' }}%
+                <span class="md:hidden text-xs text-slate-400">confidence</span>
+              </p>
+              <p class="md:col-span-3 m-0 mt-1 md:mt-0 text-slate-600 truncate">{{ scan.location }}</p>
+              <div class="md:col-span-1 md:text-right mt-2 md:mt-0">
+                @if (scan.lat !== null) {
+                  <button
+                    (click)="viewOnMap(scan)"
+                    class="text-green-700 font-medium hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
+                  >
+                    View
+                  </button>
+                } @else {
+                  <span class="text-slate-400">No GPS</span>
+                }
+              </div>
             </div>
-          </div>
-        }
-      }
-    </div>
+          }
+        </div>
+
+        <div class="border-t border-slate-200">
+          <app-pagination
+            [currentPage]="currentPage"
+            [totalPages]="totalPages"
+            [pageStart]="pageStart"
+            [pageEnd]="pageEnd"
+            [totalItems]="allScans.length"
+            itemLabel="scans"
+            (pageChange)="goToPage($event)"
+          />
+        </div>
+      </section>
+    }
   }
 </div>
