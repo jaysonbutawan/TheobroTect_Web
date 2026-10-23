@@ -59,10 +59,7 @@
 
       <div>
         @if (isLoading) {
-          <div class="p-4 sm:p-6">
-            <app-field-log-skeleton-mobile class="md:hidden" />
-            <app-field-log-skeleton-desktop class="hidden md:block" />
-          </div>
+          <app-field-log-skeleton-desktop />
         } @else if (recentScans.length === 0) {
           <div class="py-14 px-6 text-center">
             <h4 class="text-base font-semibold m-0">No logs yet</h4>

@@ -18,7 +18,6 @@ import {
 } from '../../app/core/services/reverse-geocoding.service';
 import { Scan } from '../../app/shared/models';
 import { catchError, concatMap, from, Observable, of, Subscription, tap } from 'rxjs';
-import { FieldLogSkeletonMobileComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-mobile/field-log-skeleton-mobile';
 import { FieldLogSkeletonDesktopComponent } from '../../app/shared/skeletons/dashboard/field-log-skeleton-desktop/field-log-skeleton-desktop';
 import { StatsSkeletonComponent } from '../../app/shared/skeletons/dashboard/stats-skeleton/stats-skeleton';
 import { ChartSkeletonComponent } from '../../app/shared/skeletons/dashboard/chart-skeleton/chart-skeleton';
@@ -70,7 +69,6 @@ export interface RecentScan extends Scan {
   standalone: true,
   imports: [
     CommonModule,
-    FieldLogSkeletonMobileComponent,
     FieldLogSkeletonDesktopComponent,
     StatsSkeletonComponent,
     ChartSkeletonComponent,
