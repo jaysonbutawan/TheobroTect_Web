@@ -1,7 +1,6 @@
 import { Component, HostListener, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { loadPlaces, Places } from '../heatmap-places';
 
 export type DiseaseValue = 'all' | 'black_pod_disease' | 'cacao_pod_borer' | 'mealybug' | 'healthy';
 
@@ -14,8 +13,6 @@ export interface FilterState {
   year: number;
   month: number | null;
   disease: DiseaseValue;
-  barangay: string | null;
-  purok: string | null;
 }
 
 export function normalizeDisease(raw: string): DiseaseValue {
@@ -70,9 +67,7 @@ const now = new Date();
 const DEFAULT_FILTER: FilterState = {
   year: now.getFullYear(),
   month: null,
-  disease: 'all',
-  barangay: null,
-  purok: null,
+  disease: 'all'
 };
 
 @Component({
@@ -211,33 +206,6 @@ const DEFAULT_FILTER: FilterState = {
     }
   </div>
 
-  <select
-    aria-label="Filter by barangay"
-    class="rounded-[10px] border border-slate-200 bg-white px-[10px] py-[9px] text-[13px] font-medium text-slate-900 focus-visible:outline-2 focus-visible:outline-green-700 disabled:text-slate-400"
-    [class.border-slate-900]="appliedFilter.barangay"
-    [ngModel]="appliedFilter.barangay || ''"
-    (ngModelChange)="onBarangayChange($event)"
-  >
-    <option value="">All barangays</option>
-    @for (b of places.barangays; track b.name) {
-      <option [value]="b.name">{{ b.name }}</option>
-    }
-  </select>
-
-  <select
-    aria-label="Filter by purok"
-    class="rounded-[10px] border border-slate-200 bg-white px-[10px] py-[9px] text-[13px] font-medium text-slate-900 focus-visible:outline-2 focus-visible:outline-green-700 disabled:text-slate-400"
-    [class.border-slate-900]="appliedFilter.purok"
-    [disabled]="!appliedFilter.barangay || purokOptions.length === 0"
-    [ngModel]="appliedFilter.purok || ''"
-    (ngModelChange)="onPurokChange($event)"
-  >
-    <option value="">{{ appliedFilter.barangay && purokOptions.length === 0 ? 'No puroks mapped' : 'All puroks' }}</option>
-    @for (name of purokOptions; track name) {
-      <option [value]="name">{{ name }}</option>
-    }
-  </select>
-
   <button
     aria-label="Reset filters"
     title="Reset filters"
@@ -268,24 +236,7 @@ export class FilterBarComponent implements OnInit {
   pendingDisease: DiseaseValue = DEFAULT_FILTER.disease;
   searchQuery = '';
 
-  places: Places = { barangays: [], puroks: [] };
-
   ngOnInit(): void {
-    this.filterChange.emit(this.appliedFilter);
-    loadPlaces().then((places) => (this.places = places));
-  }
-
-  get purokOptions(): string[] {
-    return this.places.puroks.filter((p) => p.barangay === this.appliedFilter.barangay).map((p) => p.name);
-  }
-
-  onBarangayChange(name: string): void {
-    this.appliedFilter = { ...this.appliedFilter, barangay: name || null, purok: null };
-    this.filterChange.emit(this.appliedFilter);
-  }
-
-  onPurokChange(name: string): void {
-    this.appliedFilter = { ...this.appliedFilter, purok: name || null };
     this.filterChange.emit(this.appliedFilter);
   }
 

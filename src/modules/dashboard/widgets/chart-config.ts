@@ -50,6 +50,8 @@ export function getInitialLineChartData(): ChartConfiguration<'line'>['data'] {
   };
 }
 
+export const TREND_BARANGAYS = ['Datu Balong', 'Libuton', 'Sabangan'] as const;
+
 export const LEGEND_ITEMS = [
   { label: 'Healthy', color: DISEASE_COLORS.healthy.primary },
   { label: 'Black Pod', color: DISEASE_COLORS.blackPod.primary },

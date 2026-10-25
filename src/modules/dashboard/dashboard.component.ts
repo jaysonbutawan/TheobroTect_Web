@@ -90,6 +90,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private barangayResolution?: Subscription;
 
   selectedYear = signal<number>(new Date().getFullYear());
+  selectedBarangay = signal<string>('');
   availableYears: number[] = [];
   allScans: Scan[] = [];
 
@@ -174,6 +175,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.filterAndProcessData();
     this.cdr.markForCheck();
   }
+  onBarangayChange(barangay: string): void {
+    this.selectedBarangay.set(barangay);
+    this.processLineChartData(
+      filterScansByYear(this.allScans, this.selectedYear()),
+      this.selectedYear(),
+    );
+    this.cdr.markForCheck();
+  }
+
   private filterAndProcessData(): void {
     const year = this.selectedYear();
     const filteredScans = filterScansByYear(this.allScans, year);
@@ -350,7 +360,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.stats = calculateStats(scans);
   }
-  private processLineChartData(scans: Scan[], year: number): void {
+  private processLineChartData(allScans: Scan[], year: number): void {
+    const barangay = this.selectedBarangay();
+    const scans = barangay ? allScans.filter((s) => s.user_address === barangay) : allScans;
     const monthGroups = groupScansByMonth(scans);
     const sortedMonths = getMonthsOfYear(year);
 

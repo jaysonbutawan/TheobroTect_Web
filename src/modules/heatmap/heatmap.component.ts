@@ -19,7 +19,6 @@ import { FilterBarComponent, FilterState, normalizeDisease } from './widgets/fil
 import { DISEASE_SHADES, DiseaseCounts, Observation } from './heatmap.models';
 import { HeatmapLogicService } from './heatmap-logic.service';
 import { HeatmapMapService, OverlayKey } from './heatmap-map.service';
-import { inBarangay, loadPlaces, nearestPurok, Places } from './heatmap-places';
 import { ToastService } from '../../app/shared/components/toast/toast.service';
 
 @Component({
@@ -41,8 +40,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
     year: new Date().getFullYear(),
     month: new Date().getMonth(),
     disease: 'all',
-    barangay: null,
-    purok: null,
   };
   diseaseCounts: DiseaseCounts = {
     healthy: 0,
@@ -86,7 +83,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     window.scrollTo(0, 0);
-    loadPlaces().then((places) => (this.places = places));
   }
 
   ngAfterViewInit() {
@@ -133,11 +129,8 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFilterChange(filter: FilterState): void {
-    const placeChanged =
-      filter.barangay !== this.activeFilter.barangay || filter.purok !== this.activeFilter.purok;
     this.activeFilter = filter;
     this.applyFilters();
-    if (placeChanged) this.mapService.showPlace(filter.barangay, filter.purok);
   }
 
   applyFilters(): void {
@@ -151,7 +144,7 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
       const matchesMonth =
         this.activeFilter.month === null || scanDate.getMonth() === this.activeFilter.month;
 
-      return matchesDisease && matchesYear && matchesMonth && this.matchesPlace(scan);
+      return matchesDisease && matchesYear && matchesMonth;
     });
 
     const validScans = this.filteredScans.filter((s) => s.location_lat && s.location_lng);
@@ -192,20 +185,6 @@ export class HeatmapComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleOverlay(key: OverlayKey): void {
     this.overlays[key] = !this.overlays[key];
     this.mapService.setOverlay(key, this.overlays[key]);
-  }
-
-  private places: Places = { barangays: [], puroks: [] };
-
-  private matchesPlace(scan: Scan): boolean {
-    const { barangay, purok } = this.activeFilter;
-    if (!barangay) return true;
-    const area = this.places.barangays.find((b) => b.name === barangay);
-    const lat = Number(scan.location_lat);
-    const lng = Number(scan.location_lng);
-    if (!area || !inBarangay(lat, lng, area)) return false;
-    if (!purok) return true;
-    const inArea = this.places.puroks.filter((p) => p.barangay === barangay);
-    return nearestPurok(lat, lng, inArea)?.name === purok;
   }
 
   private closeDetailCard(): void {

@@ -34,7 +34,9 @@
         [chartData]="lineChartData"
         [availableYears]="availableYears"
         [selectedYear]="selectedYear()"
+        [selectedBarangay]="selectedBarangay()"
         (yearSelected)="onYearChange($event)"
+        (barangaySelected)="onBarangayChange($event)"
       >
       </app-line-chart>
     }

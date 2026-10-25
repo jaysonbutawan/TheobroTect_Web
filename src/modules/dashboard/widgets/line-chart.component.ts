@@ -2,7 +2,7 @@ import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { LEGEND_ITEMS } from './chart-config';
+import { LEGEND_ITEMS, TREND_BARANGAYS } from './chart-config';
 
 @Component({
   selector: 'app-line-chart',
@@ -14,9 +14,12 @@ export class LineChartComponent {
   @Input({ required: true }) chartData!: ChartConfiguration<'line'>['data'];
   @Input() availableYears: number[] = [];
   @Input() selectedYear: number = new Date().getFullYear();
+  @Input() selectedBarangay = '';
   @Output() yearSelected = new EventEmitter<number>();
+  @Output() barangaySelected = new EventEmitter<string>();
 
   readonly legend = LEGEND_ITEMS;
+  readonly barangays = TREND_BARANGAYS;
 
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: true,

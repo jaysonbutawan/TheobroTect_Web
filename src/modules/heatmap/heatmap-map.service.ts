@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import type * as LeafletType from 'leaflet';
 import { Scan } from '../../app/shared/models';
 import { DISEASE_SHADES, SeverityShades } from './heatmap.models';
-import { inRing, loadPlaces, LatLon, Places } from './heatmap-places';
+import { inRing, loadPlaces, LatLon } from './heatmap-places';
 
 export type OverlayKey = 'barangays' | 'puroks';
 
@@ -105,7 +105,6 @@ export class HeatmapMapService {
   private heatSyncBound = false;
   private heatFrame = 0;
   private overlayVisible: Record<OverlayKey, boolean> = { barangays: true, puroks: true };
-  private places?: Places;
   private barangayLayer?: LeafletType.LayerGroup;
   private purokLayer?: LeafletType.LayerGroup;
 
@@ -168,7 +167,6 @@ export class HeatmapMapService {
   private async loadPlaces(): Promise<void> {
     const data = await loadPlaces();
     if (!this.map) return;
-    this.places = data;
 
     const barangays = this.L.layerGroup();
     for (const b of data.barangays) {
@@ -201,16 +199,6 @@ export class HeatmapMapService {
     }
     if (run.length) runs.push(run);
     return runs;
-  }
-
-  /** Zooms to the chosen barangay (or purok); with nothing chosen, back to the whole area. */
-  showPlace(barangay: string | null, purok: string | null): void {
-    if (!this.map || !this.places) return;
-    const target = this.places.puroks.find((p) => p.name === purok && p.barangay === barangay);
-    const area = this.places.barangays.find((b) => b.name === barangay);
-    if (target) this.map.flyTo([target.lat, target.lon], 17, { duration: 1 });
-    else if (area) this.map.flyToBounds(this.L.latLngBounds(area.rings.flat()), { padding: [24, 24], duration: 1 });
-    else this.recenter();
   }
 
   private addLabel(at: LeafletType.LatLngExpression, name: string | undefined, cls: string, group: LeafletType.LayerGroup): void {

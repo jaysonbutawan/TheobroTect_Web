@@ -44,21 +44,3 @@ export function inRing(lat: number, lng: number, ring: LatLon[]): boolean {
   }
   return inside;
 }
-
-export function inBarangay(lat: number, lng: number, barangay: Barangay): boolean {
-  return barangay.rings.some((ring) => inRing(lat, lng, ring));
-}
-
-/** Puroks are single points in OpenStreetMap, so a scan belongs to the closest one. */
-export function nearestPurok(lat: number, lng: number, puroks: Purok[]): Purok | undefined {
-  let best: Purok | undefined;
-  let bestDist = Infinity;
-  for (const p of puroks) {
-    const dist = (p.lat - lat) ** 2 + ((p.lon - lng) * Math.cos((lat * Math.PI) / 180)) ** 2;
-    if (dist < bestDist) {
-      best = p;
-      bestDist = dist;
-    }
-  }
-  return best;
-}
