@@ -87,12 +87,13 @@ export class DiseaseViewModalComponent implements OnChanges {
       next: ({ monitoring, recommendations }) => {
         const allPlans: any[] = (monitoring as any)?.data ?? monitoring ?? [];
 
-        this.monitoringPlans = allPlans.filter((p) => {
-          return (
+        // Severity plans have no disease_key; they belong to a disease through their severity.
+        this.monitoringPlans = allPlans.filter(
+          (p) =>
+            Number(p.severity?.disease_id) === this.disease!.id ||
             p.disease_key?.toString().toLowerCase() ===
-            this.disease!.disease_key?.toString().toLowerCase()
-          );
-        });
+              this.disease!.disease_key?.toString().toLowerCase(),
+        );
 
         this.recommendations = Array.isArray(recommendations)
           ? recommendations
