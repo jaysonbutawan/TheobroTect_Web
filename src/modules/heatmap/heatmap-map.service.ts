@@ -6,7 +6,6 @@ import { inRing, loadPlaces, LatLon } from './heatmap-places';
 
 export type OverlayKey = 'barangays' | 'puroks';
 
-/** Puroks are small, so their labels only appear once the map is zoomed in this far. */
 const PUROK_MIN_ZOOM = 15;
 
 const severityWeight = (p: any[]): number => {
@@ -15,7 +14,6 @@ const severityWeight = (p: any[]): number => {
   return 0.25;
 };
 
-/** Flat colour bands (no blending between severities): weights 0.25 / 0.6 / 1.0 land in mild / moderate / severe. */
 const bandedGradient = (c: SeverityShades): Record<number, string> => ({
   0: c.mild,
   0.4: c.mild,
@@ -117,7 +115,6 @@ export class HeatmapMapService {
     return this.L;
   }
 
-  /** Scan plotting waits on this, so data that arrives before the map is built is not lost. */
   initMap(containerId: string): Promise<void> {
     this.mapReady = this.createMap(containerId);
     return this.mapReady;
@@ -126,7 +123,6 @@ export class HeatmapMapService {
   private async createMap(containerId: string): Promise<void> {
     await this.getLeaflet();
 
-    // OpenStreetMap's standard style: small roads, footpaths, buildings and place names.
     const streets = this.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
@@ -158,12 +154,10 @@ export class HeatmapMapService {
     this.syncOverlays();
   }
 
-  /** Fires when the user clicks empty map (a click on a scan spot does not count). */
   onMapClick(callback: () => void): void {
     this.map?.on('click', callback);
   }
 
-  /** Draws barangay outlines and purok names, keeping only the parts inside the red boundary. */
   private async loadPlaces(): Promise<void> {
     const data = await loadPlaces();
     if (!this.map) return;
@@ -186,7 +180,6 @@ export class HeatmapMapService {
     this.syncOverlays();
   }
 
-  /** Splits an outline into the runs of vertices that lie inside the boundary. */
   private insideBoundary(ring: LatLon[]): LatLon[][] {
     const runs: LatLon[][] = [];
     let run: LatLon[] = [];
@@ -224,7 +217,6 @@ export class HeatmapMapService {
     show(this.purokLayer, this.overlayVisible.puroks && this.map.getZoom() >= PUROK_MIN_ZOOM);
   }
 
-  /** Fires when the user starts dragging the map. */
   onDragStart(callback: () => void): void {
     this.map?.on('dragstart', callback);
   }
@@ -316,11 +308,6 @@ export class HeatmapMapService {
       .openPopup();
   }
 
-  /**
-   * Heat colours are unchanged per disease. Each layer is registered so it can be
-   * redrawn while the map moves (leaflet.heat only redraws on `moveend`, which made
-   * the spots slide and clip at the canvas edge during a drag).
-   */
   private renderHeatLayers(heatPoints: any[]): void {
     const radius = this.heatRadius();
     for (const g of HEAT_GROUPS) {
@@ -338,7 +325,6 @@ export class HeatmapMapService {
     this.bindHeatSync();
   }
 
-  /** Radius in px that scales with zoom so hotspots stay anchored to the ground. */
   private heatRadius(): number {
     const zoom = this.map.getZoom();
     return Math.max(14, Math.min(36, 14 + (zoom - 12) * 7));

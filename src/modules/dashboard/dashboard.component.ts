@@ -310,7 +310,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const current = this.scanLocations.get(scanKey);
       if (!current || current.coordinateKey !== group.key) continue;
 
-      // Each scan receives its own state object, even when a coordinate lookup is shared.
       this.scanLocations.set(scanKey, {
         coordinateKey: current.coordinateKey,
         lat: current.lat,

@@ -24,7 +24,6 @@ export interface SeverityShades {
   severe: string;
 }
 
-/** Flat colours per disease: lighter = mild, darker = severe. Healthy has no severity. */
 export const DISEASE_SHADES = {
   blackPod: { mild: '#fca5a5', moderate: '#ef4444', severe: '#b91c1c' },
   podBorer: { mild: '#fde68a', moderate: '#facc15', severe: '#ca8a04' },

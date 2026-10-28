@@ -122,7 +122,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     return this.users.length === 0 ? 0 : this.totalScans / this.users.length;
   }
 
-  /** Width of a user's scan bar, relative to the most active user. */
   scanShare(user: User): number {
     const max = Math.max(0, ...this.users.map((u) => u.total_scans ?? 0));
     return max === 0 ? 0 : ((user.total_scans ?? 0) / max) * 100;

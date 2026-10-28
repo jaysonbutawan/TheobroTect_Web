@@ -163,7 +163,6 @@ export class FieldReportDetailComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          // The API may return the report directly or wrapped as { data: report }.
           const wrapped = response as unknown as { data?: FieldReport };
           this.report = wrapped.data && !Array.isArray(wrapped.data) ? wrapped.data : response;
           this.isLoading = false;

@@ -111,7 +111,6 @@ export class ScanHistoryComponent implements OnInit, OnDestroy {
         next: ({ users, scans }) => {
           this.user = users?.data?.find((u) => u.id === this.userId) ?? null;
 
-          // The endpoint filters by user, but keep only this user's scans in case it does not.
           this.allScans = (scans?.data ?? [])
             .filter((s) => !s.user_id || s.user_id === this.userId)
             .map((s) => this.mapApiScan(s))

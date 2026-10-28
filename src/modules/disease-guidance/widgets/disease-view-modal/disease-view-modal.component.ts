@@ -87,7 +87,6 @@ export class DiseaseViewModalComponent implements OnChanges {
       next: ({ monitoring, recommendations }) => {
         const allPlans: any[] = (monitoring as any)?.data ?? monitoring ?? [];
 
-        // Severity plans have no disease_key; they belong to a disease through their severity.
         this.monitoringPlans = allPlans.filter(
           (p) =>
             Number(p.severity?.disease_id) === this.disease!.id ||

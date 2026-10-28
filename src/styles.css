@@ -13,7 +13,6 @@
   z-index: 1;
 }
 
-/* Top bar shown while a page loads; it waits 150ms so quick navigations don't flash it. */
 .nav-progress {
   opacity: 0;
   animation: nav-progress-show 0s linear 150ms forwards;

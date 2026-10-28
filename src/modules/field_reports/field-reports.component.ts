@@ -26,19 +26,9 @@ export class FieldReportsComponent implements OnInit, OnDestroy {
   errorMsg = '';
 
   barangayOptions: string[] = [
-    'Dacudao',
     'Datu Balong',
-    'Igangon',
-    'Kipalili',
     'Libuton',
-    'Linao',
-    'Mamangan',
-    'Monte Dujali',
-    'Pinamuno',
     'Sabangan',
-    'San Miguel',
-    'Santo Niño',
-    'Poblacion',
   ];
 
   categoryOptions: string[] = ['Black Pod Disease', 'Mealybug', 'Cacao Pod Borer'];

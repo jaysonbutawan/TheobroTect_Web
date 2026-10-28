@@ -27,7 +27,6 @@ export class LayoutComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
 
-  /** True while a page is loading, so a click on the menu never looks ignored. */
   navigating = signal(false);
   isMobileMenuOpen = false;
   sideCollapsed = false;

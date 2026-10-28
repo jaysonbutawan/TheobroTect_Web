@@ -23,7 +23,6 @@
   border-top-left-radius: 8px;
 }
 
-/* Keep heat canvases GPU-composited so they stay smooth while dragging. */
 :host ::ng-deep .leaflet-heatmap-layer {
   will-change: transform;
   opacity: 0.6;
@@ -33,7 +32,6 @@
   outline: none;
 }
 
-/* Place names from OpenStreetMap: plain text with a white outline so it reads on any basemap. */
 :host ::ng-deep .map-label-icon {
   background: none;
   border: 0;

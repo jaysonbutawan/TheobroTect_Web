@@ -33,7 +33,6 @@ export interface OfficialSignatories {
 })
 export class FieldReportPdfService {
 
-  // 1. Helper function to load the image as Base64 for jsPDF
   private async getBase64Logo(url: string): Promise<string | null> {
     return new Promise((resolve) => {
       const img = new Image();
@@ -126,9 +125,7 @@ export class FieldReportPdfService {
     };
   }
 
-  // 2. Changed to async to await the logo loading
   async generatePDF(summary: ReportSummary, signatories: OfficialSignatories): Promise<void> {
-    // Loaded on demand so the Field Reports page opens without downloading the PDF libraries.
     const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import('jspdf'), import('jspdf-autotable')]);
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
@@ -137,12 +134,10 @@ export class FieldReportPdfService {
     const marginRight = 20;
     const contentWidth = pageWidth - marginLeft - marginRight;
 
-    // Attempt to load the logo from the Angular public folder
     const logoBase64 = await this.getBase64Logo('/Sawata,_Davao_Del_Norte_Official_Seal_Logo.png');
 
-    let yPosition = 35; // Start below the header area
+    let yPosition = 35;
 
-    // --- 1. Draw Summary Box (Page 1 Only) ---
     doc.setFillColor(248, 250, 248);
     doc.setDrawColor(61, 104, 58);
     doc.setLineWidth(0.3);
@@ -157,7 +152,6 @@ export class FieldReportPdfService {
     doc.setFontSize(9);
     doc.setTextColor(80, 80, 80);
 
-    // Column 1
     doc.text(`Date of Report:`, marginLeft + 5, yPosition + 12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
@@ -170,7 +164,6 @@ export class FieldReportPdfService {
     doc.setTextColor(0, 0, 0);
     doc.text(String(summary.totalScans), marginLeft + 32, yPosition + 17);
 
-    // Column 2
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(80, 80, 80);
     doc.text(`Healthy Pods:`, pageWidth / 2, yPosition + 12);
@@ -187,7 +180,6 @@ export class FieldReportPdfService {
 
     yPosition += 30;
 
-    // --- 2. Iterate through Barangay Data ---
     summary.barangayData.forEach((barangayData) => {
       if (yPosition > pageHeight - 45) {
         doc.addPage();
@@ -257,7 +249,6 @@ export class FieldReportPdfService {
       yPosition = (doc as any).lastAutoTable.finalY + 8;
     });
 
-    // --- 3. Signatures Block ---
     const signatureBlockHeight = 40;
     if (yPosition + signatureBlockHeight > pageHeight - 25) {
       doc.addPage();
@@ -295,18 +286,14 @@ export class FieldReportPdfService {
     doc.setFontSize(9);
     doc.text('Municipal Mayor', rightSigX + sigWidth / 2, yPosition + 7, { align: 'center' });
 
-    // --- 4. Global Header & Footer ---
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
 
-      // --- Header Background ---
       doc.setFillColor(61, 104, 58);
       doc.rect(0, 0, pageWidth, 25, 'F');
 
-      // --- Draw Logo (if successfully loaded) ---
       if (logoBase64) {
-        // x=18, y=3.5, width=18, height=18
         doc.addImage(logoBase64, 'PNG', 18, 3.5, 18, 18);
       }
 
@@ -320,7 +307,6 @@ export class FieldReportPdfService {
       doc.setTextColor(220, 235, 220);
       doc.text('Municipal Department of Agriculture • Sawata, Davao del Norte', pageWidth / 2, 19, { align: 'center' });
 
-      // --- Footer ---
       const fY = pageHeight - 15;
       doc.setDrawColor(61, 104, 58);
       doc.setLineWidth(0.5);
@@ -348,12 +334,10 @@ export class FieldReportPdfService {
       );
     }
 
-    // --- 5. Save PDF ---
     const fileName = `Field_Report_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
   }
 
-  // ... (normalizeDiseaseKey and formatDiseaseKey remain exactly the same) ...
   private normalizeDiseaseKey(diseaseKey: string): string {
     if (!diseaseKey) return 'Unknown';
 

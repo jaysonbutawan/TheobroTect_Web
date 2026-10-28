@@ -22,14 +22,14 @@ import { ConfirmationDialogComponent } from '../../../app/shared/components/conf
           <input
             type="search"
             [(ngModel)]="searchQuery"
-            (ngModelChange)="currentPage = 1"
+            (ngModelChange)="onSearchChange()"
             placeholder="Search diseases"
             aria-label="Search diseases"
             class="block w-full sm:w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus-visible:outline-2 focus-visible:outline-green-700"
           />
           <select
             [(ngModel)]="filterLocale"
-            (ngModelChange)="currentPage = 1"
+            (ngModelChange)="onLabelChange()"
             aria-label="Filter by detection label"
             class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 focus-visible:outline-2 focus-visible:outline-green-700"
           >
@@ -84,7 +84,7 @@ import { ConfirmationDialogComponent } from '../../../app/shared/components/conf
               <button
                 type="button"
                 (click)="onTableDeleteDisease(disease)"
-                class="text-slate-500 hover:text-red-600 hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
+                class="text-red-600 md:text-slate-500 md:hover:text-red-600 hover:underline focus-visible:outline-2 focus-visible:outline-green-700"
               >
                 Delete
               </button>
@@ -179,6 +179,16 @@ export class DiseaseTableComponent {
     }
     const start = (this.currentPage - 1) * this.pageSize;
     return this.filteredRecords.slice(start, start + this.pageSize);
+  }
+
+  onSearchChange(): void {
+    this.filterLocale = '';
+    this.currentPage = 1;
+  }
+
+  onLabelChange(): void {
+    this.searchQuery = '';
+    this.currentPage = 1;
   }
 
   onPageChange(page: number): void {
